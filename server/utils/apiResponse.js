@@ -36,6 +36,7 @@ const errorResponse = (
     statusCode = 500,
     message = "Internal server error",
     errorCode = undefined,
+    data = undefined,
   } = {},
 ) => {
   const payload = {
@@ -45,6 +46,10 @@ const errorResponse = (
 
   if (errorCode !== undefined) {
     payload.errorCode = errorCode;
+  }
+
+  if (data !== undefined) {
+    payload.data = data;
   }
 
   return res.status(statusCode).json(payload);

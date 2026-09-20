@@ -41,6 +41,7 @@ const errorHandler = (err, req, res, next) => {
     statusCode,
     message,
     errorCode,
+    data: err.data,
   });
 };
 

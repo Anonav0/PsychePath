@@ -12,7 +12,8 @@
     "test:auth": "node utils/verifyAuth.js",
     "test:assessment": "node utils/verifyAssessments.js",
     "test:profile": "node utils/verifyProfile.js",
-    "test:curriculum": "node utils/verifyCurriculum.js"
+    "test:curriculum": "node utils/verifyCurriculum.js",
+    "test:recommendations": "node utils/verifyRecommendations.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

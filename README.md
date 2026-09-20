@@ -322,6 +322,48 @@ npm run test:curriculum
 
 ---
 
+## Recommendation Engine (Phase 7)
+
+PsychePath connects learner profiles to the curriculum using a transparent, deterministic rule-based recommendation engine.
+
+### Scoring Architecture
+
+```text
+Learner Profile (Goals, Skills, Psychometrics, Preferences)
+          │
+          ▼
+Candidate Generation & Prerequisite Check
+          │
+          ▼
+Multi-Factor Normalized Scoring (0–100)
+  ├── Goal Match (25%)
+  ├── Skill Match & Gap Detection (25%)
+  ├── Prerequisite Readiness (15%)
+  ├── Assessment Alignment (15%)
+  ├── Difficulty / Experience Alignment (10%)
+  ├── Interest Match (5%)
+  └── Learning Preferences (5%)
+          │
+          ▼
+Deterministic Sorting & Tie-Breaking
+          │
+          ▼
+Actionable Recommendations + Blocked Modules + Grounded Reasons
+```
+
+### Run Automated Recommendation Test Suite
+
+```bash
+npm run test:recommendations
+```
+
+### Recommendation REST Endpoints
+
+| Method | Endpoint                       | Role               | Purpose                                                               |
+| :----- | :----------------------------- | :----------------- | :-------------------------------------------------------------------- |
+| `GET`  | `/api/recommendations`         | `STUDENT`, `ADMIN` | Retrieve ranked recommendations, score breakdown, and blocked modules |
+| `GET`  | `/api/recommendations/modules` | `STUDENT`, `ADMIN` | Alias endpoint for recommendations query                              |
+
 ## Running the Application
 
 ### Option A: Run Concurrently from Root
