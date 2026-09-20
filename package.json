@@ -1,0 +1,18 @@
+{
+  "name": "psychepath-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PsychePath — Psychometric Learning Path Recommender (Monorepo Root)",
+  "scripts": {
+    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"blue,green\" \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "start:server": "npm start --prefix server",
+    "start:client": "npm start --prefix client",
+    "build:client": "npm run build --prefix client",
+    "install:all": "npm install && npm install --prefix server && npm install --prefix client"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
