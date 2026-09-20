@@ -245,6 +245,54 @@ npm run test:assessment
 
 ---
 
+## Learner Profile System (Phase 5)
+
+PsychePath structures learner data into a clean profile that balances student self-managed information with authoritative assessment-derived psychometrics.
+
+### Data Source Separation
+
+| Category               | Attributes                                                                                                                                              | Controlled By          | Endpoints                                                  |
+| :--------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ | :--------------------- | :--------------------------------------------------------- |
+| **User-Managed**       | `educationLevel`, `experienceLevel`, `currentSkills`, `learningGoals`, `interests`, `learningPreferences`, `preferredDifficulty`, `weeklyLearningHours` | Student                | `PATCH /api/profile/me`                                    |
+| **Assessment-Derived** | `assessmentDimensions`, `strengths`, `improvementAreas`, `lastAssessmentAttempt`, `profileVersion`                                                      | Backend Scoring Engine | `POST /api/profile/me/generate-from-assessment/:attemptId` |
+
+_Note: Direct client attempts to spoof or overwrite assessment-derived fields via `PATCH /api/profile/me` are strictly rejected (`400 PROFILE_UPDATE_INVALID`)._
+
+### Deterministic Thresholds (Non-Clinical)
+
+- **Strengths**: Dimension score $\ge 75\%$
+- **Neutral / Developing**: $60\% \le \text{Score} < 75\%$
+- **Development Areas**: Dimension score $< 60\%$
+
+### Profile Completeness Calculation
+
+Deterministic weighted score (0–100%):
+
+- **Education**: 15%
+- **Current Skills**: 20%
+- **Learning Goals**: 20%
+- **Interests**: 10%
+- **Preferences**: 10%
+- **Assessment**: 25%
+
+### Run Automated Profile Test Suite
+
+```bash
+npm run test:profile
+```
+
+### Learner Profile Endpoints
+
+| Method  | Endpoint                                              | Role               | Purpose                                                       |
+| :------ | :---------------------------------------------------- | :----------------- | :------------------------------------------------------------ |
+| `GET`   | `/api/profile/me`                                     | `STUDENT`, `ADMIN` | Get authenticated student's profile & completeness            |
+| `PATCH` | `/api/profile/me`                                     | `STUDENT`, `ADMIN` | Update user-managed attributes                                |
+| `POST`  | `/api/profile/me`                                     | `STUDENT`, `ADMIN` | Alternative initialization/update                             |
+| `POST`  | `/api/profile/me/generate-from-assessment/:attemptId` | `STUDENT`, `ADMIN` | Convert completed assessment into profile & increment version |
+| `GET`   | `/api/profiles/:userId`                               | `ADMIN`            | Inspect learner profile by user ID                            |
+
+---
+
 ## Running the Application
 
 ### Option A: Run Concurrently from Root
