@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import recommendationService from "../../services/recommendationService";
+import learningPathService from "../../services/learningPathService";
 import authService from "../../services/authService";
 
 const CATEGORIES = [
@@ -27,6 +28,10 @@ export default function RecommendationsPage() {
   const [selectedDifficulty, setSelectedDifficulty] = useState("ALL");
   const [expandedScoreId, setExpandedScoreId] = useState(null);
   const [showBlocked, setShowBlocked] = useState(false);
+
+  const [activePath, setActivePath] = useState(null);
+  const [generatingPath, setGeneratingPath] = useState(false);
+  const [pathMessage, setPathMessage] = useState(null);
 
   const user = authService.getUser();
 
@@ -60,9 +65,43 @@ export default function RecommendationsPage() {
     }
   }, [selectedCategory, selectedDifficulty]);
 
+  const fetchCurrentPath = useCallback(async () => {
+    if (!authService.isAuthenticated()) return;
+    try {
+      const res = await learningPathService.getCurrentPath();
+      if (res.success && res.data) {
+        setActivePath(res.data);
+      }
+    } catch {
+      // No active path yet
+    }
+  }, []);
+
   useEffect(() => {
     fetchRecommendations();
-  }, [fetchRecommendations]);
+    fetchCurrentPath();
+  }, [fetchRecommendations, fetchCurrentPath]);
+
+  const handleSavePath = async () => {
+    try {
+      setGeneratingPath(true);
+      setPathMessage(null);
+      const res = activePath
+        ? await learningPathService.regeneratePath()
+        : await learningPathService.generatePath();
+
+      if (res.success && res.data) {
+        setActivePath(res.data);
+        setPathMessage(
+          `Official Learning Path (v${res.data.version}) saved to MongoDB! ${res.data.modules.length} modules, ${res.data.estimatedDuration} total hours.`,
+        );
+      }
+    } catch (err) {
+      setError(err.message || "Failed to generate learning path");
+    } finally {
+      setGeneratingPath(false);
+    }
+  };
 
   const toggleScoreBreakdown = (id) => {
     setExpandedScoreId((prev) => (prev === id ? null : id));
@@ -152,6 +191,123 @@ export default function RecommendationsPage() {
             ? "AI-synthesized learning sequence and study strategies powered by Gemini, grounded strictly in pre-computed deterministic recommendations."
             : "Deterministic, rule-based curriculum recommendations matching your verified skills, learning goals, cognitive assessment dimensions, and prerequisite readiness."}
         </p>
+
+        {/* Learning Path Generation & Status Bar (Phase 9) */}
+        {data && data.recommendations && data.recommendations.length > 0 && (
+          <div
+            style={{
+              marginTop: "1.25rem",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "1rem",
+              background: "var(--bg-surface)",
+              border: "1px solid var(--border-color)",
+              padding: "1rem 1.25rem",
+              borderRadius: "10px",
+            }}
+          >
+            <div>
+              {activePath ? (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <span style={{ fontSize: "1rem" }}>📘</span>
+                  <span style={{ fontWeight: 600, fontSize: "0.95rem" }}>
+                    Active Learning Path: Version {activePath.version}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "0.75rem",
+                      padding: "0.2rem 0.5rem",
+                      borderRadius: "4px",
+                      background: "rgba(16, 185, 129, 0.15)",
+                      color: "#10b981",
+                      fontWeight: 700,
+                    }}
+                  >
+                    ACTIVE
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "0.85rem",
+                      color: "var(--text-muted)",
+                    }}
+                  >
+                    ({activePath.modules?.length || 0} modules •{" "}
+                    {activePath.estimatedDuration} hrs)
+                  </span>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                  }}
+                >
+                  <span style={{ fontSize: "1rem" }}>💡</span>
+                  <span
+                    style={{
+                      color: "var(--text-secondary)",
+                      fontSize: "0.9rem",
+                    }}
+                  >
+                    Turn these recommendations into an official versioned
+                    Learning Path.
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={handleSavePath}
+              disabled={generatingPath}
+              style={{
+                background: "linear-gradient(135deg, #6366f1, #a855f7)",
+                color: "#ffffff",
+                border: "none",
+                padding: "0.6rem 1.4rem",
+                borderRadius: "8px",
+                fontWeight: 600,
+                fontSize: "0.9rem",
+                cursor: generatingPath ? "not-allowed" : "pointer",
+                opacity: generatingPath ? 0.7 : 1,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.4rem",
+              }}
+            >
+              {generatingPath
+                ? "Persisting to Database..."
+                : activePath
+                  ? "🔄 Regenerate Learning Path"
+                  : "💾 Save as Official Learning Path"}
+            </button>
+          </div>
+        )}
+
+        {pathMessage && (
+          <div
+            style={{
+              marginTop: "1rem",
+              padding: "0.75rem 1.25rem",
+              borderRadius: "8px",
+              background: "rgba(16, 185, 129, 0.1)",
+              border: "1px solid rgba(16, 185, 129, 0.3)",
+              color: "#10b981",
+              fontSize: "0.9rem",
+            }}
+          >
+            ✅ {pathMessage}
+          </div>
+        )}
       </div>
 
       {/* Filter Controls */}

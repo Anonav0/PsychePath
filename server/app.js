@@ -9,6 +9,7 @@ const attemptRoutes = require("./routes/attemptRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const curriculumRoutes = require("./routes/curriculumRoutes");
 const recommendationRoutes = require("./routes/recommendationRoutes");
+const learningPathRoutes = require("./routes/learningPathRoutes");
 const {
   notFoundHandler,
   errorHandler,
@@ -52,6 +53,8 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/profiles", profileRoutes);
 app.use("/api/curriculum", curriculumRoutes);
 app.use("/api/recommendations", recommendationRoutes);
+app.use("/api/learning-path", learningPathRoutes);
+app.use("/api/learning-paths", learningPathRoutes);
 
 // 404 handler for undefined routes
 app.use(notFoundHandler);

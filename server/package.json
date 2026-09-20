@@ -14,7 +14,8 @@
     "test:profile": "node utils/verifyProfile.js",
     "test:curriculum": "node utils/verifyCurriculum.js",
     "test:recommendations": "node utils/verifyRecommendations.js",
-    "test:gemini": "node utils/verifyGemini.js"
+    "test:gemini": "node utils/verifyGemini.js",
+    "test:learning-path": "node utils/verifyLearningPath.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

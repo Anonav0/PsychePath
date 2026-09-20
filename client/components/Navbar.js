@@ -29,7 +29,9 @@ export default function Navbar() {
           <Link href="/" className="logo-text">
             PsychePath
           </Link>
-          <span className="phase-tag">Phase 8: Gemini AI Integration</span>
+          <span className="phase-tag">
+            Phase 9: Personalized Learning Paths
+          </span>
         </div>
 
         <nav className="header-nav">

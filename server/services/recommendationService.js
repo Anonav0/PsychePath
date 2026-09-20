@@ -130,6 +130,9 @@ class RecommendationService {
         reason,
         matchedSkills: scoring.matchedSkills,
         skillGaps: scoring.skillGaps,
+        prerequisites: (cand.prerequisites || []).map((p) =>
+          p._id ? p._id.toString() : p.toString(),
+        ),
         prerequisitesSatisfied: cand.prerequisitesSatisfied,
         missingPrerequisites: cand.missingPrerequisites,
         scoreBreakdown: scoring.scoreBreakdown,

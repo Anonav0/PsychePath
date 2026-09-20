@@ -436,6 +436,109 @@ npm run test:gemini --prefix server
 
 ---
 
+## Personalized Learning Path Architecture (Phase 9)
+
+PsychePath combines deterministic candidate scoring with Gemini AI personalization to synthesize and persist official, versioned `LearningPath` documents in MongoDB.
+
+### Learning Path Generation Flow
+
+```text
+                     ┌───────────────────┐
+                     │   Learner Profile │
+                     └─────────┬─────────┘
+                               │
+                               ▼
+                     ┌───────────────────┐
+                     │ Deterministic     │
+                     │ Recommendation    │
+                     │ Engine (Phase 7)  │
+                     └─────────┬─────────┘
+                               │
+                               ▼
+                     ┌───────────────────┐
+                     │ Candidate Modules │
+                     └─────────┬─────────┘
+                               │
+                               ▼
+                     ┌───────────────────┐
+                     │ Gemini AI         │
+                     │ Personalization   │
+                     │ (Phase 8 Layer)   │
+                     └─────────┬─────────┘
+                               │
+                               ▼
+                     ┌───────────────────┐
+                     │ AI Output         │
+                     │ Validation        │
+                     └─────────┬─────────┘
+                               │
+                               ▼
+                     ┌───────────────────┐
+                     │ Prerequisite &    │
+                     │ DAG Topological   │
+                     │ Validation        │
+                     └─────────┬─────────┘
+                               │
+                               ▼
+                     ┌───────────────────┐
+                     │ Learning Path     │
+                     │ Service (Phase 9) │
+                     └─────────┬─────────┘
+                               │
+                               ▼
+                     ┌───────────────────┐
+                     │ LearningPath      │
+                     │ MongoDB Document  │
+                     │ (v1, v2, ...)     │
+                     └───────────────────┘
+```
+
+### Key Architectural Principles
+
+- **Single Active Path Invariant**: At any given time, a student has at most one `ACTIVE` learning path. When a new path is generated or regenerated, previous paths are transitioned to `ARCHIVED` status.
+- **Deterministic Versioning**: Paths are assigned monotonically increasing versions ($v1 \to v2 \to v3$), allowing historical review while keeping the active learning plan unambiguous.
+- **Authoritative Metrics**: Total `estimatedDuration` is calculated strictly by the backend by summing the durations of referenced `CurriculumModule` documents.
+- **Prerequisite DAG Integrity**: Enforces that no module appears before its required prerequisite module in the persisted sequence.
+- **Scope Separation**: In Phase 9, modules in the learning path have initial status `"NOT_STARTED"`. Granular progress tracking (percentage completion, activity logs) is deferred to Phase 10.
+
+### Data Model Relationships
+
+```text
+User
+  │
+  ├── LearnerProfile (skills, goals, psychometrics)
+  │
+  ├── AssessmentAttempt (source assessment answers & scores)
+  │
+  └── LearningPath (v1, v2, ... with status ACTIVE / ARCHIVED)
+          │
+          └── CurriculumModule (references real active curriculum documents)
+```
+
+### Learning Path REST Endpoints
+
+| Method | Endpoint                        | Role               | Purpose                                                        |
+| :----- | :------------------------------ | :----------------- | :------------------------------------------------------------- |
+| `POST` | `/api/learning-path/generate`   | `STUDENT`, `ADMIN` | Generate and persist a new active personalized learning path   |
+| `POST` | `/api/learning-path/regenerate` | `STUDENT`, `ADMIN` | Regenerate learning path, archive previous, increment version  |
+| `GET`  | `/api/learning-path/current`    | `STUDENT`, `ADMIN` | Retrieve currently active learning path with populated modules |
+| `GET`  | `/api/learning-path/history`    | `STUDENT`, `ADMIN` | Retrieve version history of all paths for user (newest first)  |
+| `GET`  | `/api/learning-path/:id`        | `STUDENT`, `ADMIN` | Retrieve specific learning path by ID with ownership check     |
+
+### Run Automated Learning Path Test Suite
+
+```bash
+npm run test:learning-path
+```
+
+Or from server directory:
+
+```bash
+npm run test:learning-path --prefix server
+```
+
+---
+
 ## Running the Application
 
 ### Option A: Run Concurrently from Root

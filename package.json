@@ -18,7 +18,8 @@
     "test:profile": "npm run test:profile --prefix server",
     "test:curriculum": "npm run test:curriculum --prefix server",
     "test:recommendations": "npm run test:recommendations --prefix server",
-    "test:gemini": "npm run test:gemini --prefix server"
+    "test:gemini": "npm run test:gemini --prefix server",
+    "test:learning-path": "npm run test:learning-path --prefix server"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

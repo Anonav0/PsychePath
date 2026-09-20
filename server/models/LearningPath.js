@@ -40,11 +40,10 @@ const learningPathSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: [true, "User reference is required"],
-      index: true,
     },
     sourceAssessment: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Assessment",
+      ref: "AssessmentAttempt",
       default: null,
     },
     modules: {
@@ -65,9 +64,8 @@ const learningPathSchema = new mongoose.Schema(
       default: [],
     },
     learningStrategy: {
-      type: String,
-      default: "",
-      trim: true,
+      type: [String],
+      default: [],
     },
     estimatedDuration: {
       type: Number, // Total hours
@@ -108,6 +106,11 @@ const learningPathSchema = new mongoose.Schema(
 // Indexes for path retrieval per user
 learningPathSchema.index({ user: 1, createdAt: -1 });
 learningPathSchema.index({ user: 1, status: 1 });
+// Guarantee at database level that at most one ACTIVE path exists per user
+learningPathSchema.index(
+  { user: 1 },
+  { unique: true, partialFilterExpression: { status: "ACTIVE" } },
+);
 
 const LearningPath =
   mongoose.models.LearningPath ||

@@ -131,10 +131,16 @@ class GeminiPersonalizationService {
       if (!candidate) continue;
 
       // Check against any prerequisites present in the sequence
-      const missing = candidate.missingPrerequisites || [];
-      for (const prereq of missing) {
-        if (position.has(prereq.id)) {
-          const prereqPos = position.get(prereq.id);
+      const prereqs = [
+        ...(candidate.prerequisites || []),
+        ...(candidate.missingPrerequisites || []).map(
+          (p) => p.id || p.moduleId,
+        ),
+      ].filter(Boolean);
+
+      for (const prereqId of prereqs) {
+        if (position.has(prereqId)) {
+          const prereqPos = position.get(prereqId);
           if (prereqPos > i) {
             // Prerequisite appears AFTER dependent module!
             hasViolation = true;
@@ -160,8 +166,13 @@ class GeminiPersonalizationService {
 
     orderedCandidateIds.forEach((id) => {
       const candidate = candidatesMap.get(id);
-      const prereqs = (candidate?.missingPrerequisites || [])
-        .map((p) => p.id)
+      const prereqs = [
+        ...(candidate?.prerequisites || []),
+        ...(candidate?.missingPrerequisites || []).map(
+          (p) => p.id || p.moduleId,
+        ),
+      ]
+        .filter(Boolean)
         .filter((pid) => graph.has(pid));
 
       prereqs.forEach((pid) => {
