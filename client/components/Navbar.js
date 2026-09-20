@@ -29,9 +29,7 @@ export default function Navbar() {
           <Link href="/" className="logo-text">
             PsychePath
           </Link>
-          <span className="phase-tag">
-            Phase 9: Personalized Learning Paths
-          </span>
+          <span className="phase-tag">Phase 10: Progress Tracking</span>
         </div>
 
         <nav className="header-nav">

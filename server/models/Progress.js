@@ -55,6 +55,7 @@ const progressSchema = new mongoose.Schema(
 
 // Unique compound index: only one progress record per user per path per module
 progressSchema.index({ user: 1, learningPath: 1, module: 1 }, { unique: true });
+progressSchema.index({ learningPath: 1, status: 1 });
 
 const Progress =
   mongoose.models.Progress || mongoose.model("Progress", progressSchema);

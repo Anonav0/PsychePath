@@ -539,6 +539,82 @@ npm run test:learning-path --prefix server
 
 ---
 
+## Progress Tracking Architecture (Phase 10)
+
+PsychePath enforces a **server-authoritative execution and progress tracking architecture**. The `LearningPath` specifies what the learner should study; the `Progress` collection records what the learner has actually completed, with an immutable `ProgressHistory` audit trail.
+
+```text
+                    ┌──────────────────┐
+                    │  Learning Path   │
+                    └────────┬─────────┘
+                             │
+                             ▼
+                    ┌──────────────────┐
+                    │ Path Modules     │
+                    └────────┬─────────┘
+                             │
+                             ▼
+                    ┌──────────────────┐
+                    │ Progress Service │
+                    └───────┬──────────┘
+                            │
+                ┌───────────┴───────────┐
+                ▼                       ▼
+      ┌─────────────────┐     ┌─────────────────┐
+      │ Current Progress│     │ Progress History│
+      └────────┬────────┘     └─────────────────┘
+               │
+               ▼
+      ┌─────────────────┐
+      │ Progress        │
+      │ Calculation     │
+      └────────┬────────┘
+               │
+               ▼
+      ┌─────────────────┐
+      │ Path Summary    │
+      │ + Overall %     │
+      └─────────────────┘
+```
+
+### Core Progress Rules & Formulas
+
+1. **Server Source of Truth**: Clients cannot declare completion, manipulate percentages arbitrarily, or supply timestamps. The backend derives status and percentages deterministically.
+2. **Monotonic Progression (Anti-Regression)**: Accidental progress decreases (e.g., attempting to lower percentage from $75\%$ to $50\%$) are rejected with `PROGRESS_REGRESSION` (HTTP 400).
+3. **Actionable Modules Progress Formula**:
+   $$\text{actionableModules} = \max(0, \text{totalModules} - \text{skippedModules})$$
+   $$\text{overallProgress} = \text{actionableModules} === 0 ? 0 : \text{round}\left(\frac{\text{completedModules}}{\text{actionableModules}} \times 100\right)$$
+   Skipped modules are excluded from the denominator. When all actionable modules are completed, `overallProgress = 100%` and `isComplete = true`.
+4. **LearningPath Version Isolation**: Progress records are bound to specific `(user, learningPath, module)` tuples. Regenerating a path to $v2$ starts progress tracking afresh for $v2$ while keeping $v1$ progress immutable.
+5. **Archived Path Protection**: Historical/archived learning paths (`status: "ARCHIVED"`) remain fully readable, but mutation attempts (`start`, `update`, `complete`, `skip`) are rejected with `PATH_ARCHIVED` (HTTP 400).
+
+### Progress REST Endpoints
+
+| Method  | Endpoint                                | Role               | Purpose                                                  |
+| :------ | :-------------------------------------- | :----------------- | :------------------------------------------------------- |
+| `POST`  | `/api/progress/start`                   | `STUDENT`, `ADMIN` | Initialize/resume module progress (`IN_PROGRESS`)        |
+| `PATCH` | `/api/progress`                         | `STUDENT`, `ADMIN` | Update module percentage ($0 \to 100\%$)                 |
+| `POST`  | `/api/progress/complete`                | `STUDENT`, `ADMIN` | Explicitly complete module ($100\%$, sets timestamp)     |
+| `POST`  | `/api/progress/skip`                    | `STUDENT`, `ADMIN` | Skip module (marks `SKIPPED`, excluded from denominator) |
+| `GET`   | `/api/progress/current`                 | `STUDENT`, `ADMIN` | Retrieve active path progress and module states          |
+| `GET`   | `/api/progress/:learningPathId`         | `STUDENT`, `ADMIN` | Retrieve path progress for specific path (with archived) |
+| `GET`   | `/api/progress/:learningPathId/history` | `STUDENT`, `ADMIN` | Retrieve paginated immutable progress audit trail        |
+| `GET`   | `/api/progress/summary/:learningPathId` | `STUDENT`, `ADMIN` | Retrieve path summary counts and overall percentage      |
+
+### Run Automated Progress Tracking Test Suite
+
+```bash
+npm run test:progress
+```
+
+Or from server directory:
+
+```bash
+npm run test:progress --prefix server
+```
+
+---
+
 ## Running the Application
 
 ### Option A: Run Concurrently from Root

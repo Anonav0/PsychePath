@@ -6,6 +6,7 @@ const LearnerProfile = require("./LearnerProfile");
 const CurriculumModule = require("./CurriculumModule");
 const LearningPath = require("./LearningPath");
 const Progress = require("./Progress");
+const ProgressHistory = require("./ProgressHistory");
 
 module.exports = {
   User,
@@ -16,4 +17,5 @@ module.exports = {
   CurriculumModule,
   LearningPath,
   Progress,
+  ProgressHistory,
 };
