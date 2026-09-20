@@ -615,6 +615,45 @@ npm run test:progress --prefix server
 
 ---
 
+## Phase 11: Student Frontend Application
+
+The student-facing frontend is built with Next.js App Router, providing a clean, accessible, and responsive user experience consuming backend APIs across Phases 1–10.
+
+### Route Architecture
+
+| Route                    | Access  | Description                                                                               |
+| :----------------------- | :-----: | :---------------------------------------------------------------------------------------- |
+| `/`                      | Public  | SaaS Landing page with 5-stage learner journey, architecture details, and live API status |
+| `/dashboard`             | Student | Central student dashboard with profile meter, active path, and next actionable module     |
+| `/assessments`           | Student | Catalog of available psychometric assessments and active attempt resume                   |
+| `/assessments/[id]/take` | Student | Question flow with auto-saving, progress bar, and anti-tampering verification             |
+| `/results`               | Student | Assessment scores, cognitive alignment meter, strengths, and areas to develop             |
+| `/recommendations`       | Student | Transparent multi-factor curriculum recommendations with Gemini AI rationale              |
+| `/learning-path`         | Student | Interactive learning path with prerequisite timeline, execution controls & regeneration   |
+| `/progress`              | Student | Comprehensive analytics, module-level execution tracker, and immutable audit table        |
+| `/profile`               | Student | Learner preferences, target goals, acquired skills, and psychometric dimensions           |
+
+### Core UI Components
+
+- `ProgressBar`: Accessible progress indicator (`role="progressbar"`, ARIA attributes, gradient/status variants).
+- `StatusBadge`: Semantic status pills for `COMPLETED`, `IN_PROGRESS`, `NOT_STARTED`, `SKIPPED`, and version states.
+- `EmptyState`: Standardized empty state card with contextual icons and actionable CTAs.
+- `Navbar`: Responsive navigation bar displaying active phase badge, navigation links, and student session controls.
+
+### Architectural Principles
+
+1. **Server as Single Source of Truth**: The client never computes assessment scores, recommendation ranks, or path completion percentages. All authoritative calculations originate from server services.
+2. **Strict Route Protection**: All student pages enforce client authentication and redirect guests to `/login?redirect=...`.
+3. **Non-Clinical Framing**: Assessment descriptions and diagnostics explicitly frame insights as cognitive learning preferences rather than medical or psychological diagnoses.
+
+### Build and Verify Frontend
+
+```bash
+npm run build --prefix client
+```
+
+---
+
 ## Running the Application
 
 ### Option A: Run Concurrently from Root

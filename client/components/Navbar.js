@@ -29,26 +29,36 @@ export default function Navbar() {
           <Link href="/" className="logo-text">
             PsychePath
           </Link>
-          <span className="phase-tag">Phase 10: Progress Tracking</span>
+          <span className="phase-tag">Phase 11: Student Frontend</span>
         </div>
 
         <nav className="header-nav">
           <Link href="/" className="nav-link">
             Home
           </Link>
+          {user && (
+            <Link href="/dashboard" className="nav-link">
+              Dashboard
+            </Link>
+          )}
           <Link href="/assessments" className="nav-link">
             Assessments
-          </Link>
-          <Link href="/curriculum" className="nav-link">
-            Curriculum
           </Link>
           <Link href="/recommendations" className="nav-link">
             Recommendations
           </Link>
           {user && (
-            <Link href="/profile" className="nav-link">
-              Profile
-            </Link>
+            <>
+              <Link href="/learning-path" className="nav-link">
+                Learning Path
+              </Link>
+              <Link href="/progress" className="nav-link">
+                Progress
+              </Link>
+              <Link href="/profile" className="nav-link">
+                Profile
+              </Link>
+            </>
           )}
 
           {user ? (
