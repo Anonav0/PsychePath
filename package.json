@@ -15,7 +15,8 @@
     "test:models": "npm run test:models --prefix server",
     "test:auth": "npm run test:auth --prefix server",
     "test:assessment": "npm run test:assessment --prefix server",
-    "test:profile": "npm run test:profile --prefix server"
+    "test:profile": "npm run test:profile --prefix server",
+    "test:curriculum": "npm run test:curriculum --prefix server"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

@@ -293,6 +293,35 @@ npm run test:profile
 
 ---
 
+## Curriculum System (Phase 6)
+
+PsychePath provides a structured curriculum knowledge base representing independently learnable units of software engineering, database systems, AI/data science, and DevOps.
+
+### Graph-Based Prerequisites & Cycle Detection
+
+- **DFS Cycle Detection**: Prerequisites form a Directed Acyclic Graph (DAG). Whenever prerequisites are assigned or updated, the system evaluates all transitive connections to reject self-referencing and circular loops (`400 CURRICULUM_CIRCULAR_DEPENDENCY`).
+- **Safe Soft Deactivation**: Deleting a module that has active dependents does not hard-delete or orphan relationships; instead, it safely soft-deactivates the module (`isActive = false`) to preserve prerequisite integrity.
+- **Resource URL Sanitization**: Enforces strict URL scheme validation (`http://` and `https://` only); dangerous schemes (`javascript:`, `data:`, `file:`) are rejected.
+
+### Run Automated Curriculum Test Suite
+
+```bash
+npm run test:curriculum
+```
+
+### Curriculum REST Endpoints
+
+| Method   | Endpoint                             | Role               | Purpose                                                           |
+| :------- | :----------------------------------- | :----------------- | :---------------------------------------------------------------- |
+| `GET`    | `/api/curriculum/modules`            | `STUDENT`, `ADMIN` | Browse curriculum (filtered, paginated, active-only for students) |
+| `GET`    | `/api/curriculum/modules/:id`        | `STUDENT`, `ADMIN` | Get module details with populated prerequisite metadata           |
+| `POST`   | `/api/curriculum/modules`            | `ADMIN`            | Create module with prerequisite cycle detection                   |
+| `PATCH`  | `/api/curriculum/modules/:id`        | `ADMIN`            | Update module & modify prerequisites with cycle prevention        |
+| `PATCH`  | `/api/curriculum/modules/:id/status` | `ADMIN`            | Toggle module active/inactive status                              |
+| `DELETE` | `/api/curriculum/modules/:id`        | `ADMIN`            | Safe deletion / soft deactivation when dependents exist           |
+
+---
+
 ## Running the Application
 
 ### Option A: Run Concurrently from Root

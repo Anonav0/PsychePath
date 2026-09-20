@@ -29,7 +29,7 @@ export default function Navbar() {
           <Link href="/" className="logo-text">
             PsychePath
           </Link>
-          <span className="phase-tag">Phase 5: Learner Profile</span>
+          <span className="phase-tag">Phase 6: Curriculum System</span>
         </div>
 
         <nav className="header-nav">
@@ -38,6 +38,9 @@ export default function Navbar() {
           </Link>
           <Link href="/assessments" className="nav-link">
             Assessments
+          </Link>
+          <Link href="/curriculum" className="nav-link">
+            Curriculum
           </Link>
           {user && (
             <Link href="/profile" className="nav-link">
