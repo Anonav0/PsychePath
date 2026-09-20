@@ -29,7 +29,7 @@ export default function Navbar() {
           <Link href="/" className="logo-text">
             PsychePath
           </Link>
-          <span className="phase-tag">Phase 11: Student Frontend</span>
+          <span className="phase-tag">Phase 12: Admin Dashboard</span>
         </div>
 
         <nav className="header-nav">
@@ -59,6 +59,22 @@ export default function Navbar() {
                 Profile
               </Link>
             </>
+          )}
+          {user?.role === "ADMIN" && (
+            <Link
+              href="/admin"
+              className="nav-link"
+              style={{
+                background: "rgba(99, 102, 241, 0.15)",
+                color: "#a5b4fc",
+                border: "1px solid rgba(99, 102, 241, 0.3)",
+                padding: "0.25rem 0.6rem",
+                borderRadius: "6px",
+                fontWeight: 600,
+              }}
+            >
+              ⚙ Admin Console
+            </Link>
           )}
 
           {user ? (

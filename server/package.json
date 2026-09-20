@@ -16,7 +16,8 @@
     "test:recommendations": "node utils/verifyRecommendations.js",
     "test:gemini": "node utils/verifyGemini.js",
     "test:learning-path": "node utils/verifyLearningPath.js",
-    "test:progress": "node utils/verifyProgress.js"
+    "test:progress": "node utils/verifyProgress.js",
+    "test:admin": "node utils/verifyAdmin.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

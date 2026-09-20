@@ -654,6 +654,48 @@ npm run build --prefix client
 
 ---
 
+## Phase 12: Admin Dashboard & Management System
+
+Phase 12 delivers an authoritative, responsive, and secure administrative system for managing platform operations, learner accounts, diagnostic assessments, and curriculum catalogs.
+
+### Admin Route Architecture
+
+| Route                     | Access | Description                                                                     |
+| :------------------------ | :----: | :------------------------------------------------------------------------------ |
+| `/admin`                  | Admin  | Real-time platform metrics, engagement counters, and recent activity tables     |
+| `/admin/learners`         | Admin  | Searchable, filterable student directory with pagination and status toggle      |
+| `/admin/learners/[id]`    | Admin  | Deep learner inspection (profile, skills, goals, attempt history, active path)  |
+| `/admin/assessments`      | Admin  | Assessment catalog manager with creation modal, duration, and status toggle     |
+| `/admin/assessments/[id]` | Admin  | Question catalog manager with dynamic scoring options, reordering, and deletion |
+| `/admin/curriculum`       | Admin  | Curriculum catalog manager with prerequisite DAG validation and safe deletion   |
+
+### Admin REST API Endpoints
+
+| Method   | Endpoint                             | Description                                                                           |
+| :------- | :----------------------------------- | :------------------------------------------------------------------------------------ |
+| `GET`    | `/api/admin/stats`                   | Aggregated counters (learners, active learners, assessments, modules, recent records) |
+| `GET`    | `/api/admin/learners`                | Paginated student directory with search and status filtering                          |
+| `GET`    | `/api/admin/learners/:id`            | Read-only inspection of learner profile, attempts, and active progress                |
+| `PATCH`  | `/api/admin/learners/:id/status`     | Enable or disable student account access                                              |
+| `POST`   | `/api/assessments`                   | Create diagnostic assessment                                                          |
+| `PATCH`  | `/api/assessments/:id/status`        | Toggle assessment visibility                                                          |
+| `DELETE` | `/api/assessments/:id`               | Safe assessment deactivation/deletion                                                 |
+| `POST`   | `/api/assessments/:id/questions`     | Add question with option score mappings                                               |
+| `PATCH`  | `/api/questions/:id`                 | Update question text, type, or options                                                |
+| `PATCH`  | `/api/questions/:id/order`           | Reorder question position                                                             |
+| `DELETE` | `/api/questions/:id`                 | Remove question from assessment                                                       |
+| `POST`   | `/api/curriculum/modules`            | Create curriculum module                                                              |
+| `PATCH`  | `/api/curriculum/modules/:id/status` | Toggle module active status                                                           |
+| `DELETE` | `/api/curriculum/modules/:id`        | Safe delete module with dependent protection                                          |
+
+### Run Automated Admin Verification Test Suite
+
+```bash
+npm run test:admin --prefix server
+```
+
+---
+
 ## Running the Application
 
 ### Option A: Run Concurrently from Root
