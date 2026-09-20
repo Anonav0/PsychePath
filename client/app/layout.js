@@ -1,4 +1,5 @@
 import "./globals.css";
+import Navbar from "../components/Navbar";
 
 export const metadata = {
   title: "PsychePath — Psychometric Learning Path Recommender",
@@ -11,12 +12,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <div className="app-shell">
-          <header className="app-header">
-            <div className="header-container">
-              <span className="logo-text">PsychePath</span>
-              <span className="phase-tag">Phase 1: Architecture</span>
-            </div>
-          </header>
+          <Navbar />
           <main className="main-content">{children}</main>
           <footer className="app-footer">
             <p>

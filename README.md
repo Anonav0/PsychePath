@@ -152,6 +152,26 @@ npm run test:models
 
 ---
 
+## Authentication & Role-Based Access Control (Phase 3)
+
+PsychePath provides stateless JWT authentication with bcrypt password hashing and RBAC (`STUDENT` / `ADMIN`).
+
+### Run Automated Security & Auth Test Suite
+
+```bash
+npm run test:auth
+```
+
+### Authentication REST Endpoints
+
+- `POST /api/auth/register`: Public student registration (role forced to `STUDENT`)
+- `POST /api/auth/login`: Credential authentication returning signed JWT
+- `GET /api/auth/me`: Protected profile query (`Authorization: Bearer <token>`)
+- `GET /api/auth/student-test`: Protected route verifying `STUDENT` role access
+- `GET /api/auth/admin-test`: Protected route verifying `ADMIN` role access (returns 403 for students)
+
+---
+
 ## Running the Application
 
 ### Option A: Run Concurrently from Root

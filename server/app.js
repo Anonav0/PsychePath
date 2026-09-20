@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const config = require("./config");
 const healthRoutes = require("./routes/healthRoutes");
+const authRoutes = require("./routes/authRoutes");
 const {
   notFoundHandler,
   errorHandler,
@@ -35,8 +36,9 @@ app.use(
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 
-// Base API route mount
+// API route mounts
 app.use("/api/health", healthRoutes);
+app.use("/api/auth", authRoutes);
 
 // 404 handler for undefined routes
 app.use(notFoundHandler);

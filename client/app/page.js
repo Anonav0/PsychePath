@@ -1,4 +1,5 @@
 import HealthStatus from "../components/HealthStatus";
+import AuthStatusCard from "../components/AuthStatusCard";
 
 export default function Home() {
   return (
@@ -10,8 +11,9 @@ export default function Home() {
           insights, and AI.
         </p>
 
-        <div className="status-section">
+        <div className="status-grid-container">
           <HealthStatus />
+          <AuthStatusCard />
         </div>
 
         <div className="phase-info-grid">

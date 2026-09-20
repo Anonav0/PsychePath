@@ -17,6 +17,14 @@ class ApiClient {
       ...options.headers,
     };
 
+    // Attach Bearer token if available and not already set
+    if (!headers["Authorization"] && typeof window !== "undefined") {
+      const storedToken = localStorage.getItem("psychepath_token");
+      if (storedToken) {
+        headers["Authorization"] = `Bearer ${storedToken}`;
+      }
+    }
+
     const controller = new AbortController();
     const timeoutId = setTimeout(
       () => controller.abort(),
