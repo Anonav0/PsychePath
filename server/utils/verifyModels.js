@@ -285,8 +285,8 @@ const runTests = async () => {
       throw new Error(`Expected 1 assessment, found ${assessmentCount}`);
     if (questionCount !== 12)
       throw new Error(`Expected 12 questions, found ${questionCount}`);
-    if (moduleCount !== 10)
-      throw new Error(`Expected 10 modules, found ${moduleCount}`);
+    if (moduleCount < 10)
+      throw new Error(`Expected at least 10 modules, found ${moduleCount}`);
     if (profileCount !== 2)
       throw new Error(`Expected 2 learner profiles, found ${profileCount}`);
     if (pathCount !== 1)

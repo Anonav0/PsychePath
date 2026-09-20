@@ -18,15 +18,17 @@ const {
 } = require("../models");
 
 const seedDatabase = async ({ disconnectOnComplete = false } = {}) => {
-  if (config.isProduction && !process.argv.includes('--force')) {
-    console.error('CRITICAL: Attempted to run seed script in PRODUCTION environment without --force flag. Aborting.');
+  if (config.isProduction && !process.argv.includes("--force")) {
+    console.error(
+      "CRITICAL: Attempted to run seed script in PRODUCTION environment without --force flag. Aborting.",
+    );
     process.exit(1);
   }
 
   if (mongoose.connection.readyState !== 1) {
     console.log(`[Seed] Connecting to database at ${config.mongoUri}...`);
     await mongoose.connect(config.mongoUri, { serverSelectionTimeoutMS: 5000 });
-    console.log('[Seed] Connected successfully.');
+    console.log("[Seed] Connected successfully.");
   }
 
   console.log("[Seed] Cleaning existing development collections...");
@@ -377,8 +379,229 @@ const seedDatabase = async ({ disconnectOnComplete = false } = {}) => {
     createdBy: admin._id,
   });
 
+  const module11 = await CurriculumModule.create({
+    title: "Python Foundations for Data Engineering & Scripting",
+    description:
+      "Core Python syntax, idiomatic patterns, object-oriented design, list comprehensions, and virtual environments for data analysis.",
+    category: "Programming",
+    difficulty: "BEGINNER",
+    estimatedDuration: 18,
+    order: 11,
+    skills: [
+      { name: "Python", level: "BEGINNER" },
+      { name: "Object-Oriented Programming", level: "BEGINNER" },
+    ],
+    learningObjectives: [
+      "Write clean Python scripts utilizing core control flow and data structures",
+      "Manage project dependencies defensively with pip and virtualenv",
+      "Parse and process structured files (JSON, CSV) efficiently",
+    ],
+    resources: [
+      {
+        title: "Official Python Tutorial",
+        type: "DOCUMENTATION",
+        url: "https://docs.python.org/3/tutorial/",
+      },
+    ],
+    createdBy: admin._id,
+  });
+
+  const module12 = await CurriculumModule.create({
+    title: "Data Analysis & Manipulation with NumPy & Pandas",
+    description:
+      "Vectorized operations, multidimensional arrays, data cleaning, transformations, and aggregation with Pandas DataFrames.",
+    category: "Data Science",
+    difficulty: "INTERMEDIATE",
+    estimatedDuration: 22,
+    order: 12,
+    prerequisites: [module11._id],
+    skills: [
+      { name: "NumPy", level: "INTERMEDIATE" },
+      { name: "Pandas DataFrames", level: "INTERMEDIATE" },
+    ],
+    learningObjectives: [
+      "Perform high-performance numeric computations with NumPy arrays",
+      "Clean, filter, and transform dirty datasets into structured analysis matrices",
+      "Compute descriptive statistics, group-by aggregations, and joins",
+    ],
+    resources: [
+      {
+        title: "Pandas User Guide",
+        type: "DOCUMENTATION",
+        url: "https://pandas.pydata.org/docs/user_guide/index.html",
+      },
+    ],
+    createdBy: admin._id,
+  });
+
+  const module13 = await CurriculumModule.create({
+    title: "Machine Learning Foundations: Supervised & Unsupervised Models",
+    description:
+      "Mathematical foundations and practical implementations of linear regression, decision trees, random forests, and k-means clustering using Scikit-Learn.",
+    category: "Artificial Intelligence",
+    difficulty: "ADVANCED",
+    estimatedDuration: 30,
+    order: 13,
+    prerequisites: [module12._id],
+    skills: [
+      { name: "Machine Learning Algorithms", level: "ADVANCED" },
+      { name: "Scikit-Learn", level: "ADVANCED" },
+    ],
+    learningObjectives: [
+      "Train, evaluate, and tune supervised classification and regression models",
+      "Apply cross-validation, feature scaling, and regularization techniques",
+      "Interpret model evaluation metrics: precision, recall, F1 score, and ROC-AUC",
+    ],
+    resources: [
+      {
+        title: "Scikit-Learn Machine Learning in Python",
+        type: "DOCUMENTATION",
+        url: "https://scikit-learn.org/stable/",
+      },
+    ],
+    createdBy: admin._id,
+  });
+
+  const module14 = await CurriculumModule.create({
+    title: "Relational Database Design & ANSI SQL Fundamentals",
+    description:
+      "Entity-relationship modeling, third normal form (3NF), complex joins, subqueries, grouping, and transactional integrity.",
+    category: "Database",
+    difficulty: "BEGINNER",
+    estimatedDuration: 16,
+    order: 14,
+    skills: [
+      { name: "SQL Querying", level: "BEGINNER" },
+      { name: "Relational Modeling", level: "BEGINNER" },
+    ],
+    learningObjectives: [
+      "Model relational database schemas with primary and foreign key constraints",
+      "Write multi-table INNER, LEFT, and FULL OUTER joins",
+      "Aggregate metrics across relational tables using GROUP BY and HAVING clauses",
+    ],
+    resources: [
+      {
+        title: "PostgreSQL Tutorial",
+        type: "ARTICLE",
+        url: "https://www.postgresqltutorial.com/",
+      },
+    ],
+    createdBy: admin._id,
+  });
+
+  const module15 = await CurriculumModule.create({
+    title: "PostgreSQL & Prisma ORM: Production Schema Migrations",
+    description:
+      "Advanced relational indexing (B-Tree, GIN), schema migrations, connection pooling, and type-safe query composition with Prisma.",
+    category: "Database",
+    difficulty: "INTERMEDIATE",
+    estimatedDuration: 20,
+    order: 15,
+    prerequisites: [module14._id],
+    skills: [
+      { name: "PostgreSQL", level: "INTERMEDIATE" },
+      { name: "Prisma ORM", level: "INTERMEDIATE" },
+    ],
+    learningObjectives: [
+      "Manage progressive, zero-downtime database migrations safely",
+      "Construct type-safe queries preventing SQL injection vulnerabilities",
+      "Optimize slow queries using EXPLAIN ANALYZE and appropriate indexing",
+    ],
+    resources: [
+      {
+        title: "Prisma Documentation",
+        type: "DOCUMENTATION",
+        url: "https://www.prisma.io/docs",
+      },
+    ],
+    createdBy: admin._id,
+  });
+
+  const module16 = await CurriculumModule.create({
+    title: "Git Version Control, Trunk-Based Development & Code Reviews",
+    description:
+      "Branching strategies, interactive rebasing, merge conflict resolution, git hooks, and collaborative team pull request workflows.",
+    category: "DevOps",
+    difficulty: "BEGINNER",
+    estimatedDuration: 12,
+    order: 16,
+    skills: [
+      { name: "Git Version Control", level: "BEGINNER" },
+      { name: "Branching Strategies", level: "BEGINNER" },
+    ],
+    learningObjectives: [
+      "Navigate git history, cherry-pick commits, and resolve merge conflicts cleanly",
+      "Adopt trunk-based workflows and short-lived feature branches",
+      "Conduct constructive, quality-focused peer code reviews",
+    ],
+    resources: [
+      {
+        title: "Pro Git Book",
+        type: "DOCUMENTATION",
+        url: "https://git-scm.com/book/en/v2",
+      },
+    ],
+    createdBy: admin._id,
+  });
+
+  const module17 = await CurriculumModule.create({
+    title: "Containerization with Docker: Multi-Stage Builds & Networking",
+    description:
+      "Containerizing Node.js and Next.js applications, optimizing image layers, container networking, volumes, and docker-compose for multi-service environments.",
+    category: "DevOps",
+    difficulty: "INTERMEDIATE",
+    estimatedDuration: 22,
+    order: 17,
+    prerequisites: [module16._id, module3._id],
+    skills: [
+      { name: "Docker Containerization", level: "INTERMEDIATE" },
+      { name: "Docker Compose", level: "INTERMEDIATE" },
+    ],
+    learningObjectives: [
+      "Write multi-stage Dockerfiles that produce lightweight, secure production images",
+      "Orchestrate local full-stack environments (app + database) with docker-compose",
+      "Configure persistent volume storage and container bridge networks",
+    ],
+    resources: [
+      {
+        title: "Docker Official Docs: Get Started",
+        type: "DOCUMENTATION",
+        url: "https://docs.docker.com/get-started/",
+      },
+    ],
+    createdBy: admin._id,
+  });
+
+  const module18 = await CurriculumModule.create({
+    title: "Continuous Integration & Automated Deployment (CI/CD) Pipelines",
+    description:
+      "Automating unit and integration testing, build validation, artifact publishing, and zero-downtime deployment pipelines using GitHub Actions.",
+    category: "DevOps",
+    difficulty: "ADVANCED",
+    estimatedDuration: 24,
+    order: 18,
+    prerequisites: [module17._id],
+    skills: [
+      { name: "CI/CD Pipelines", level: "ADVANCED" },
+      { name: "GitHub Actions", level: "ADVANCED" },
+    ],
+    learningObjectives: [
+      "Write GitHub Actions workflow definitions testing pull requests automatically",
+      "Enforce branch protection rules and security scanning checks",
+      "Deploy containerized microservices to cloud container registries automatically",
+    ],
+    resources: [
+      {
+        title: "GitHub Actions Documentation",
+        type: "DOCUMENTATION",
+        url: "https://docs.github.com/en/actions",
+      },
+    ],
+    createdBy: admin._id,
+  });
+
   console.log(
-    `[Seed] Created 10 realistic curriculum modules spanning Beginner to Advanced.`,
+    `[Seed] Created 18 realistic curriculum modules spanning Beginner to Advanced across Frontend, Backend, Database, AI, and DevOps.`,
   );
 
   // ==========================================
@@ -774,7 +997,7 @@ const seedDatabase = async ({ disconnectOnComplete = false } = {}) => {
 
   if (disconnectOnComplete) {
     await mongoose.disconnect();
-    console.log('[Seed] Database disconnected.');
+    console.log("[Seed] Database disconnected.");
   }
 };
 
