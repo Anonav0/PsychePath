@@ -10,7 +10,9 @@
     "start:server": "npm start --prefix server",
     "start:client": "npm start --prefix client",
     "build:client": "npm run build --prefix client",
-    "install:all": "npm install && npm install --prefix server && npm install --prefix client"
+    "install:all": "npm install && npm install --prefix server && npm install --prefix client",
+    "seed": "npm run seed --prefix server",
+    "test:models": "npm run test:models --prefix server"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

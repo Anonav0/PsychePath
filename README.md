@@ -6,7 +6,7 @@ PsychePath is an AI-enhanced personalized learning platform that tailors educati
 
 ## Technology Stack
 
-- **Frontend**: Next.js, React, JavaScript, CSS Modules / Modern CSS
+- **Frontend**: Next.js (App Router), React, JavaScript, CSS Modules / Modern CSS
 - **Backend**: Node.js, Express.js, JavaScript (REST API)
 - **Database**: MongoDB with Mongoose ODM
 - **AI Integration**: Google Gemini API (Phase 4+)
@@ -32,9 +32,21 @@ psychepath/
 │   ├── controllers/            # Request handlers
 │   ├── middleware/             # Auth, error handling, validation middleware
 │   ├── models/                 # Mongoose data models
+│   │   ├── User.js             # User accounts & RBAC roles
+│   │   ├── Assessment.js       # Assessment definitions & dimensions
+│   │   ├── Question.js         # Assessment questions & option scoring
+│   │   ├── AssessmentAttempt.js# Student attempts & computed scores
+│   │   ├── LearnerProfile.js   # Learner skills, goals & psychometrics
+│   │   ├── CurriculumModule.js # Modules, prerequisites & resources
+│   │   ├── LearningPath.js     # Recommended curriculum paths & AI metadata
+│   │   ├── Progress.js         # Granular module progress (0-100%)
+│   │   └── index.js            # Centralized model exports
 │   ├── routes/                 # API route definitions
 │   ├── services/               # Business logic layer
-│   ├── utils/                  # Response formatters and utilities
+│   ├── utils/                  # Response formatters, seeders & verifiers
+│   │   ├── apiResponse.js      # Standard JSON response helpers
+│   │   ├── seed.js             # Development database seeder
+│   │   └── verifyModels.js     # Schema validation & integrity test suite
 │   ├── validators/             # Request payload validators
 │   ├── app.js                  # Express application setup
 │   └── server.js               # Entry point and server lifecycle
@@ -42,6 +54,7 @@ psychepath/
 ├── .docs/                      # Project documentation and specifications
 │   ├── master.md
 │   ├── prompt1.md
+│   ├── prompt2.md
 │   └── walkthroughs/           # Phase walkthroughs and instructions
 │
 ├── package.json                # Monorepo root script runner
@@ -50,9 +63,36 @@ psychepath/
 
 ---
 
+## Database Architecture
+
+```text
+       ┌──────────────┐
+       │     User     │
+       └──────┬───────┘
+              │ (1:1)
+              ├─────────────────────────────► LearnerProfile
+              │                                      │
+              │ (1:N)                                │ (latest scores)
+              ├─────────────────────────────► AssessmentAttempt ◄───┐
+              │                                      │               │
+              │ (1:N)                                │               │
+              ├─────────────────────────────► LearningPath           │
+              │                                      │               │
+              │ (1:N)                                │ (ordered)     │
+              └──────────────► Progress              ▼               │
+                                  │           CurriculumModule       │
+                                  │                  │ (prereqs)     │
+                                  └──────────────────┴───────────────┘
+
+Assessment (1:N) ──► Question
+Assessment (1:N) ──► AssessmentAttempt
+```
+
+---
+
 ## Prerequisites
 
-- **Node.js**: `v18.x` or higher (tested on Node v20)
+- **Node.js**: `v18.x` or higher (tested on Node `v20.18.0`)
 - **npm**: `v9.x` or higher
 - **MongoDB**: Local MongoDB daemon running at `mongodb://localhost:27017` or MongoDB Atlas URI
 
@@ -90,14 +130,24 @@ Install dependencies across the monorepo root, backend, and frontend:
 npm run install:all
 ```
 
-Or install individually:
+---
+
+## Database Operations (Phase 2)
+
+### Seed Development Data
+
+Populate the database with realistic sample users, psychometric assessments, questions, curriculum modules, learner profiles, and learning paths:
 
 ```bash
-# Server dependencies
-cd server && npm install
+npm run seed
+```
 
-# Client dependencies
-cd ../client && npm install
+### Run Model Verification & Constraint Tests
+
+Run automated tests verifying schema constraints, unique indexes, enum validations, and document population:
+
+```bash
+npm run test:models
 ```
 
 ---
@@ -144,8 +194,10 @@ Expected JSON response:
 {
   "success": true,
   "message": "PsychePath API is running",
-  "timestamp": "2026-09-20T17:40:00.000Z"
+  "timestamp": "2026-09-20T18:03:34.973Z",
+  "database": "connected",
+  "uptime": 9
 }
 ```
 
-Open `http://localhost:3000` in your browser. The landing page will query `GET /api/health` and display **Backend Status: Connected** with live response metadata.
+Open `http://localhost:3000` in your browser. The landing page queries `GET /api/health` and displays **Backend Status: Connected** with live response latency and database connection state.
