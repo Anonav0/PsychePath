@@ -29,12 +29,15 @@ export default function Navbar() {
           <Link href="/" className="logo-text">
             PsychePath
           </Link>
-          <span className="phase-tag">Phase 3: Auth & RBAC</span>
+          <span className="phase-tag">Phase 4: Assessment Engine</span>
         </div>
 
         <nav className="header-nav">
           <Link href="/" className="nav-link">
             Home
+          </Link>
+          <Link href="/assessments" className="nav-link">
+            Assessments
           </Link>
 
           {user ? (

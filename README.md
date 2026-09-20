@@ -172,6 +172,79 @@ npm run test:auth
 
 ---
 
+## Assessment Engine (Phase 4)
+
+PsychePath includes a generic, backend-authoritative psychometric assessment engine.
+
+### Scoring Architecture
+
+> **Security Note**: Scoring is performed entirely on the backend. The client never determines or submits authoritative scores. Client scoring payloads are strictly ignored and sanitized.
+
+```text
+Assessment
+    ↓
+Questions (sanitized: scoring keys hidden from students)
+    ↓
+Student Attempt (IN_PROGRESS)
+    ↓
+Submitted Answers (auto-saved incrementally)
+    ↓
+Backend Validation (completeness check, option verification)
+    ↓
+Scoring Engine (authoritative DB option lookup)
+    ↓
+Dimension Scores & Normalization (0–100%)
+    ↓
+Assessment Result (educational summary, strongest dimensions, development areas)
+```
+
+### Supported Assessment Types
+
+- `LEARNING_STYLE`: Cognitive problem-solving, study habits, collaboration preferences
+- `SKILLS`: Technical skill proficiency evaluations
+- `PERSONALITY_PROFILE`: Self-management, persistence, communication traits
+- `GENERAL`: Extensible generic diagnostics
+
+### Attempt Lifecycle
+
+```text
+[Start Attempt] ──► IN_PROGRESS ──► [Auto-save Answers] ──► [Submit Attempt] ──► COMPLETED (Scored)
+```
+
+- A student has at most one active (`IN_PROGRESS`) attempt per assessment at any given time.
+- Inactive assessments cannot be started.
+- Completed attempts are permanently locked against modifications or re-submissions.
+- Assessment results are protected by strict IDOR checks.
+
+### Run Automated Assessment Test Suite
+
+```bash
+npm run test:assessment
+```
+
+### Assessment Engine Endpoints
+
+| Method   | Endpoint                               | Role             | Purpose                                               |
+| :------- | :------------------------------------- | :--------------- | :---------------------------------------------------- |
+| `GET`    | `/api/assessments`                     | Public / Student | List active assessments (scoring keys stripped)       |
+| `POST`   | `/api/assessments`                     | `ADMIN`          | Create new assessment                                 |
+| `GET`    | `/api/assessments/:id`                 | Public / Student | Get assessment instructions and details               |
+| `PATCH`  | `/api/assessments/:id`                 | `ADMIN`          | Update assessment details                             |
+| `PATCH`  | `/api/assessments/:id/status`          | `ADMIN`          | Activate or deactivate assessment                     |
+| `DELETE` | `/api/assessments/:id`                 | `ADMIN`          | Safe soft-delete / deactivate if attempts exist       |
+| `GET`    | `/api/assessments/:id/questions`       | Public / Student | Get ordered questions (scores stripped for students)  |
+| `POST`   | `/api/assessments/:id/questions`       | `ADMIN`          | Create question with scoring rules                    |
+| `PATCH`  | `/api/questions/:id/order`             | `ADMIN`          | Reorder question sequence                             |
+| `POST`   | `/api/assessments/:id/attempts`        | `STUDENT`        | Start new attempt or resume active attempt            |
+| `GET`    | `/api/assessments/:id/attempts/active` | `STUDENT`        | Get current active attempt                            |
+| `PATCH`  | `/api/attempts/:id/answers`            | `STUDENT`        | Save / update answers (anti-tamper sanitized)         |
+| `POST`   | `/api/attempts/:id/submit`             | `STUDENT`        | Submit attempt, validate completion, calculate scores |
+| `GET`    | `/api/attempts/:id/result`             | `STUDENT`        | View scored results and dimension breakdown           |
+| `GET`    | `/api/attempts/my`                     | `STUDENT`        | View student's assessment attempt history             |
+| `GET`    | `/api/attempts`                        | `ADMIN`          | View all learner attempts across the platform         |
+
+---
+
 ## Running the Application
 
 ### Option A: Run Concurrently from Root

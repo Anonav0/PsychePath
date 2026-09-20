@@ -9,7 +9,8 @@
     "dev": "nodemon server.js",
     "seed": "node utils/seed.js",
     "test:models": "node utils/verifyModels.js",
-    "test:auth": "node utils/verifyAuth.js"
+    "test:auth": "node utils/verifyAuth.js",
+    "test:assessment": "node utils/verifyAssessments.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

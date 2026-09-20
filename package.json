@@ -13,7 +13,8 @@
     "install:all": "npm install && npm install --prefix server && npm install --prefix client",
     "seed": "npm run seed --prefix server",
     "test:models": "npm run test:models --prefix server",
-    "test:auth": "npm run test:auth --prefix server"
+    "test:auth": "npm run test:auth --prefix server",
+    "test:assessment": "npm run test:assessment --prefix server"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

@@ -3,6 +3,9 @@ const cors = require("cors");
 const config = require("./config");
 const healthRoutes = require("./routes/healthRoutes");
 const authRoutes = require("./routes/authRoutes");
+const assessmentRoutes = require("./routes/assessmentRoutes");
+const questionRoutes = require("./routes/questionRoutes");
+const attemptRoutes = require("./routes/attemptRoutes");
 const {
   notFoundHandler,
   errorHandler,
@@ -39,6 +42,9 @@ app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 // API route mounts
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/assessments", assessmentRoutes);
+app.use("/api/questions", questionRoutes);
+app.use("/api/attempts", attemptRoutes);
 
 // 404 handler for undefined routes
 app.use(notFoundHandler);

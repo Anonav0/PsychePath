@@ -62,6 +62,31 @@ const authenticate = async (req, res, next) => {
 };
 
 /**
+ * Optional authentication middleware - attaches req.user if valid token present, but doesn't block unauthenticated
+ */
+const optionalAuthenticate = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return next();
+  }
+
+  const token = authHeader.split(" ")[1];
+  if (!token) return next();
+
+  try {
+    const decoded = jwt.verify(token, config.jwtSecret);
+    const user = await User.findById(decoded.sub).select("-password");
+    if (user && user.isActive) {
+      req.user = user;
+    }
+  } catch (err) {
+    // Ignore invalid/expired token for optional endpoints
+  }
+  next();
+};
+
+/**
  * Middleware to enforce role-based access control (RBAC)
  * @param  {...string} allowedRoles - e.g. 'ADMIN', 'STUDENT'
  */
@@ -89,5 +114,6 @@ const authorizeRole = (...allowedRoles) => {
 
 module.exports = {
   authenticate,
+  optionalAuthenticate,
   authorizeRole,
 };
