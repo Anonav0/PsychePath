@@ -16,6 +16,10 @@ const config = {
       : ""),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "1d",
   geminiApiKey: process.env.GEMINI_API_KEY || "",
+  geminiModel: process.env.GEMINI_MODEL || "gemini-flash-latest",
+  geminiTimeoutMs: parseInt(process.env.GEMINI_TIMEOUT_MS, 10) || 15000,
+  geminiMaxRetries: parseInt(process.env.GEMINI_MAX_RETRIES, 10) || 2,
+  aiMaxCandidates: parseInt(process.env.AI_MAX_CANDIDATES, 10) || 10,
   isProduction: process.env.NODE_ENV === "production",
 };
 

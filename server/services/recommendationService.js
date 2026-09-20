@@ -1,7 +1,9 @@
 const { LearnerProfile } = require("../models");
+const config = require("../config");
 const candidateGenerationService = require("./candidateGenerationService");
 const recommendationScoringService = require("./recommendationScoringService");
 const recommendationReasonService = require("./recommendationReasonService");
+const geminiPersonalizationService = require("./geminiPersonalizationService");
 
 const MIN_RECOMMENDATION_SCORE = 35;
 const DEFAULT_LIMIT = 10;
@@ -87,6 +89,10 @@ class RecommendationService {
 
     if (candidates.length === 0) {
       return {
+        source: "RULE_ENGINE",
+        summary: "No eligible modules match the current criteria.",
+        focusAreas: profile.learningGoals || [],
+        learningStrategy: [],
         recommendations: [],
         blockedModules: [],
         profileVersion: profile.profileVersion || 1,
@@ -161,12 +167,24 @@ class RecommendationService {
       Math.max(1, parseInt(queryParams.limit, 10) || DEFAULT_LIMIT),
     );
 
-    return {
-      recommendations: actionable.slice(0, limit),
-      blockedModules: blocked.slice(0, limit),
-      profileVersion: profile.profileVersion || 1,
-      candidateCount: candidates.length,
-    };
+    const limitedActionable = actionable.slice(0, limit);
+    const limitedBlocked = blocked.slice(0, limit);
+
+    // If Gemini API key is configured, personalize recommendations using Gemini AI
+    if (config.geminiApiKey) {
+      return await geminiPersonalizationService.personalize(
+        profile,
+        limitedActionable,
+        limitedBlocked,
+      );
+    }
+
+    // Otherwise use deterministic rule engine result
+    return geminiPersonalizationService.fallback(
+      limitedActionable,
+      limitedBlocked,
+      profile,
+    );
   }
 }
 

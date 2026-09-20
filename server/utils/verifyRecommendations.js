@@ -24,6 +24,9 @@ const setup = async () => {
     config.jwtSecret = "test_suite_recommendation_secret_key_at_least_32_chars";
   }
 
+  // Ensure deterministic engine testing without live AI non-determinism
+  config.geminiApiKey = "";
+
   await new Promise((resolve) => {
     server = http.createServer(app);
     server.listen(0, () => {

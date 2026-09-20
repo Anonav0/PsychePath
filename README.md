@@ -364,6 +364,78 @@ npm run test:recommendations
 | `GET`  | `/api/recommendations`         | `STUDENT`, `ADMIN` | Retrieve ranked recommendations, score breakdown, and blocked modules |
 | `GET`  | `/api/recommendations/modules` | `STUDENT`, `ADMIN` | Alias endpoint for recommendations query                              |
 
+---
+
+## AI Recommendation Architecture (Phase 8: Gemini AI Integration)
+
+PsychePath integrates Google Gemini AI as an explainable, personalized recommendation service layer that acts strictly on top of Phase 7's deterministic engine.
+
+> **Core Architectural Principle**:
+> Rules determine what can be recommended; Gemini determines how valid recommendations are personalized and explained.
+
+### AI Personalization Flow
+
+```text
+Learner Profile (Goals, Skills, Psychometrics, Preferences)
+          │
+          ▼
+Deterministic Candidate Selection (Phase 7 Engine)
+          │
+          ▼
+Gemini AI Personalization Service
+  ├── System Directives (Zero Hallucination, Non-Clinical)
+  ├── Untrusted User Data Quarantine (Prompt Injection Defense)
+  └── Candidate Set Payload (max 10 modules)
+          │
+          ▼
+Structured JSON Validation
+  ├── Schema Integrity (summary, focusAreas, learningStrategy, sequence)
+  └── Hallucination Pruning (moduleIds must exist in candidate set)
+          │
+          ▼
+Prerequisite DAG Validation & Reordering
+  └── Kahn's Topological Sort (repairs any inadvertent prerequisite inversions)
+          │
+          ├── (AI Success) ──► HYBRID Response (Personalized Narrative, Focus Areas, Sequence)
+          │
+          └── (Failure / Timeout / Quota) ──► RULE_ENGINE Fallback (Zero Downtime)
+```
+
+### Safety & Integrity Boundaries
+
+- **Curriculum Integrity**: Gemini is strictly prohibited from inventing module IDs, courses, resources, or skills. Any returned module ID not present in the pre-approved candidate list is pruned.
+- **Prerequisite Preservation**: The backend guarantees that prerequisite relationships (DAG) can never be violated by AI ordering. If Gemini suggests Module B before required Module A, the system topologically reorders them.
+- **Prompt Injection Protection**: All learner-provided text (goals, skills, interests) is quarantined in isolated JSON blocks and labeled as untrusted data to analyze, never instructions to follow.
+- **Security & Secret Protection**: `GEMINI_API_KEY` exists strictly on the backend, is omitted from client bundles, excluded from API responses, and sanitized from server logs.
+
+### Configuration & Environment
+
+Add the following to `server/.env`:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-flash-latest
+GEMINI_TIMEOUT_MS=15000
+GEMINI_MAX_RETRIES=2
+AI_MAX_CANDIDATES=10
+```
+
+### Run Automated Gemini Test Suite
+
+The test suite runs with zero network dependency using isolated mocks and stubs:
+
+```bash
+npm run test:gemini
+```
+
+Or from server directory:
+
+```bash
+npm run test:gemini --prefix server
+```
+
+---
+
 ## Running the Application
 
 ### Option A: Run Concurrently from Root

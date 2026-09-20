@@ -102,19 +102,55 @@ export default function RecommendationsPage() {
   return (
     <div className="recommendation-container">
       <div style={{ marginBottom: "2rem" }}>
-        <h1
+        <div
           style={{
-            fontSize: "2.2rem",
-            fontWeight: 800,
+            display: "flex",
+            alignItems: "center",
+            gap: "0.75rem",
+            flexWrap: "wrap",
             marginBottom: "0.5rem",
           }}
         >
-          Recommended for You
-        </h1>
+          <h1
+            style={{
+              fontSize: "2.2rem",
+              fontWeight: 800,
+              margin: 0,
+            }}
+          >
+            Recommended for You
+          </h1>
+          {data?.source && (
+            <span
+              style={{
+                fontSize: "0.8rem",
+                fontWeight: 700,
+                padding: "0.25rem 0.75rem",
+                borderRadius: "9999px",
+                background:
+                  data.source === "HYBRID"
+                    ? "linear-gradient(135deg, #6366f1, #a855f7)"
+                    : "var(--bg-surface-elevated)",
+                color: "#ffffff",
+                border:
+                  data.source === "HYBRID"
+                    ? "none"
+                    : "1px solid var(--border-color)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.35rem",
+              }}
+            >
+              {data.source === "HYBRID"
+                ? "✨ AI-Personalized (Gemini)"
+                : "⚙️ Deterministic (Rule Engine)"}
+            </span>
+          )}
+        </div>
         <p style={{ color: "var(--text-secondary)", maxWidth: "750px" }}>
-          Deterministic, rule-based curriculum recommendations matching your
-          verified skills, learning goals, cognitive assessment dimensions, and
-          prerequisite readiness.
+          {data?.source === "HYBRID"
+            ? "AI-synthesized learning sequence and study strategies powered by Gemini, grounded strictly in pre-computed deterministic recommendations."
+            : "Deterministic, rule-based curriculum recommendations matching your verified skills, learning goals, cognitive assessment dimensions, and prerequisite readiness."}
         </p>
       </div>
 
@@ -277,6 +313,129 @@ export default function RecommendationsPage() {
         </div>
       )}
 
+      {!loading && data && data.summary && (
+        <div
+          style={{
+            background:
+              data.source === "HYBRID"
+                ? "linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(168, 85, 247, 0.08))"
+                : "var(--bg-surface)",
+            border:
+              data.source === "HYBRID"
+                ? "1px solid rgba(99, 102, 241, 0.3)"
+                : "1px solid var(--border-color)",
+            borderRadius: "12px",
+            padding: "1.5rem",
+            marginBottom: "2rem",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              marginBottom: "0.75rem",
+            }}
+          >
+            <span style={{ fontSize: "1.25rem" }}>
+              {data.source === "HYBRID" ? "✨" : "🎯"}
+            </span>
+            <h2
+              style={{
+                fontSize: "1.15rem",
+                fontWeight: 700,
+                margin: 0,
+                color: "var(--text-primary)",
+              }}
+            >
+              {data.source === "HYBRID"
+                ? "Personalized Learning Narrative & Strategy"
+                : "Deterministic Recommendation Strategy"}
+            </h2>
+          </div>
+
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              lineHeight: 1.6,
+              marginBottom: "1.25rem",
+            }}
+          >
+            {data.summary}
+          </p>
+
+          {data.focusAreas && data.focusAreas.length > 0 && (
+            <div style={{ marginBottom: "1rem" }}>
+              <span
+                style={{
+                  fontSize: "0.85rem",
+                  fontWeight: 600,
+                  color: "var(--text-muted)",
+                  marginRight: "0.5rem",
+                }}
+              >
+                Focus Areas:
+              </span>
+              <div
+                style={{
+                  display: "inline-flex",
+                  flexWrap: "wrap",
+                  gap: "0.4rem",
+                  marginTop: "0.25rem",
+                }}
+              >
+                {data.focusAreas.map((fa, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      fontSize: "0.8rem",
+                      padding: "0.2rem 0.6rem",
+                      borderRadius: "6px",
+                      background: "rgba(99, 102, 241, 0.15)",
+                      color: "var(--accent-primary, #6366f1)",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {fa}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {data.learningStrategy && data.learningStrategy.length > 0 && (
+            <div>
+              <span
+                style={{
+                  fontSize: "0.85rem",
+                  fontWeight: 600,
+                  color: "var(--text-muted)",
+                  display: "block",
+                  marginBottom: "0.4rem",
+                }}
+              >
+                Recommended Study Approach:
+              </span>
+              <ul
+                style={{
+                  margin: 0,
+                  paddingLeft: "1.25rem",
+                  color: "var(--text-secondary)",
+                  fontSize: "0.9rem",
+                  lineHeight: 1.5,
+                }}
+              >
+                {data.learningStrategy.map((strat, idx) => (
+                  <li key={idx} style={{ marginBottom: "0.25rem" }}>
+                    {strat}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
       {!loading && data && data.recommendations && (
         <>
           {data.recommendations.length === 0 ? (
@@ -323,6 +482,21 @@ export default function RecommendationsPage() {
                           marginBottom: "0.5rem",
                         }}
                       >
+                        {rec.aiPriority && (
+                          <span
+                            style={{
+                              fontSize: "0.75rem",
+                              fontWeight: 700,
+                              padding: "0.2rem 0.5rem",
+                              borderRadius: "4px",
+                              background: "rgba(99, 102, 241, 0.2)",
+                              color: "#818cf8",
+                              border: "1px solid rgba(99, 102, 241, 0.3)",
+                            }}
+                          >
+                            Step #{rec.aiPriority}
+                          </span>
+                        )}
                         <span className="category-tag">
                           {rec.module.category}
                         </span>
