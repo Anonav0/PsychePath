@@ -6,7 +6,6 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-7.x-green.svg)](https://www.mongodb.com/)
 [![Gemini AI](https://img.shields.io/badge/Google%20Gemini-1.5%20%2F%202.0-blue.svg)](https://ai.google.dev/)
 [![Tests](https://img.shields.io/badge/Jest-67%2F67%20Passing-success.svg)](https://jestjs.io/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 PsychePath is an AI-augmented educational engineering platform that synthesizes individualized curriculum pathways. By coupling **authoritative psychometric assessment scoring**, **directed acyclic graph (DAG) curriculum filtering**, and **Google Gemini AI contextual rationale generation**, PsychePath solves the two fundamental flaws of modern EdTech: generic static playlists and hallucinated, unverified AI course recommendations.
 
