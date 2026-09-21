@@ -173,7 +173,7 @@ export default function LearningPathPage() {
   if (loading) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-        <div className="rounded-2xl border p-8 bg-card/40 space-y-4">
+        <div className="rounded-xl border border-border p-6 bg-white shadow-sm space-y-4">
           <CardSkeleton count={1} />
         </div>
         <CardSkeleton count={3} />
@@ -246,7 +246,7 @@ export default function LearningPathPage() {
         <>
           {/* 2. Overall Progress Card */}
           {progressData?.pathSummary && (
-            <Card className="p-5 space-y-3 bg-card/60 backdrop-blur-sm shadow-sm">
+            <Card className="p-6 space-y-4 bg-white border border-border shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
                 <div className="flex items-center gap-2 font-bold text-foreground text-sm">
                   <span>
@@ -270,36 +270,35 @@ export default function LearningPathPage() {
               <ProgressBar
                 value={progressData.pathSummary.overallProgress}
                 height="10px"
-                variant="gradient"
               />
             </Card>
           )}
 
           {/* 3. AI Narrative & Strategy */}
           {activePath.summary && (
-            <Card className="border-primary/20 bg-primary/5 p-6 space-y-3 shadow-sm">
-              <div className="flex items-center gap-2 text-primary">
+            <Card className="border-indigo-100 bg-indigo-50/50 p-6 space-y-3 shadow-sm">
+              <div className="flex items-center gap-2 text-indigo-700">
                 <Sparkles className="h-5 w-5" />
-                <h3 className="text-base font-bold text-foreground">
+                <h3 className="text-base font-bold text-slate-900">
                   {activePath.generatedBy === "HYBRID"
                     ? "AI-Synthesized Narrative & Study Strategy"
                     : "Curriculum Strategy"}
                 </h3>
               </div>
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                 {activePath.summary}
               </p>
 
               {activePath.focusAreas && activePath.focusAreas.length > 0 && (
                 <div className="flex items-center gap-2 flex-wrap pt-2">
-                  <span className="text-xs font-semibold text-foreground">
+                  <span className="text-xs font-semibold text-slate-900">
                     Focus Areas:
                   </span>
                   {activePath.focusAreas.map((fa, i) => (
                     <Badge
                       key={i}
                       variant="secondary"
-                      className="text-[11px] bg-primary/10 text-primary border-primary/20"
+                      className="text-[11px] bg-indigo-100 text-indigo-700 border-indigo-200"
                     >
                       {fa}
                     </Badge>
@@ -327,7 +326,7 @@ export default function LearningPathPage() {
                   return (
                     <Card
                       key={modId || idx}
-                      className="p-5 shadow-sm hover:border-primary/40 transition-all space-y-4"
+                      className="p-6 shadow-sm border border-border bg-white hover:border-indigo-200 transition-all space-y-4"
                     >
                       {/* Top Row */}
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -366,9 +365,9 @@ export default function LearningPathPage() {
                           </p>
                         )}
                         {item.reason && (
-                          <div className="p-2.5 rounded-lg bg-muted/40 border text-xs text-muted-foreground">
+                          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-600">
                             💡{" "}
-                            <strong className="text-foreground">
+                            <strong className="text-slate-900">
                               Placement Rationale:
                             </strong>{" "}
                             {item.reason}
@@ -377,7 +376,7 @@ export default function LearningPathPage() {
                       </div>
 
                       {/* Progress Controls */}
-                      <div className="pt-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="pt-3 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex-1 max-w-sm">
                           <ProgressBar
                             value={percentage}
@@ -434,7 +433,7 @@ export default function LearningPathPage() {
                           )}
 
                           {status === "COMPLETED" && (
-                            <span className="text-xs font-semibold text-emerald-500 flex items-center gap-1">
+                            <span className="text-xs font-semibold text-emerald-600 flex items-center gap-1">
                               <CheckCircle2 className="h-4 w-4" />
                               <span>Completed</span>
                             </span>
@@ -458,11 +457,11 @@ export default function LearningPathPage() {
                 </h2>
               </div>
 
-              <Card className="divide-y overflow-hidden shadow-sm">
+              <Card className="divide-y divide-border border border-border bg-white overflow-hidden shadow-sm">
                 {historyPaths.map((p, idx) => (
                   <div
                     key={p.id || p._id || idx}
-                    className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:bg-muted/30 transition-colors"
+                    className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:bg-slate-50/70 transition-colors"
                   >
                     <div>
                       <span className="font-bold text-foreground text-sm">

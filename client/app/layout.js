@@ -10,14 +10,14 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <body className="min-h-screen bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary">
         <div className="app-shell min-h-screen flex flex-col">
           <Navbar />
           <main className="main-content flex-1 flex flex-col w-full">
             {children}
           </main>
-          <footer className="app-footer border-t py-6 text-center text-xs text-muted-foreground bg-card/40">
+          <footer className="app-footer border-t border-border py-6 text-center text-xs text-muted-foreground bg-white">
             <p>
               PsychePath &copy; {new Date().getFullYear()} &mdash; Personalized
               Learning System &bull; Evidence-Based Education

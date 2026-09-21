@@ -117,7 +117,7 @@ export default function LearnersDirectoryPage() {
     >
       <div className="space-y-6">
         {/* Search & Filter Controls */}
-        <Card className="p-4 shadow-sm">
+        <Card className="p-4 bg-white border border-border shadow-sm">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="relative w-full sm:max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -173,7 +173,7 @@ export default function LearnersDirectoryPage() {
             }
           />
         ) : (
-          <Card className="overflow-hidden shadow-sm">
+          <Card className="overflow-hidden bg-white border border-border shadow-sm">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -263,8 +263,8 @@ export default function LearnersDirectoryPage() {
                           className={cn(
                             "h-7 text-xs px-2.5",
                             learner.isActive
-                              ? "text-destructive hover:bg-destructive/10"
-                              : "text-emerald-500 hover:bg-emerald-500/10",
+                              ? "text-red-600 hover:bg-red-50"
+                              : "text-emerald-600 hover:bg-emerald-50",
                           )}
                         >
                           {learner.isActive ? "Deactivate" : "Activate"}
@@ -277,7 +277,7 @@ export default function LearnersDirectoryPage() {
             </Table>
 
             {/* Pagination Controls */}
-            <div className="flex items-center justify-between p-4 border-t text-xs text-muted-foreground bg-muted/20">
+            <div className="flex items-center justify-between p-4 border-t border-border text-xs text-muted-foreground bg-slate-50/50">
               <span>
                 Showing {learners.length} of {pagination.total} learners (Page{" "}
                 {pagination.page} of {pagination.totalPages})

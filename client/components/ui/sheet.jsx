@@ -77,7 +77,7 @@ export function SheetContent({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm animate-in fade-in-0"
+      className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm animate-in fade-in-0"
       onClick={() => setOpen(false)}
     >
       <div

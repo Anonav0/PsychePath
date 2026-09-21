@@ -270,7 +270,7 @@ export default function RecommendationsPage() {
 
         {/* Learning Path Action Bar */}
         {data && data.recommendations && data.recommendations.length > 0 && (
-          <Card className="p-4 sm:p-5 bg-card/60 backdrop-blur-sm border-border/80 shadow-sm">
+          <Card className="p-5 sm:p-6 bg-white border border-border shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0">
@@ -314,8 +314,8 @@ export default function RecommendationsPage() {
             </div>
 
             {pathMessage && (
-              <div className="mt-3 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 shrink-0" />
+              <div className="mt-3 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
                 <span>{pathMessage}</span>
               </div>
             )}
@@ -353,7 +353,7 @@ export default function RecommendationsPage() {
       </div>
 
       {/* Filter Controls Bar */}
-      <div className="flex flex-wrap items-center gap-3 bg-muted/40 p-3 rounded-xl border border-border/60">
+      <div className="flex flex-wrap items-center gap-3 bg-white p-3 rounded-xl border border-border shadow-xs">
         <div className="w-44">
           <Select
             value={selectedCategory}
@@ -398,7 +398,7 @@ export default function RecommendationsPage() {
       {/* Profile Not Ready Card */}
       {notReadyError && (
         <Alert variant="warning" className="p-6">
-          <AlertCircle className="h-5 w-5 text-amber-500" />
+          <AlertCircle className="h-5 w-5 text-amber-600" />
           <AlertTitle className="text-base font-bold">
             Profile Setup Required
           </AlertTitle>
@@ -445,7 +445,7 @@ export default function RecommendationsPage() {
 
       {/* AI / Deterministic Strategy Summary */}
       {!loading && data && data.summary && (
-        <Card className="border-primary/20 bg-primary/5 p-6 space-y-4 shadow-sm">
+        <Card className="border-indigo-100 bg-indigo-50/50 p-6 space-y-4 shadow-sm">
           <div className="flex items-center gap-2.5 text-primary">
             {data.source === "HYBRID" ? (
               <Sparkles className="h-5 w-5" />
@@ -502,11 +502,11 @@ export default function RecommendationsPage() {
                 return (
                   <Card
                     key={rec.module.id}
-                    className="p-5 hover:border-primary/40 transition-all shadow-sm"
+                    className="p-5 hover:border-primary/40 transition-all shadow-sm bg-white border-border"
                   >
                     <div className="flex flex-col md:flex-row md:items-start gap-4 justify-between">
                       {/* Left: Score Badge */}
-                      <div className="flex md:flex-col items-center justify-center p-3 rounded-xl border bg-muted/30 shrink-0 w-fit md:w-20 text-center gap-1">
+                      <div className="flex md:flex-col items-center justify-center p-3 rounded-xl border border-indigo-100 bg-indigo-50/70 shrink-0 w-fit md:w-20 text-center gap-1">
                         <span className="text-2xl font-black text-primary leading-none">
                           {rec.score}
                         </span>
@@ -542,7 +542,7 @@ export default function RecommendationsPage() {
                           {rec.module.title}
                         </h3>
 
-                        <div className="p-3 rounded-lg bg-muted/40 border text-xs text-muted-foreground leading-relaxed">
+                        <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed">
                           💡{" "}
                           <strong className="text-foreground">
                             Why Recommended:
@@ -565,7 +565,7 @@ export default function RecommendationsPage() {
                             <Badge
                               key={idx}
                               variant="secondary"
-                              className="text-[10px] bg-amber-500/10 text-amber-500 border-amber-500/20"
+                              className="text-[10px] bg-amber-50 text-amber-800 border-amber-200"
                             >
                               + Gap: {g}
                             </Badge>

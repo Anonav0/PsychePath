@@ -141,7 +141,7 @@ export default function LearnerDetailPage() {
         </div>
 
         {/* Header Banner */}
-        <Card className="p-6 shadow-sm">
+        <Card className="p-6 bg-white border border-border shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-3 flex-wrap">
@@ -164,8 +164,8 @@ export default function LearnerDetailPage() {
               className={cn(
                 "text-xs h-8 shrink-0",
                 user.isActive
-                  ? "text-destructive hover:bg-destructive/10"
-                  : "text-emerald-500 hover:bg-emerald-500/10",
+                  ? "text-red-600 hover:bg-red-50 border-red-200"
+                  : "text-emerald-600 hover:bg-emerald-50 border-emerald-200",
               )}
             >
               {user.isActive ? "Deactivate Account" : "Activate Account"}
@@ -176,13 +176,13 @@ export default function LearnerDetailPage() {
         {/* Profile & Academic Attributes Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Profile Overview */}
-          <Card className="p-5 shadow-sm space-y-4">
+          <Card className="p-6 bg-white border border-border shadow-sm space-y-4">
             <h3 className="text-base font-bold text-foreground">
               Learner Profile & Preferences
             </h3>
             {profile ? (
               <div className="space-y-3 text-xs">
-                <div className="flex justify-between py-1 border-b">
+                <div className="flex justify-between py-1.5 border-b border-slate-100">
                   <span className="text-muted-foreground flex items-center gap-1.5">
                     <GraduationCap className="h-3.5 w-3.5" />
                     <span>Education Level:</span>
@@ -191,7 +191,7 @@ export default function LearnerDetailPage() {
                     {profile.educationLevel || "Not specified"}
                   </span>
                 </div>
-                <div className="flex justify-between py-1 border-b">
+                <div className="flex justify-between py-1.5 border-b border-slate-100">
                   <span className="text-muted-foreground flex items-center gap-1.5">
                     <Briefcase className="h-3.5 w-3.5" />
                     <span>Experience Level:</span>
@@ -200,7 +200,7 @@ export default function LearnerDetailPage() {
                     {profile.experienceLevel || "BEGINNER"}
                   </span>
                 </div>
-                <div className="flex justify-between py-1 border-b">
+                <div className="flex justify-between py-1.5 border-b border-slate-100">
                   <span className="text-muted-foreground flex items-center gap-1.5">
                     <Clock className="h-3.5 w-3.5" />
                     <span>Weekly Study Hours:</span>
@@ -209,7 +209,7 @@ export default function LearnerDetailPage() {
                     {profile.weeklyLearningHours || 5} hrs/week
                   </span>
                 </div>
-                <div className="flex justify-between py-1 border-b">
+                <div className="flex justify-between py-1.5 border-b border-slate-100">
                   <span className="text-muted-foreground">
                     Preferred Format:
                   </span>
@@ -217,7 +217,7 @@ export default function LearnerDetailPage() {
                     {profile.learningPreferences?.preferredFormat || "MIXED"}
                   </span>
                 </div>
-                <div className="flex justify-between py-1">
+                <div className="flex justify-between py-1.5">
                   <span className="text-muted-foreground">
                     Preferred Difficulty:
                   </span>
@@ -235,7 +235,7 @@ export default function LearnerDetailPage() {
           </Card>
 
           {/* Skills & Goals */}
-          <Card className="p-5 shadow-sm space-y-4">
+          <Card className="p-6 bg-white border border-border shadow-sm space-y-4">
             <h3 className="text-base font-bold text-foreground">
               Skills & Target Goals
             </h3>
@@ -294,7 +294,7 @@ export default function LearnerDetailPage() {
         </div>
 
         {/* Assessment Attempts */}
-        <Card className="p-5 shadow-sm space-y-4">
+        <Card className="p-6 bg-white border border-border shadow-sm space-y-4">
           <h3 className="text-base font-bold text-foreground">
             Psychometric Assessment History ({attempts.length})
           </h3>
@@ -307,7 +307,7 @@ export default function LearnerDetailPage() {
               {attempts.map((att) => (
                 <div
                   key={att._id}
-                  className="p-3.5 rounded-xl border bg-muted/20 space-y-2 text-xs"
+                  className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2 text-xs"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -333,7 +333,7 @@ export default function LearnerDetailPage() {
                         <Badge
                           key={dim}
                           variant="secondary"
-                          className="text-[10px]"
+                          className="text-[10px] bg-indigo-50 text-indigo-700 border-indigo-200"
                         >
                           <strong>{dim}:</strong> {score}%
                         </Badge>
@@ -353,7 +353,7 @@ export default function LearnerDetailPage() {
         </Card>
 
         {/* Active Learning Path & Progress */}
-        <Card className="p-5 shadow-sm space-y-4">
+        <Card className="p-6 bg-white border border-border shadow-sm space-y-4">
           <h3 className="text-base font-bold text-foreground">
             Active Learning Path & Progress
           </h3>
@@ -379,14 +379,13 @@ export default function LearnerDetailPage() {
                     <span className="text-muted-foreground">
                       Overall Path Completion:
                     </span>
-                    <span className="text-emerald-500 font-bold">
+                    <span className="text-emerald-600 font-bold">
                       {progressSummary.overallProgress}%
                     </span>
                   </div>
                   <ProgressBar
                     value={progressSummary.overallProgress}
                     height="8px"
-                    variant="gradient"
                   />
                   <div className="flex gap-3 text-xs text-muted-foreground pt-1">
                     <span>✓ Completed: {progressSummary.completedModules}</span>
@@ -407,7 +406,7 @@ export default function LearnerDetailPage() {
                   {learningPath.modules?.map((item, idx) => (
                     <div
                       key={idx}
-                      className="p-2.5 rounded-lg border bg-muted/15 flex items-center justify-between text-xs"
+                      className="p-3 rounded-lg border border-slate-200 bg-slate-50/50 flex items-center justify-between text-xs"
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-muted-foreground font-mono">
@@ -437,8 +436,8 @@ export default function LearnerDetailPage() {
         </Card>
 
         {/* Non-Destructive Administrative Notice */}
-        <div className="p-3.5 rounded-xl border bg-muted/20 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
-          <Lock className="h-4 w-4 shrink-0" />
+        <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 text-center text-xs text-slate-600 flex items-center justify-center gap-2">
+          <Lock className="h-4 w-4 shrink-0 text-slate-500" />
           <span>
             <strong>Read-Only Inspection:</strong> Administrative inspection
             preserves the integrity of student-owned execution records.

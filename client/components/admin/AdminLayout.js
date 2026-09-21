@@ -65,13 +65,13 @@ export default function AdminLayout({ children, title, subtitle }) {
       <div className="max-w-md mx-auto my-16 p-6">
         <Alert
           variant="destructive"
-          className="border-destructive/40 bg-card p-6 rounded-2xl shadow-lg"
+          className="border-red-200 bg-white p-6 rounded-xl shadow-md"
         >
-          <ShieldAlert className="h-8 w-8 text-destructive mb-2" />
-          <AlertTitle className="text-xl font-bold mb-2">
+          <ShieldAlert className="h-8 w-8 text-red-600 mb-2" />
+          <AlertTitle className="text-xl font-bold mb-2 text-slate-900">
             Access Denied
           </AlertTitle>
-          <AlertDescription className="text-sm text-muted-foreground leading-relaxed mb-6">
+          <AlertDescription className="text-sm text-slate-600 leading-relaxed mb-6">
             You do not have administrative privileges to view or manage this
             section. This console is strictly reserved for platform
             administrators.
@@ -109,16 +109,16 @@ export default function AdminLayout({ children, title, subtitle }) {
             href={item.href}
             onClick={onSelect}
             className={cn(
-              "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors",
+              "flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors",
               active
-                ? "bg-purple-600/20 text-purple-300 font-semibold border border-purple-500/30"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
+                ? "bg-indigo-50 text-indigo-700 font-semibold border border-indigo-200 shadow-xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100",
             )}
           >
             <Icon
               className={cn(
                 "h-4 w-4",
-                active ? "text-purple-400" : "opacity-70",
+                active ? "text-indigo-600" : "text-slate-400",
               )}
             />
             <span>{item.label}</span>
@@ -131,10 +131,10 @@ export default function AdminLayout({ children, title, subtitle }) {
   return (
     <div className="min-h-[calc(100vh-4rem)] flex flex-col md:flex-row bg-background">
       {/* Mobile Top Bar with Drawer Trigger */}
-      <div className="md:hidden border-b bg-card/60 backdrop-blur-md px-4 py-3 flex items-center justify-between">
+      <div className="md:hidden border-b border-border bg-white px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="h-5 w-5 text-purple-400" />
-          <span className="font-bold text-sm tracking-tight">
+          <ShieldCheck className="h-5 w-5 text-indigo-600" />
+          <span className="font-bold text-sm tracking-tight text-slate-900">
             Admin Console
           </span>
         </div>
@@ -148,19 +148,19 @@ export default function AdminLayout({ children, title, subtitle }) {
           </SheetTrigger>
           <SheetContent
             side="left"
-            className="w-[280px] p-6 flex flex-col justify-between"
+            className="w-[280px] p-6 flex flex-col justify-between bg-white border-r border-border"
           >
             <div className="space-y-6">
-              <SheetHeader className="text-left pb-4 border-b">
+              <SheetHeader className="text-left pb-4 border-b border-border">
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="h-5 w-5 text-purple-400" />
-                  <SheetTitle className="text-base font-bold">
+                  <ShieldCheck className="h-5 w-5 text-indigo-600" />
+                  <SheetTitle className="text-base font-bold text-slate-900">
                     Admin Console
                   </SheetTitle>
                 </div>
                 <Badge
                   variant="secondary"
-                  className="w-fit text-[10px] mt-1 bg-purple-500/10 text-purple-300 border-purple-500/20"
+                  className="w-fit text-[10px] mt-1 bg-indigo-50 text-indigo-700 border-indigo-200"
                 >
                   Administrator
                 </Badge>
@@ -169,12 +169,12 @@ export default function AdminLayout({ children, title, subtitle }) {
               <NavList onSelect={() => setMobileNavOpen(false)} />
             </div>
 
-            <div className="pt-4 border-t">
+            <div className="pt-4 border-t border-border">
               <Link href="/dashboard" onClick={() => setMobileNavOpen(false)}>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-start gap-2 text-muted-foreground"
+                  className="w-full justify-start gap-2 text-slate-600 hover:text-slate-900"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   <span>Exit to Student App</span>
@@ -186,32 +186,32 @@ export default function AdminLayout({ children, title, subtitle }) {
       </div>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 border-r bg-card/40 p-5 shrink-0 justify-between">
+      <aside className="hidden md:flex flex-col w-64 border-r border-border bg-white p-5 shrink-0 justify-between">
         <div className="space-y-6">
           <div className="px-2">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-semibold text-purple-400 uppercase tracking-wider">
+              <span className="text-[11px] font-semibold text-indigo-600 uppercase tracking-wider">
                 Console
               </span>
               <Badge
                 variant="secondary"
-                className="text-[10px] px-1.5 py-0 bg-purple-500/10 text-purple-300 border-purple-500/20"
+                className="text-[10px] px-1.5 py-0 bg-indigo-50 text-indigo-700 border-indigo-200"
               >
                 Admin
               </Badge>
             </div>
-            <h2 className="text-base font-bold text-foreground">Management</h2>
+            <h2 className="text-base font-bold text-slate-900">Management</h2>
           </div>
 
           <NavList />
         </div>
 
-        <div className="pt-4 border-t">
+        <div className="pt-4 border-t border-border">
           <Link href="/dashboard">
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start gap-2 text-xs text-muted-foreground hover:text-foreground"
+              className="w-full justify-start gap-2 text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-100"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Exit to Student App</span>

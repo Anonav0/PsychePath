@@ -171,7 +171,7 @@ export default function ProgressPage() {
   if (loading) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-        <div className="rounded-2xl border p-8 bg-card/40 space-y-4">
+        <div className="rounded-xl border border-border p-6 bg-white shadow-sm space-y-4">
           <CardSkeleton count={1} />
         </div>
         <CardSkeleton count={4} />
@@ -192,7 +192,7 @@ export default function ProgressPage() {
           {activePath && (
             <Badge
               variant="secondary"
-              className="font-bold text-xs bg-primary/10 text-primary border-primary/20"
+              className="font-bold text-xs bg-indigo-50 text-indigo-700 border-indigo-200"
             >
               v{activePath.version}
             </Badge>
@@ -228,11 +228,11 @@ export default function ProgressPage() {
         <>
           {/* 2. Metrics Cards Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <Card className="p-4 shadow-sm">
+            <Card className="p-5 bg-white border border-border shadow-sm">
               <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                 Overall Progress
               </span>
-              <div className="text-2xl sm:text-3xl font-black text-emerald-500 mt-1">
+              <div className="text-2xl sm:text-3xl font-black text-emerald-600 mt-1">
                 {summary?.overallProgress ?? 0}%
               </div>
               <span className="text-xs text-muted-foreground">
@@ -240,7 +240,7 @@ export default function ProgressPage() {
               </span>
             </Card>
 
-            <Card className="p-4 shadow-sm">
+            <Card className="p-5 bg-white border border-border shadow-sm">
               <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                 Completed
               </span>
@@ -252,11 +252,11 @@ export default function ProgressPage() {
               </span>
             </Card>
 
-            <Card className="p-4 shadow-sm">
+            <Card className="p-5 bg-white border border-border shadow-sm">
               <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                 In Progress
               </span>
-              <div className="text-2xl sm:text-3xl font-black text-primary mt-1">
+              <div className="text-2xl sm:text-3xl font-black text-indigo-600 mt-1">
                 {summary?.inProgressModules ?? 0}
               </div>
               <span className="text-xs text-muted-foreground">
@@ -264,11 +264,11 @@ export default function ProgressPage() {
               </span>
             </Card>
 
-            <Card className="p-4 shadow-sm">
+            <Card className="p-5 bg-white border border-border shadow-sm">
               <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                 Skipped
               </span>
-              <div className="text-2xl sm:text-3xl font-black text-amber-500 mt-1">
+              <div className="text-2xl sm:text-3xl font-black text-amber-600 mt-1">
                 {summary?.skippedModules ?? 0}
               </div>
               <span className="text-xs text-muted-foreground">
@@ -278,18 +278,14 @@ export default function ProgressPage() {
           </div>
 
           {/* 3. Overall Path Progress Bar */}
-          <Card className="p-5 shadow-sm space-y-3">
+          <Card className="p-6 bg-white border border-border shadow-sm space-y-3">
             <div className="flex justify-between items-center text-sm font-semibold">
               <span className="text-foreground">Path Execution Mastery</span>
-              <span className="text-emerald-500 font-bold">
+              <span className="text-emerald-600 font-bold">
                 {summary?.overallProgress ?? 0}%
               </span>
             </div>
-            <ProgressBar
-              value={summary?.overallProgress ?? 0}
-              height="10px"
-              variant="gradient"
-            />
+            <ProgressBar value={summary?.overallProgress ?? 0} height="10px" />
           </Card>
 
           {/* 4. Module Execution Tracker */}
@@ -306,7 +302,7 @@ export default function ProgressPage() {
                 return (
                   <Card
                     key={item.moduleId || idx}
-                    className="p-4 shadow-sm hover:border-primary/40 transition-all space-y-3"
+                    className="p-5 bg-white border border-border shadow-sm hover:border-indigo-200 transition-all space-y-3"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -384,7 +380,7 @@ export default function ProgressPage() {
                         )}
 
                         {status === "COMPLETED" && (
-                          <span className="text-xs font-semibold text-emerald-500 flex items-center gap-1">
+                          <span className="text-xs font-semibold text-emerald-600 flex items-center gap-1">
                             <CheckCircle2 className="h-3.5 w-3.5" />
                             <span>Done</span>
                           </span>
@@ -395,7 +391,7 @@ export default function ProgressPage() {
                     {(item.startedAt ||
                       item.completedAt ||
                       item.lastAccessedAt) && (
-                      <div className="text-[11px] text-muted-foreground flex gap-4 flex-wrap pt-1 border-t">
+                      <div className="text-[11px] text-muted-foreground flex gap-4 flex-wrap pt-1 border-t border-border">
                         {item.startedAt && (
                           <span>
                             Started:{" "}
@@ -443,7 +439,7 @@ export default function ProgressPage() {
                 record activity.
               </p>
             ) : (
-              <Card className="overflow-hidden shadow-sm">
+              <Card className="overflow-hidden bg-white border border-border shadow-sm">
                 <Table>
                   <TableHeader>
                     <TableRow>

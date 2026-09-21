@@ -2,52 +2,25 @@
 
 import React from "react";
 import { cn } from "../../lib/utils";
+import { ChevronDown } from "lucide-react";
 
 const Select = React.forwardRef(
-  ({ className, children, error, style = {}, ...props }, ref) => {
+  ({ className, children, error, ...props }, ref) => {
     return (
-      <div style={{ position: "relative", width: "100%" }}>
+      <div className="relative w-full">
         <select
           className={cn(
-            "flex h-9 w-full appearance-none rounded-md border border-slate-700 bg-slate-900/60 px-3 py-1.5 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 text-slate-100 pr-8",
-            error && "border-red-500",
+            "flex h-9 w-full appearance-none rounded-lg border border-border bg-white px-3 py-1.5 text-sm shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50 text-foreground pr-8 cursor-pointer",
+            error &&
+              "border-destructive focus-visible:ring-destructive/20 focus-visible:border-destructive",
             className,
           )}
           ref={ref}
-          style={{
-            width: "100%",
-            height: "38px",
-            padding: "0.5rem 2rem 0.5rem 0.75rem",
-            borderRadius: "6px",
-            background: "var(--bg-surface, #1e293b)",
-            border: error
-              ? "1px solid #ef4444"
-              : "1px solid var(--border-color, #334155)",
-            color: "var(--text-primary, #f8fafc)",
-            fontSize: "0.875rem",
-            outline: "none",
-            cursor: "pointer",
-            appearance: "none",
-            fontFamily: "inherit",
-            ...style,
-          }}
           {...props}
         >
           {children}
         </select>
-        <div
-          style={{
-            position: "absolute",
-            right: "10px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            pointerEvents: "none",
-            color: "var(--text-muted, #64748b)",
-            fontSize: "0.75rem",
-          }}
-        >
-          ▼
-        </div>
+        <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
       </div>
     );
   },

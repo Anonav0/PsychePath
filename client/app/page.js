@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import HealthStatus from "../components/HealthStatus";
-import AuthStatusCard from "../components/AuthStatusCard";
 import authService from "../services/authService";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +18,7 @@ import {
   Activity,
   ArrowRight,
   Info,
+  CheckCircle,
 } from "lucide-react";
 
 export default function HomePage() {
@@ -30,35 +29,33 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-16 sm:space-y-24">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-16 space-y-16 sm:space-y-24">
       {/* 1. Hero Section */}
-      <section className="text-center pt-8 pb-4 max-w-4xl mx-auto space-y-6">
+      <section className="text-center max-w-4xl mx-auto space-y-6 pt-4">
         <div className="inline-flex items-center gap-2">
           <Badge
-            variant="secondary"
-            className="px-3 py-1 text-xs font-semibold uppercase tracking-wider bg-primary/10 text-primary border-primary/20"
+            variant="info"
+            className="px-3 py-1 text-xs font-semibold uppercase tracking-wider"
           >
-            Psychometric Learning Path Recommender
+            Psychometric Learning Path Platform
           </Badge>
         </div>
 
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.15] text-foreground">
           Master Software Engineering <br className="hidden sm:inline" />
-          <span className="bg-gradient-to-r from-primary via-purple-400 to-accent bg-clip-text text-transparent">
-            Tailored to How Your Brain Learns
-          </span>
+          <span className="text-primary">Tailored to How You Learn</span>
         </h1>
 
         <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-          PsychePath maps your cognitive strengths, aligns technical goals with
-          prerequisite curriculum graphs, and generates personalized, AI-guided
-          learning paths with verifiable progress tracking.
+          PsychePath evaluates your cognitive processing style, aligns your
+          career goals with prerequisite curriculum graphs, and generates
+          verifiable, AI-guided learning paths with verified progress tracking.
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           {user ? (
             <Link href="/dashboard">
-              <Button size="lg" className="gap-2 shadow-lg text-base">
+              <Button size="lg" className="gap-2 shadow-md">
                 <span>Go to Your Dashboard</span>
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -66,13 +63,13 @@ export default function HomePage() {
           ) : (
             <>
               <Link href="/register">
-                <Button size="lg" className="gap-2 shadow-lg text-base">
+                <Button size="lg" className="gap-2 shadow-md">
                   <span>Get Started Free</span>
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/login">
-                <Button variant="outline" size="lg" className="text-base">
+                <Button variant="outline" size="lg">
                   Sign In
                 </Button>
               </Link>
@@ -82,7 +79,7 @@ export default function HomePage() {
             <Button
               variant="ghost"
               size="lg"
-              className="text-base text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground"
             >
               Explore Diagnostics
             </Button>
@@ -96,7 +93,7 @@ export default function HomePage() {
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
             The 5-Step Learner Journey
           </h2>
-          <p className="text-sm sm:text-base text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
             From diagnostic self-discovery to progressive curriculum mastery.
           </p>
         </div>
@@ -138,13 +135,13 @@ export default function HomePage() {
             return (
               <Card
                 key={s.step}
-                className="hover:border-primary/50 transition-colors shadow-sm relative flex flex-col justify-between"
+                className="hover:border-primary/40 hover:shadow-md transition-all relative flex flex-col justify-between"
               >
                 <CardContent className="p-5 space-y-3">
                   <div className="text-[11px] font-bold text-primary tracking-wider">
                     STEP {s.step}
                   </div>
-                  <div className="p-2 rounded-lg bg-primary/10 text-primary w-fit">
+                  <div className="p-2.5 rounded-lg bg-primary/10 text-primary w-fit">
                     <Icon className="h-5 w-5" />
                   </div>
                   <h3 className="text-sm font-bold text-foreground">
@@ -160,22 +157,22 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. Core Architectural Features */}
+      {/* 3. Core Architectural Guarantees */}
       <section className="space-y-8">
         <div className="text-center space-y-2">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
             Engineered for Educational Precision
           </h2>
-          <p className="text-sm sm:text-base text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
             Built on strict computer science guarantees, deterministic rules,
             and AI guardrails.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="shadow-sm">
+          <Card className="hover:border-primary/30 transition-all">
             <CardContent className="p-6 space-y-3">
-              <div className="p-3 rounded-xl bg-primary/10 text-primary w-fit">
+              <div className="p-3 rounded-xl bg-indigo-50 text-indigo-700 w-fit">
                 <GitFork className="h-6 w-6" />
               </div>
               <h3 className="text-base font-bold text-foreground">
@@ -190,9 +187,9 @@ export default function HomePage() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm">
+          <Card className="hover:border-primary/30 transition-all">
             <CardContent className="p-6 space-y-3">
-              <div className="p-3 rounded-xl bg-purple-500/10 text-purple-400 w-fit">
+              <div className="p-3 rounded-xl bg-purple-50 text-purple-700 w-fit">
                 <ShieldCheck className="h-6 w-6" />
               </div>
               <h3 className="text-base font-bold text-foreground">
@@ -206,9 +203,9 @@ export default function HomePage() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm">
+          <Card className="hover:border-primary/30 transition-all">
             <CardContent className="p-6 space-y-3">
-              <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 w-fit">
+              <div className="p-3 rounded-xl bg-emerald-50 text-emerald-700 w-fit">
                 <Activity className="h-6 w-6" />
               </div>
               <h3 className="text-base font-bold text-foreground">
@@ -225,13 +222,13 @@ export default function HomePage() {
       </section>
 
       {/* 4. Educational Framing Notice */}
-      <section className="rounded-2xl border border-primary/20 bg-primary/5 p-6 sm:p-8">
+      <section className="rounded-2xl border border-border bg-white p-6 sm:p-8 shadow-sm">
         <div className="flex items-start gap-4">
-          <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0 mt-0.5">
+          <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 shrink-0 mt-0.5">
             <Info className="h-5 w-5" />
           </div>
           <div className="space-y-1">
-            <h4 className="text-sm font-bold text-primary">
+            <h4 className="text-sm font-bold text-foreground">
               Educational Scope & Non-Clinical Framing
             </h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
@@ -244,14 +241,24 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5. Live Architecture & System Status */}
-      <section className="space-y-4 pb-8">
-        <h3 className="text-lg font-bold tracking-tight text-foreground">
-          Live System Health & API Telemetry
+      {/* 5. CTA Banner */}
+      <section className="rounded-2xl border border-border bg-gradient-to-r from-primary/10 via-primary/5 to-white p-8 sm:p-12 text-center space-y-4 shadow-sm">
+        <h3 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+          Ready to Personalize Your Engineering Learning?
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <HealthStatus />
-          <AuthStatusCard />
+        <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
+          Take the 5-minute diagnostic assessment to map your learning profile
+          and generate your customized curriculum path.
+        </p>
+        <div className="pt-2">
+          <Link href={user ? "/dashboard" : "/register"}>
+            <Button size="lg" className="gap-2 shadow-sm">
+              <span>
+                {user ? "View Your Dashboard" : "Create Free Account"}
+              </span>
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
         </div>
       </section>
     </div>

@@ -34,9 +34,7 @@ export default function ProgressBar({
         return "bg-primary";
       case "gradient":
       default:
-        return percentage === 100
-          ? "bg-emerald-500"
-          : "bg-gradient-to-r from-primary to-accent";
+        return percentage === 100 ? "bg-emerald-500" : "bg-primary";
     }
   };
 
@@ -52,7 +50,7 @@ export default function ProgressBar({
         aria-valuemax={100}
         aria-label={`Progress: ${percentage}%`}
         style={{ height }}
-        className="flex-1 bg-muted rounded-full overflow-hidden"
+        className="flex-1 bg-slate-200/80 rounded-full overflow-hidden"
       >
         <div
           style={{ width: `${percentage}%` }}

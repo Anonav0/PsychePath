@@ -121,8 +121,8 @@ export default function AssessmentResultPage() {
         {result.resultSummary && (
           <div
             style={{
-              background: "rgba(99, 102, 241, 0.08)",
-              border: "1px solid rgba(99, 102, 241, 0.25)",
+              background: "#eef2ff",
+              border: "1px solid #c7d2fe",
               borderRadius: "12px",
               padding: "1.5rem",
               marginBottom: "2rem",
@@ -132,7 +132,7 @@ export default function AssessmentResultPage() {
               style={{
                 fontSize: "1rem",
                 fontWeight: 700,
-                color: "#a5b4fc",
+                color: "#4338ca",
                 marginBottom: "0.5rem",
               }}
             >
@@ -174,7 +174,7 @@ export default function AssessmentResultPage() {
                       {formatDimName(dimKey)}
                     </span>
                     <span
-                      style={{ color: numScore >= 70 ? "#34d399" : "#a5b4fc" }}
+                      style={{ color: numScore >= 70 ? "#059669" : "#4f46e5" }}
                     >
                       {numScore}%
                     </span>

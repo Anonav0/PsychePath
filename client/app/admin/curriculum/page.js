@@ -265,7 +265,7 @@ export default function AdminCurriculumPage() {
     >
       <div className="space-y-6">
         {/* Top Search & Filter Bar */}
-        <Card className="p-4 shadow-sm">
+        <Card className="p-4 bg-white border border-border shadow-sm">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="relative w-full sm:max-w-xs">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -342,7 +342,7 @@ export default function AdminCurriculumPage() {
             onAction={openCreateModal}
           />
         ) : (
-          <Card className="overflow-hidden shadow-sm">
+          <Card className="overflow-hidden bg-white border border-border shadow-sm">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -364,7 +364,7 @@ export default function AdminCurriculumPage() {
                       </div>
                       <div className="text-[11px] text-muted-foreground">
                         {mod.category} &bull;{" "}
-                        <code className="text-xs bg-muted px-1 py-0.5 rounded">
+                        <code className="text-xs bg-slate-100 text-slate-700 px-1 py-0.5 rounded border border-slate-200">
                           {mod.slug}
                         </code>
                       </div>
@@ -444,8 +444,8 @@ export default function AdminCurriculumPage() {
                           className={cn(
                             "h-7 text-xs px-2.5",
                             mod.isActive
-                              ? "text-destructive hover:bg-destructive/10"
-                              : "text-emerald-500 hover:bg-emerald-500/10",
+                              ? "text-red-600 hover:bg-red-50"
+                              : "text-emerald-600 hover:bg-emerald-50",
                           )}
                         >
                           {mod.isActive ? "Deactivate" : "Activate"}
@@ -461,7 +461,7 @@ export default function AdminCurriculumPage() {
                               loading: false,
                             })
                           }
-                          className="h-7 text-xs px-2 text-destructive hover:bg-destructive/10"
+                          className="h-7 text-xs px-2 text-red-600 hover:bg-red-50"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -547,7 +547,7 @@ export default function AdminCurriculumPage() {
                       },
                     }))
                   }
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="w-full rounded-md border border-input bg-white px-3 py-2 text-xs text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   placeholder="Explains concepts and practical application"
                 />
               </div>
@@ -654,7 +654,7 @@ export default function AdminCurriculumPage() {
                       },
                     }))
                   }
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="w-full rounded-md border border-input bg-white px-3 py-2 text-xs text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   placeholder="e.g. Understand task queue vs microtask queue, Avoid blocking main thread"
                 />
               </div>
@@ -664,7 +664,7 @@ export default function AdminCurriculumPage() {
                 <label className="text-xs font-semibold text-foreground block">
                   Prerequisites (Select predecessor modules)
                 </label>
-                <div className="max-h-40 overflow-y-auto p-2 rounded-lg border bg-muted/20 space-y-1">
+                <div className="max-h-40 overflow-y-auto p-2 rounded-lg border border-border bg-slate-50/60 space-y-1">
                   {modules
                     .filter(
                       (m) =>
@@ -681,15 +681,15 @@ export default function AdminCurriculumPage() {
                           className={cn(
                             "flex items-center gap-2.5 p-2 rounded-md cursor-pointer text-xs transition-colors",
                             isSelected
-                              ? "bg-primary/10 text-primary font-medium"
-                              : "hover:bg-muted/40 text-foreground",
+                              ? "bg-indigo-50 text-indigo-700 font-medium"
+                              : "hover:bg-slate-100 text-foreground",
                           )}
                         >
                           <input
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => togglePrereqSelection(otherMod._id)}
-                            className="rounded border-input text-primary focus:ring-primary h-4 w-4"
+                            className="rounded border-input text-indigo-600 focus:ring-indigo-500 h-4 w-4"
                           />
                           <span>{otherMod.title}</span>
                           <span className="text-[10px] text-muted-foreground ml-auto">

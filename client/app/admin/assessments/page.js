@@ -202,7 +202,7 @@ export default function AdminAssessmentsPage() {
             onAction={() => setCreateModalOpen(true)}
           />
         ) : (
-          <Card className="overflow-hidden shadow-sm">
+          <Card className="overflow-hidden bg-white border border-border shadow-sm">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -284,8 +284,8 @@ export default function AdminAssessmentsPage() {
                           className={cn(
                             "h-7 text-xs px-2.5",
                             item.isActive
-                              ? "text-destructive hover:bg-destructive/10"
-                              : "text-emerald-500 hover:bg-emerald-500/10",
+                              ? "text-red-600 hover:bg-red-50"
+                              : "text-emerald-600 hover:bg-emerald-50",
                           )}
                         >
                           {item.isActive ? "Deactivate" : "Activate"}
@@ -301,7 +301,7 @@ export default function AdminAssessmentsPage() {
                               loading: false,
                             })
                           }
-                          className="h-7 text-xs px-2 text-destructive hover:bg-destructive/10"
+                          className="h-7 text-xs px-2 text-red-600 hover:bg-red-50"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>

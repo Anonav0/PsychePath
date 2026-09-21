@@ -214,7 +214,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
-        <div className="rounded-2xl border p-8 bg-card/40 space-y-4">
+        <div className="rounded-xl border border-border p-6 bg-white shadow-sm space-y-4">
           <CardSkeleton count={1} />
         </div>
         <CardSkeleton count={2} />
@@ -263,7 +263,7 @@ export default function ProfilePage() {
       )}
 
       {/* Assessment-Derived Attributes Section */}
-      <Card className="border-primary/30 shadow-sm">
+      <Card className="border-border shadow-sm">
         <CardHeader className="pb-4 border-b">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
@@ -302,8 +302,8 @@ export default function ProfilePage() {
             <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <h3 className="text-xs font-bold text-emerald-500 uppercase tracking-wider flex items-center gap-1.5">
-                    <Award className="h-3.5 w-3.5" />
+                  <h3 className="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <Award className="h-3.5 w-3.5 text-emerald-600" />
                     <span>Demonstrated Strengths (&ge; 75%)</span>
                   </h3>
                   <div className="flex flex-wrap gap-1.5">
@@ -326,8 +326,8 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="text-xs font-bold text-amber-500 uppercase tracking-wider flex items-center gap-1.5">
-                    <Target className="h-3.5 w-3.5" />
+                  <h3 className="text-xs font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <Target className="h-3.5 w-3.5 text-amber-600" />
                     <span>Development Areas (&lt; 60%)</span>
                   </h3>
                   <div className="flex flex-wrap gap-1.5">
@@ -337,7 +337,7 @@ export default function ProfilePage() {
                         <Badge
                           key={ia}
                           variant="secondary"
-                          className="text-xs capitalize bg-amber-500/10 text-amber-500 border-amber-500/20"
+                          className="text-xs capitalize bg-amber-50 text-amber-800 border-amber-200"
                         >
                           &bull; {ia}
                         </Badge>
@@ -364,7 +364,7 @@ export default function ProfilePage() {
                     ).map(([dim, score]) => (
                       <div key={dim} className="space-y-1">
                         <div className="flex justify-between text-xs font-medium">
-                          <span className="capitalize text-foreground">
+                          <span className="capitalize text-foreground font-semibold">
                             {dim}
                           </span>
                           <span className="text-primary font-bold">
@@ -374,7 +374,7 @@ export default function ProfilePage() {
                         <ProgressBar
                           value={score}
                           height="6px"
-                          variant="gradient"
+                          variant="primary"
                         />
                       </div>
                     ))}

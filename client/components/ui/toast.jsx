@@ -17,14 +17,11 @@ const toastVariants = cva(
   {
     variants: {
       variant: {
-        default: "border-border bg-card text-card-foreground",
-        destructive:
-          "destructive group border-destructive/50 bg-destructive/10 text-destructive dark:border-destructive",
-        success:
-          "border-emerald-500/50 bg-emerald-50/95 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-100",
-        warning:
-          "border-amber-500/50 bg-amber-50/95 dark:bg-amber-950/60 text-amber-900 dark:text-amber-100",
-        info: "border-sky-500/50 bg-sky-50/95 dark:bg-sky-950/60 text-sky-900 dark:text-sky-100",
+        default: "border-border bg-white text-foreground shadow-lg",
+        destructive: "border-red-200 bg-red-50 text-red-900 shadow-lg",
+        success: "border-emerald-200 bg-emerald-50 text-emerald-900 shadow-lg",
+        warning: "border-amber-200 bg-amber-50 text-amber-900 shadow-lg",
+        info: "border-indigo-200 bg-indigo-50 text-indigo-900 shadow-lg",
       },
     },
     defaultVariants: {
@@ -36,21 +33,17 @@ const toastVariants = cva(
 function ToastIcon({ variant }) {
   switch (variant) {
     case "destructive":
-      return (
-        <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
-      );
+      return <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />;
     case "success":
       return (
-        <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+        <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
       );
     case "warning":
       return (
-        <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+        <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
       );
     case "info":
-      return (
-        <Info className="h-5 w-5 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
-      );
+      return <Info className="h-5 w-5 text-indigo-600 shrink-0 mt-0.5" />;
     default:
       return null;
   }
@@ -80,12 +73,12 @@ export function Toaster() {
               <ToastIcon variant={toast.variant} />
               <div className="grid gap-1 flex-1">
                 {toast.title && (
-                  <div className="text-sm font-semibold tracking-tight leading-none">
+                  <div className="text-sm font-semibold tracking-tight leading-none text-foreground">
                     {toast.title}
                   </div>
                 )}
                 {toast.description && (
-                  <div className="text-xs opacity-90 leading-relaxed">
+                  <div className="text-xs text-muted-foreground leading-relaxed">
                     {toast.description}
                   </div>
                 )}
@@ -94,7 +87,7 @@ export function Toaster() {
 
             <button
               onClick={() => dismiss(toast.id)}
-              className="absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-70 transition-opacity hover:opacity-100 hover:bg-muted focus:outline-none"
+              className="absolute right-2 top-2 rounded-md p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 focus:outline-none transition-colors"
               aria-label="Close"
             >
               <X className="h-4 w-4" />

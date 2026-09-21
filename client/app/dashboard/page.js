@@ -100,14 +100,14 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-        <div className="rounded-2xl border p-8 bg-card/40 space-y-4">
+      <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
+        <div className="rounded-xl border border-border p-6 bg-white space-y-3 shadow-sm">
           <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-7 w-64" />
           <Skeleton className="h-4 w-96" />
         </div>
         <CardSkeleton count={2} />
-        <Skeleton className="h-32 w-full rounded-2xl" />
+        <Skeleton className="h-32 w-full rounded-xl" />
       </div>
     );
   }
@@ -118,23 +118,15 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-      {/* 1. Welcome Banner */}
-      <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-r from-primary/15 via-accent/15 to-purple-500/10 p-6 sm:p-8 backdrop-blur-md">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Badge
-                variant="secondary"
-                className="bg-primary/20 text-primary border-primary/30 uppercase text-[10px] tracking-wider font-bold"
-              >
-                Student Portal
-              </Badge>
-            </div>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8">
+      {/* 1. Welcome Header */}
+      <div className="rounded-xl border border-border bg-white p-6 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
               Welcome back, {user?.firstName}!
             </h1>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-2xl leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Track your cognitive metrics, follow your personalized curriculum,
               and build technical mastery.
             </p>
@@ -145,7 +137,7 @@ export default function DashboardPage() {
               <Button
                 variant="default"
                 size="default"
-                className="gap-2 shadow-md"
+                className="gap-2 shadow-sm"
               >
                 <span>Open Learning Path</span>
                 <ArrowRight className="h-4 w-4" />
@@ -165,19 +157,19 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Card A: Active Learning Path & Progress */}
         <Card className="shadow-sm">
-          <CardHeader className="pb-4">
+          <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
               <div>
                 <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                   Active Path
                 </span>
-                <CardTitle className="text-xl mt-1">
+                <CardTitle className="text-xl mt-1 text-foreground font-bold">
                   {activePath
                     ? activePath.title || `Learning Path v${activePath.version}`
                     : "No Path Generated"}
                 </CardTitle>
               </div>
-              {activePath && <StatusBadge status="ACTIVE" />}
+              {activePath && <StatusBadge status="ACTIVE" size="small" />}
             </div>
           </CardHeader>
 
@@ -188,31 +180,31 @@ export default function DashboardPage() {
                   <span className="text-muted-foreground">
                     Overall Progress
                   </span>
-                  <span className="text-foreground">
+                  <span className="text-foreground font-bold">
                     {progressData?.pathSummary?.overallProgress ?? 0}%
                   </span>
                 </div>
                 <ProgressBar
                   value={progressData?.pathSummary?.overallProgress ?? 0}
-                  variant="gradient"
-                  height="10px"
+                  variant="primary"
+                  height="8px"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground pt-1">
-                  <span className="flex items-center gap-1">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                  <span className="flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                     <span>
                       {progressData?.pathSummary?.completedModules ?? 0} of{" "}
                       {progressData?.pathSummary?.totalModules ?? 0} modules
                     </span>
                   </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-3.5 w-3.5" />
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="h-4 w-4 text-slate-400" />
                     <span>{activePath.estimatedDuration} hrs total</span>
                   </span>
                 </div>
               </div>
             ) : (
-              <div className="space-y-4 py-2">
+              <div className="space-y-3 py-1">
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   Take your assessment or view recommendations to build your
                   official personalized learning path.
@@ -234,13 +226,13 @@ export default function DashboardPage() {
 
         {/* Card B: Learner Profile Completeness */}
         <Card className="shadow-sm">
-          <CardHeader className="pb-4">
+          <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
               <div>
                 <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                   Learner Profile
                 </span>
-                <CardTitle className="text-xl mt-1">
+                <CardTitle className="text-xl mt-1 text-foreground font-bold">
                   {profile
                     ? `${profile.completeness}% Complete`
                     : "Profile Incomplete"}
@@ -259,10 +251,10 @@ export default function DashboardPage() {
             <ProgressBar
               value={profile?.completeness ?? 20}
               variant={profile?.completeness === 100 ? "success" : "warning"}
-              height="10px"
+              height="8px"
             />
             <div className="flex justify-between items-center text-xs pt-1">
-              <span className="text-muted-foreground">
+              <span className="text-muted-foreground font-medium">
                 {profile?.currentSkills?.length ?? 0} skills &bull;{" "}
                 {profile?.learningGoals?.length ?? 0} goals
               </span>
@@ -270,7 +262,7 @@ export default function DashboardPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 text-xs text-primary hover:text-primary gap-1 px-2"
+                  className="h-7 text-xs text-primary hover:text-primary gap-1 px-2 font-semibold"
                 >
                   <span>Edit Profile</span>
                   <ArrowRight className="h-3 w-3" />
@@ -283,28 +275,22 @@ export default function DashboardPage() {
 
       {/* 3. Next Recommended Module / Action Card */}
       {nextModule && (
-        <Card className="border-primary/30 bg-primary/5 shadow-sm">
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-2 text-primary text-xs font-bold uppercase tracking-wider">
-              <Target className="h-4 w-4" />
-              <span>Current / Next Module</span>
-            </div>
-          </CardHeader>
-          <CardContent>
+        <Card className="border-indigo-200 bg-indigo-50/40 shadow-sm">
+          <CardContent className="p-5 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2">
                   <StatusBadge status={nextModule.status} size="small" />
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground font-medium">
                     Step #{nextModule.order} &bull; {nextModule.category} &bull;{" "}
                     {nextModule.estimatedDuration} hrs
                   </span>
                 </div>
-                <h3 className="text-lg font-bold text-foreground">
+                <h3 className="text-lg font-bold text-foreground tracking-tight">
                   {nextModule.title}
                 </h3>
                 {nextModule.reason && (
-                  <p className="text-xs text-muted-foreground max-w-2xl leading-relaxed">
+                  <p className="text-xs text-slate-600 max-w-2xl leading-relaxed">
                     💡 {nextModule.reason}
                   </p>
                 )}
@@ -330,28 +316,28 @@ export default function DashboardPage() {
       )}
 
       {/* 4. Quick Actions Grid */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-bold tracking-tight text-foreground">
+      <div className="space-y-3">
+        <h2 className="text-base font-bold tracking-tight text-foreground">
           Quick Actions
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <Link href="/assessments">
-            <div className="h-full rounded-xl border bg-card p-4 sm:p-5 hover:border-primary/50 hover:shadow-md transition-all group cursor-pointer space-y-2">
-              <div className="p-2.5 rounded-lg bg-primary/10 text-primary w-fit group-hover:scale-105 transition-transform">
+            <div className="h-full rounded-xl border border-border bg-white p-4 sm:p-5 hover:border-primary/50 hover:shadow-md transition-all group cursor-pointer space-y-2">
+              <div className="p-2.5 rounded-lg bg-indigo-50 text-indigo-700 w-fit group-hover:scale-105 transition-transform">
                 <Brain className="h-5 w-5" />
               </div>
               <div className="font-semibold text-sm text-foreground">
                 Take Assessment
               </div>
               <div className="text-xs text-muted-foreground">
-                Diagnostic psychometrics
+                Diagnostic evaluation
               </div>
             </div>
           </Link>
 
           <Link href="/recommendations">
-            <div className="h-full rounded-xl border bg-card p-4 sm:p-5 hover:border-accent/50 hover:shadow-md transition-all group cursor-pointer space-y-2">
-              <div className="p-2.5 rounded-lg bg-accent/10 text-accent w-fit group-hover:scale-105 transition-transform">
+            <div className="h-full rounded-xl border border-border bg-white p-4 sm:p-5 hover:border-primary/50 hover:shadow-md transition-all group cursor-pointer space-y-2">
+              <div className="p-2.5 rounded-lg bg-indigo-50 text-indigo-700 w-fit group-hover:scale-105 transition-transform">
                 <Sparkles className="h-5 w-5" />
               </div>
               <div className="font-semibold text-sm text-foreground">
@@ -364,8 +350,8 @@ export default function DashboardPage() {
           </Link>
 
           <Link href="/learning-path">
-            <div className="h-full rounded-xl border bg-card p-4 sm:p-5 hover:border-sky-500/50 hover:shadow-md transition-all group cursor-pointer space-y-2">
-              <div className="p-2.5 rounded-lg bg-sky-500/10 text-sky-400 w-fit group-hover:scale-105 transition-transform">
+            <div className="h-full rounded-xl border border-border bg-white p-4 sm:p-5 hover:border-primary/50 hover:shadow-md transition-all group cursor-pointer space-y-2">
+              <div className="p-2.5 rounded-lg bg-indigo-50 text-indigo-700 w-fit group-hover:scale-105 transition-transform">
                 <Route className="h-5 w-5" />
               </div>
               <div className="font-semibold text-sm text-foreground">
@@ -378,8 +364,8 @@ export default function DashboardPage() {
           </Link>
 
           <Link href="/progress">
-            <div className="h-full rounded-xl border bg-card p-4 sm:p-5 hover:border-emerald-500/50 hover:shadow-md transition-all group cursor-pointer space-y-2">
-              <div className="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-400 w-fit group-hover:scale-105 transition-transform">
+            <div className="h-full rounded-xl border border-border bg-white p-4 sm:p-5 hover:border-primary/50 hover:shadow-md transition-all group cursor-pointer space-y-2">
+              <div className="p-2.5 rounded-lg bg-emerald-50 text-emerald-700 w-fit group-hover:scale-105 transition-transform">
                 <TrendingUp className="h-5 w-5" />
               </div>
               <div className="font-semibold text-sm text-foreground">
@@ -395,15 +381,15 @@ export default function DashboardPage() {
 
       {/* 5. Recent Activity Snapshot */}
       {history.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-lg font-bold tracking-tight text-foreground">
+        <div className="space-y-3">
+          <h2 className="text-base font-bold tracking-tight text-foreground">
             Recent Learning Activity
           </h2>
-          <Card className="divide-y overflow-hidden shadow-sm">
+          <Card className="divide-y divide-border overflow-hidden shadow-sm">
             {history.map((item, idx) => (
               <div
                 key={item.id || idx}
-                className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs hover:bg-muted/30 transition-colors"
+                className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs hover:bg-slate-50 transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <StatusBadge status={item.newStatus} size="small" />

@@ -270,10 +270,10 @@ export default function TakeAssessmentPage() {
                         handleSelectOption(currentQuestion._id, opt.value)
                       }
                       className={cn(
-                        "w-full text-left p-4 rounded-xl border transition-all flex items-center gap-3.5 group",
+                        "w-full text-left p-4 rounded-xl border transition-all flex items-center gap-3.5 group cursor-pointer",
                         isSelected
-                          ? "border-primary bg-primary/10 shadow-sm text-foreground"
-                          : "border-border bg-card/60 hover:bg-muted/50 hover:border-border text-foreground",
+                          ? "border-primary bg-indigo-50/80 shadow-xs text-foreground font-medium"
+                          : "border-border bg-white hover:bg-slate-50/80 hover:border-slate-300 text-foreground",
                       )}
                     >
                       <div
@@ -281,7 +281,7 @@ export default function TakeAssessmentPage() {
                           "h-5 w-5 rounded-full border flex items-center justify-center shrink-0 transition-all",
                           isSelected
                             ? "border-primary bg-primary text-primary-foreground"
-                            : "border-muted-foreground/40 group-hover:border-primary",
+                            : "border-slate-300 group-hover:border-primary",
                         )}
                       >
                         {isSelected && (

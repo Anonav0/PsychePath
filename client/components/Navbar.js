@@ -80,23 +80,19 @@ export default function Navbar() {
   });
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur-md transition-all">
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-white/95 backdrop-blur-md transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        {/* Logo & Phase Badge */}
+        {/* Logo */}
         <div className="flex items-center gap-3">
           <Link
             href="/"
-            className="flex items-center gap-2 font-bold text-lg tracking-tight bg-gradient-to-r from-primary via-accent to-purple-400 bg-clip-text text-transparent hover:opacity-90 transition-opacity"
+            className="flex items-center gap-2.5 font-bold text-lg tracking-tight text-foreground hover:opacity-90 transition-opacity"
           >
-            <Compass className="h-5 w-5 text-primary shrink-0" />
-            <span>PsychePath</span>
+            <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+              <Compass className="h-5 w-5" />
+            </div>
+            <span className="font-extrabold tracking-tight">PsychePath</span>
           </Link>
-          <Badge
-            variant="secondary"
-            className="hidden sm:inline-flex text-[11px] font-medium py-0 px-2 text-primary border-primary/20 bg-primary/10"
-          >
-            Phase 13: UI/UX Polish
-          </Badge>
         </div>
 
         {/* Desktop Navigation Links */}
@@ -112,7 +108,7 @@ export default function Navbar() {
                   "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
                   isActive
                     ? "text-primary bg-primary/10 font-semibold"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+                    : "text-slate-600 hover:text-foreground hover:bg-slate-100/80",
                 )}
               >
                 <Icon className="h-4 w-4 opacity-80" />
@@ -127,11 +123,11 @@ export default function Navbar() {
               className={cn(
                 "flex items-center gap-1.5 ml-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors border",
                 pathname?.startsWith("/admin")
-                  ? "bg-purple-600/20 text-purple-300 border-purple-500/40"
-                  : "bg-purple-500/10 text-purple-400 border-purple-500/20 hover:bg-purple-500/20",
+                  ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+                  : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100",
               )}
             >
-              <Shield className="h-4 w-4" />
+              <Shield className="h-4 w-4 text-indigo-600" />
               <span>Admin Console</span>
             </Link>
           )}
@@ -145,7 +141,7 @@ export default function Navbar() {
                 <div className="text-xs font-semibold text-foreground leading-tight">
                   {user.firstName} {user.lastName}
                 </div>
-                <div className="text-[10px] text-muted-foreground">
+                <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
                   {user.role}
                 </div>
               </div>
@@ -153,7 +149,7 @@ export default function Navbar() {
                 variant="ghost"
                 size="sm"
                 onClick={handleLogout}
-                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                className="text-slate-600 hover:text-destructive hover:bg-destructive/10"
               >
                 <LogOut className="h-4 w-4 mr-1" />
                 Sign Out
@@ -170,7 +166,7 @@ export default function Navbar() {
               <Link href="/register">
                 <Button variant="default" size="sm">
                   <UserPlus className="h-4 w-4 mr-1.5" />
-                  Register
+                  Get Started
                 </Button>
               </Link>
             </div>
@@ -184,7 +180,7 @@ export default function Navbar() {
               <Button
                 size="sm"
                 variant="outline"
-                className="h-8 px-2 text-xs border-purple-500/40 text-purple-400 bg-purple-500/10"
+                className="h-8 px-2 text-xs border-indigo-200 text-indigo-700 bg-indigo-50"
               >
                 <Shield className="h-3.5 w-3.5" />
               </Button>
@@ -203,16 +199,16 @@ export default function Navbar() {
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="w-[300px] sm:w-[350px] p-6 flex flex-col justify-between"
+              className="w-[300px] sm:w-[350px] p-6 flex flex-col justify-between bg-white"
             >
               <div>
-                <SheetHeader className="text-left pb-4 border-b">
+                <SheetHeader className="text-left pb-4 border-b border-border">
                   <SheetTitle className="flex items-center gap-2 text-lg font-bold">
                     <Compass className="h-5 w-5 text-primary" />
                     <span>PsychePath</span>
                   </SheetTitle>
                   <p className="text-xs text-muted-foreground">
-                    Phase 13: UI/UX Polish
+                    Psychometric Learning Platform
                   </p>
                 </SheetHeader>
 
@@ -229,7 +225,7 @@ export default function Navbar() {
                           "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors",
                           isActive
                             ? "text-primary bg-primary/10 font-semibold"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+                            : "text-slate-600 hover:text-foreground hover:bg-slate-100",
                         )}
                       >
                         <Icon className="h-4 w-4" />
@@ -243,13 +239,13 @@ export default function Navbar() {
                       href="/admin"
                       onClick={() => setMobileOpen(false)}
                       className={cn(
-                        "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors mt-2 border border-purple-500/30",
+                        "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors mt-2 border",
                         pathname?.startsWith("/admin")
-                          ? "bg-purple-600/20 text-purple-300"
-                          : "bg-purple-500/10 text-purple-400",
+                          ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+                          : "bg-slate-50 text-slate-700 border-slate-200",
                       )}
                     >
-                      <Shield className="h-4 w-4" />
+                      <Shield className="h-4 w-4 text-indigo-600" />
                       <span>Admin Console</span>
                     </Link>
                   )}
@@ -257,7 +253,7 @@ export default function Navbar() {
               </div>
 
               {/* Mobile Drawer Footer Auth */}
-              <div className="pt-6 border-t mt-auto">
+              <div className="pt-6 border-t border-border mt-auto">
                 {user ? (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">

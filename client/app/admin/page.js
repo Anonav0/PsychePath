@@ -68,7 +68,7 @@ export default function AdminDashboardPage() {
           {/* Top Metrics Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Total Learners */}
-            <Card className="p-5 shadow-sm space-y-2">
+            <Card className="p-5 bg-white border border-border shadow-sm space-y-2">
               <div className="flex items-center justify-between text-muted-foreground">
                 <span className="text-[11px] font-bold uppercase tracking-wider">
                   Total Learners
@@ -78,20 +78,20 @@ export default function AdminDashboardPage() {
               <div className="text-3xl font-black text-foreground">
                 {stats.totalLearners}
               </div>
-              <div className="text-xs text-emerald-500 font-medium">
+              <div className="text-xs text-emerald-600 font-medium">
                 {stats.activeLearners} active accounts
               </div>
             </Card>
 
             {/* Active Learners */}
-            <Card className="p-5 shadow-sm space-y-2">
+            <Card className="p-5 bg-white border border-border shadow-sm space-y-2">
               <div className="flex items-center justify-between text-muted-foreground">
                 <span className="text-[11px] font-bold uppercase tracking-wider">
                   Active Learners
                 </span>
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
               </div>
-              <div className="text-3xl font-black text-emerald-500">
+              <div className="text-3xl font-black text-emerald-600">
                 {stats.activeLearners}
               </div>
               <div className="text-xs text-muted-foreground">
@@ -100,14 +100,14 @@ export default function AdminDashboardPage() {
             </Card>
 
             {/* Total Assessments */}
-            <Card className="p-5 shadow-sm space-y-2">
+            <Card className="p-5 bg-white border border-border shadow-sm space-y-2">
               <div className="flex items-center justify-between text-muted-foreground">
                 <span className="text-[11px] font-bold uppercase tracking-wider">
                   Assessments
                 </span>
-                <ClipboardList className="h-4 w-4 text-primary" />
+                <ClipboardList className="h-4 w-4 text-indigo-600" />
               </div>
-              <div className="text-3xl font-black text-primary">
+              <div className="text-3xl font-black text-indigo-600">
                 {stats.totalAssessments}
               </div>
               <div className="text-xs text-muted-foreground">
@@ -116,14 +116,14 @@ export default function AdminDashboardPage() {
             </Card>
 
             {/* Total Modules */}
-            <Card className="p-5 shadow-sm space-y-2">
+            <Card className="p-5 bg-white border border-border shadow-sm space-y-2">
               <div className="flex items-center justify-between text-muted-foreground">
                 <span className="text-[11px] font-bold uppercase tracking-wider">
                   Curriculum
                 </span>
-                <BookOpen className="h-4 w-4 text-purple-400" />
+                <BookOpen className="h-4 w-4 text-indigo-600" />
               </div>
-              <div className="text-3xl font-black text-purple-400">
+              <div className="text-3xl font-black text-foreground">
                 {stats.totalCurriculumModules}
               </div>
               <div className="text-xs text-muted-foreground">
@@ -135,9 +135,9 @@ export default function AdminDashboardPage() {
           {/* Quick Management Links */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <Link href="/admin/learners" className="group">
-              <Card className="p-5 h-full group-hover:border-primary/50 transition-all shadow-sm space-y-3">
+              <Card className="p-5 h-full bg-white border border-border group-hover:border-indigo-300 group-hover:shadow-md transition-all shadow-sm space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-sky-500/10 text-sky-400">
+                  <div className="p-2.5 rounded-xl bg-sky-50 text-sky-600">
                     <Users className="h-5 w-5" />
                   </div>
                   <h3 className="text-base font-bold text-foreground">
@@ -156,9 +156,9 @@ export default function AdminDashboardPage() {
             </Link>
 
             <Link href="/admin/assessments" className="group">
-              <Card className="p-5 h-full group-hover:border-primary/50 transition-all shadow-sm space-y-3">
+              <Card className="p-5 h-full bg-white border border-border group-hover:border-indigo-300 group-hover:shadow-md transition-all shadow-sm space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                  <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600">
                     <ClipboardList className="h-5 w-5" />
                   </div>
                   <h3 className="text-base font-bold text-foreground">
@@ -177,9 +177,9 @@ export default function AdminDashboardPage() {
             </Link>
 
             <Link href="/admin/curriculum" className="group">
-              <Card className="p-5 h-full group-hover:border-primary/50 transition-all shadow-sm space-y-3">
+              <Card className="p-5 h-full bg-white border border-border group-hover:border-indigo-300 group-hover:shadow-md transition-all shadow-sm space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400">
+                  <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600">
                     <BookOpen className="h-5 w-5" />
                   </div>
                   <h3 className="text-base font-bold text-foreground">
@@ -201,7 +201,7 @@ export default function AdminDashboardPage() {
           {/* Tables: Recent Learners & Recent Attempts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Recent Learners */}
-            <Card className="p-5 shadow-sm space-y-4">
+            <Card className="p-6 bg-white border border-border shadow-sm space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-base font-bold text-foreground">
                   Recent Learners
@@ -226,7 +226,7 @@ export default function AdminDashboardPage() {
                   {stats.recentLearners?.map((learner) => (
                     <div
                       key={learner._id}
-                      className="p-3 rounded-lg border bg-muted/20 flex items-center justify-between text-xs"
+                      className="p-3.5 rounded-lg border border-slate-100 bg-slate-50/70 flex items-center justify-between text-xs hover:bg-slate-50 transition-colors"
                     >
                       <div>
                         <div className="font-semibold text-foreground">
@@ -258,7 +258,7 @@ export default function AdminDashboardPage() {
             </Card>
 
             {/* Recent Assessment Attempts */}
-            <Card className="p-5 shadow-sm space-y-4">
+            <Card className="p-6 bg-white border border-border shadow-sm space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-base font-bold text-foreground">
                   Recent Assessment Activity
@@ -277,7 +277,7 @@ export default function AdminDashboardPage() {
                   {stats.recentAttempts?.map((att) => (
                     <div
                       key={att._id}
-                      className="p-3 rounded-lg border bg-muted/20 flex items-center justify-between text-xs"
+                      className="p-3.5 rounded-lg border border-slate-100 bg-slate-50/70 flex items-center justify-between text-xs hover:bg-slate-50 transition-colors"
                     >
                       <div>
                         <div className="font-semibold text-foreground">

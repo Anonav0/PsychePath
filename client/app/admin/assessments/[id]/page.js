@@ -8,6 +8,33 @@ import assessmentService from "../../../../services/assessmentService";
 import StatusBadge from "../../../../components/ui/StatusBadge";
 import ConfirmModal from "../../../../components/admin/ConfirmModal";
 import EmptyState from "../../../../components/ui/EmptyState";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { CardSkeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { toast } from "@/components/ui/use-toast";
+import {
+  ArrowLeft,
+  Plus,
+  Trash2,
+  Edit2,
+  ChevronUp,
+  ChevronDown,
+  HelpCircle,
+  Clock,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function AssessmentQuestionsPage() {
   const { id } = useParams();
@@ -133,14 +160,20 @@ export default function AssessmentQuestionsPage() {
           questionModal.questionId,
           payload,
         );
+        toast.success(
+          "Question Updated",
+          "Question was modified successfully.",
+        );
       } else {
         await assessmentService.addQuestion(id, payload);
+        toast.success("Question Added", "New question added to catalog.");
       }
 
       setQuestionModal((prev) => ({ ...prev, isOpen: false, loading: false }));
       fetchData();
     } catch (err) {
-      alert(err.message || "Failed to save question");
+      const errMsg = err.message || "Failed to save question";
+      toast.error("Save Failed", errMsg);
       setQuestionModal((prev) => ({ ...prev, loading: false }));
     }
   };
@@ -156,7 +189,10 @@ export default function AssessmentQuestionsPage() {
       await assessmentService.reorderQuestion(q._id, targetOrder);
       fetchData();
     } catch (err) {
-      alert(err.message || "Failed to reorder question");
+      toast.error(
+        "Reorder Failed",
+        err.message || "Failed to reorder question",
+      );
     }
   };
 
@@ -165,10 +201,11 @@ export default function AssessmentQuestionsPage() {
     try {
       setDeleteModal((prev) => ({ ...prev, loading: true }));
       await assessmentService.deleteQuestion(deleteModal.item._id);
+      toast.success("Question Removed", "Question deleted from assessment.");
       setDeleteModal({ isOpen: false, item: null, loading: false });
       fetchData();
     } catch (err) {
-      alert(err.message || "Failed to delete question");
+      toast.error("Delete Failed", err.message || "Failed to delete question");
       setDeleteModal((prev) => ({ ...prev, loading: false }));
     }
   };
@@ -203,7 +240,10 @@ export default function AssessmentQuestionsPage() {
 
   const removeOption = (index) => {
     if (questionModal.formData.options.length <= 2) {
-      alert("A question must have at least 2 options.");
+      toast.warning(
+        "Minimum Options",
+        "A question must have at least 2 options.",
+      );
       return;
     }
     setQuestionModal((prev) => {
@@ -221,14 +261,9 @@ export default function AssessmentQuestionsPage() {
         title="Question Management"
         subtitle="Loading assessment configuration..."
       >
-        <div
-          style={{
-            textAlign: "center",
-            padding: "4rem",
-            color: "var(--text-muted)",
-          }}
-        >
-          Loading questions...
+        <div className="space-y-6">
+          <CardSkeleton count={1} />
+          <CardSkeleton count={3} />
         </div>
       </AdminLayout>
     );
@@ -240,409 +275,229 @@ export default function AssessmentQuestionsPage() {
         title="Assessment Not Found"
         subtitle="Requested assessment could not be loaded."
       >
-        <div
-          style={{
-            background: "rgba(239, 68, 68, 0.1)",
-            color: "#f87171",
-            padding: "1rem",
-            borderRadius: "8px",
-            marginBottom: "1.5rem",
-          }}
-        >
-          {error || "Assessment not found"}
+        <div className="space-y-4 max-w-xl">
+          <Alert variant="destructive">
+            <AlertDescription>
+              {error || "Assessment not found"}
+            </AlertDescription>
+          </Alert>
+          <Link href="/admin/assessments">
+            <Button variant="outline" size="sm" className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back to Assessments</span>
+            </Button>
+          </Link>
         </div>
-        <Link href="/admin/assessments" className="btn-secondary-small">
-          ← Back to Assessments
-        </Link>
       </AdminLayout>
     );
   }
 
   return (
     <AdminLayout>
-      {/* Back Navigation */}
-      <div style={{ marginBottom: "1rem" }}>
-        <Link
-          href="/admin/assessments"
-          style={{
-            color: "var(--text-muted)",
-            fontSize: "0.85rem",
-            textDecoration: "none",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.25rem",
-          }}
-        >
-          ← Back to Assessments
-        </Link>
-      </div>
+      <div className="space-y-6">
+        {/* Back Navigation */}
+        <div>
+          <Link href="/admin/assessments">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1.5 text-xs text-muted-foreground hover:text-foreground h-8 px-2"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              <span>Back to Assessments</span>
+            </Button>
+          </Link>
+        </div>
 
-      {/* Assessment Header */}
-      <div
-        style={{
-          background: "var(--bg-surface, #1e293b)",
-          border: "1px solid var(--border-color, #334155)",
-          borderRadius: "12px",
-          padding: "1.75rem",
-          marginBottom: "1.5rem",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            flexWrap: "wrap",
-            gap: "1rem",
-            marginBottom: "0.5rem",
-          }}
-        >
-          <div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.75rem",
-                marginBottom: "0.25rem",
-              }}
-            >
-              <h1 style={{ fontSize: "1.75rem", fontWeight: 800, margin: 0 }}>
-                {assessment.title}
-              </h1>
-              <StatusBadge
-                status={assessment.isActive ? "ACTIVE" : "INACTIVE"}
-              />
+        {/* Assessment Header Card */}
+        <Card className="p-6 bg-white border border-border shadow-sm space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
+                  {assessment.title}
+                </h1>
+                <StatusBadge
+                  status={assessment.isActive ? "ACTIVE" : "INACTIVE"}
+                />
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {assessment.description}
+              </p>
             </div>
-            <p
-              style={{
-                color: "var(--text-secondary)",
-                fontSize: "0.95rem",
-                margin: 0,
-              }}
+
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
+              onClick={openAddModal}
+              className="gap-1.5 text-xs shrink-0"
             >
-              {assessment.description}
-            </p>
+              <Plus className="h-4 w-4" />
+              <span>Add Question</span>
+            </Button>
           </div>
 
-          <button
-            type="button"
-            onClick={openAddModal}
-            className="btn-primary-small"
-            style={{ padding: "0.5rem 1.25rem", fontSize: "0.85rem" }}
-          >
-            + Add Question
-          </button>
-        </div>
-
-        {/* Dimensions Tags */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            marginTop: "1rem",
-          }}
-        >
-          <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
-            Target Dimensions:
-          </span>
-          {assessment.dimensions?.map((d, i) => (
-            <span
-              key={i}
-              style={{
-                background: "rgba(99, 102, 241, 0.12)",
-                color: "#a5b4fc",
-                padding: "0.2rem 0.5rem",
-                borderRadius: "4px",
-                fontSize: "0.75rem",
-                fontWeight: 600,
-              }}
-            >
-              {d.name || d.key || d}
+          {/* Dimensions Tags */}
+          <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-border">
+            <span className="text-xs font-semibold text-foreground">
+              Target Dimensions:
             </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Questions Sequence List */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <h2 style={{ fontSize: "1.2rem", fontWeight: 700, margin: 0 }}>
-            Question Set ({questions.length})
-          </h2>
-          <span style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>
-            Ordered sequentially by execution rank
-          </span>
-        </div>
-
-        {questions.length === 0 ? (
-          <EmptyState
-            icon="❓"
-            title="No Questions in Assessment"
-            description="Add questions with scoring options and psychometric dimension mappings."
-            actionText="Add First Question"
-            onAction={openAddModal}
-          />
-        ) : (
-          questions.map((q, index) => (
-            <div
-              key={q._id}
-              style={{
-                background: "var(--bg-surface, #1e293b)",
-                border: "1px solid var(--border-color, #334155)",
-                borderRadius: "12px",
-                padding: "1.25rem 1.5rem",
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.75rem",
-              }}
-            >
-              {/* Question Header */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  gap: "1rem",
-                }}
+            {assessment.dimensions?.map((d, i) => (
+              <Badge
+                key={i}
+                variant="secondary"
+                className="text-[11px] bg-indigo-50 text-indigo-700 border-indigo-200"
               >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "baseline",
-                    gap: "0.75rem",
-                  }}
+                {d.name || d.key || d}
+              </Badge>
+            ))}
+          </div>
+        </Card>
+
+        {/* Questions Sequence List */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold text-foreground">
+              Question Set ({questions.length})
+            </h2>
+            <span className="text-xs text-muted-foreground">
+              Ordered sequentially by execution rank
+            </span>
+          </div>
+
+          {questions.length === 0 ? (
+            <EmptyState
+              icon={HelpCircle}
+              title="No Questions in Assessment"
+              description="Add questions with scoring options and psychometric dimension mappings."
+              actionText="Add First Question"
+              onAction={openAddModal}
+            />
+          ) : (
+            <div className="space-y-3">
+              {questions.map((q, index) => (
+                <Card
+                  key={q._id}
+                  className="p-5 bg-white border border-border shadow-sm space-y-3"
                 >
-                  <span
-                    style={{
-                      background: "rgba(99, 102, 241, 0.15)",
-                      color: "#a5b4fc",
-                      fontWeight: 800,
-                      fontSize: "0.85rem",
-                      width: "28px",
-                      height: "28px",
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {index + 1}
-                  </span>
-                  <div>
-                    <h3
-                      style={{
-                        margin: "0 0 0.25rem 0",
-                        fontSize: "1.05rem",
-                        fontWeight: 600,
-                      }}
-                    >
-                      {q.questionText}
-                    </h3>
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "0.5rem",
-                        fontSize: "0.75rem",
-                      }}
-                    >
-                      <span style={{ color: "var(--text-muted)" }}>
-                        Dimension:{" "}
-                        <strong style={{ color: "var(--primary, #6366f1)" }}>
-                          {q.dimension}
-                        </strong>
+                  {/* Question Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                    <div className="flex items-start gap-3">
+                      <span className="h-7 w-7 rounded-full bg-indigo-50 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0 border border-indigo-200">
+                        {index + 1}
                       </span>
-                      <span style={{ color: "var(--text-muted)" }}>•</span>
-                      <span style={{ color: "var(--text-muted)" }}>
-                        Type: {q.questionType}
-                      </span>
+                      <div className="space-y-1">
+                        <h3 className="font-semibold text-sm sm:text-base text-foreground">
+                          {q.questionText}
+                        </h3>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+                          <span>
+                            Dimension:{" "}
+                            <strong className="text-indigo-600 font-medium">
+                              {q.dimension}
+                            </strong>
+                          </span>
+                          <span>&bull;</span>
+                          <span>Type: {q.questionType}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Reorder and Edit Actions */}
+                    <div className="flex items-center gap-1 shrink-0 self-end sm:self-auto">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={index === 0}
+                        onClick={() => handleReorder(q, "up")}
+                        className="h-7 w-7 p-0"
+                        title="Move Up"
+                      >
+                        <ChevronUp className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={index === questions.length - 1}
+                        onClick={() => handleReorder(q, "down")}
+                        className="h-7 w-7 p-0"
+                        title="Move Down"
+                      >
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openEditModal(q)}
+                        className="h-7 text-xs px-2.5 gap-1"
+                      >
+                        <Edit2 className="h-3 w-3" />
+                        <span>Edit</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          setDeleteModal({
+                            isOpen: true,
+                            item: q,
+                            loading: false,
+                          })
+                        }
+                        className="h-7 text-xs px-2 text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   </div>
-                </div>
 
-                {/* Reorder and Edit Actions */}
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.35rem",
-                  }}
-                >
-                  <button
-                    type="button"
-                    disabled={index === 0}
-                    onClick={() => handleReorder(q, "up")}
-                    style={{
-                      background: "transparent",
-                      border: "1px solid var(--border-color)",
-                      color:
-                        index === 0
-                          ? "var(--text-muted)"
-                          : "var(--text-primary)",
-                      padding: "0.25rem 0.5rem",
-                      borderRadius: "4px",
-                      cursor: index === 0 ? "not-allowed" : "pointer",
-                      fontSize: "0.75rem",
-                    }}
-                    title="Move Up"
-                  >
-                    ▲
-                  </button>
-                  <button
-                    type="button"
-                    disabled={index === questions.length - 1}
-                    onClick={() => handleReorder(q, "down")}
-                    style={{
-                      background: "transparent",
-                      border: "1px solid var(--border-color)",
-                      color:
-                        index === questions.length - 1
-                          ? "var(--text-muted)"
-                          : "var(--text-primary)",
-                      padding: "0.25rem 0.5rem",
-                      borderRadius: "4px",
-                      cursor:
-                        index === questions.length - 1
-                          ? "not-allowed"
-                          : "pointer",
-                      fontSize: "0.75rem",
-                    }}
-                    title="Move Down"
-                  >
-                    ▼
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => openEditModal(q)}
-                    style={{
-                      background: "transparent",
-                      border: "1px solid var(--border-color)",
-                      color: "var(--text-primary)",
-                      padding: "0.25rem 0.6rem",
-                      borderRadius: "4px",
-                      fontSize: "0.8rem",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setDeleteModal({ isOpen: true, item: q, loading: false })
-                    }
-                    style={{
-                      background: "transparent",
-                      border: "1px solid rgba(239, 68, 68, 0.3)",
-                      color: "#f87171",
-                      padding: "0.25rem 0.6rem",
-                      borderRadius: "4px",
-                      fontSize: "0.8rem",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-
-              {/* Options Breakdown */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-                  gap: "0.5rem",
-                  padding: "0.75rem",
-                  background: "rgba(0, 0, 0, 0.2)",
-                  borderRadius: "8px",
-                  fontSize: "0.8rem",
-                }}
-              >
-                {q.options?.map((opt, optIdx) => (
-                  <div
-                    key={optIdx}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      color: "var(--text-secondary)",
-                    }}
-                  >
-                    <span>{opt.label || opt.text}</span>
-                    <span style={{ fontWeight: 700, color: "#a5b4fc" }}>
-                      Score: {opt.score ?? opt.value}
-                    </span>
+                  {/* Options Breakdown */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 p-3 bg-slate-50/70 rounded-lg border border-slate-100 text-xs">
+                    {q.options?.map((opt, optIdx) => (
+                      <div
+                        key={optIdx}
+                        className="flex flex-col justify-between p-2 rounded bg-white border border-slate-200"
+                      >
+                        <span className="font-medium text-slate-800 truncate">
+                          {opt.label || opt.text}
+                        </span>
+                        <span className="text-[11px] font-bold text-indigo-600 mt-1">
+                          Score: {opt.score ?? opt.value}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </Card>
+              ))}
             </div>
-          ))
-        )}
-      </div>
+          )}
+        </div>
 
-      {/* Question Add/Edit Modal */}
-      {questionModal.isOpen && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.7)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-            padding: "1rem",
-          }}
-          onClick={() =>
-            setQuestionModal((prev) => ({ ...prev, isOpen: false }))
+        {/* Question Add/Edit Modal */}
+        <Dialog
+          open={questionModal.isOpen}
+          onOpenChange={(open) =>
+            setQuestionModal((prev) => ({ ...prev, isOpen: open }))
           }
         >
-          <div
-            style={{
-              background: "var(--bg-surface, #1e293b)",
-              border: "1px solid var(--border-color, #334155)",
-              borderRadius: "12px",
-              width: "100%",
-              maxWidth: "580px",
-              padding: "1.75rem",
-              maxHeight: "90vh",
-              overflowY: "auto",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3
-              style={{
-                margin: "0 0 1rem 0",
-                fontSize: "1.25rem",
-                fontWeight: 700,
-              }}
-            >
-              {questionModal.isEdit ? "Edit Question" : "Add New Question"}
-            </h3>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>
+                {questionModal.isEdit ? "Edit Question" : "Add New Question"}
+              </DialogTitle>
+              <DialogDescription className="text-xs">
+                Configure question wording, dimension target, and option scores.
+              </DialogDescription>
+            </DialogHeader>
 
-            <form
-              onSubmit={handleSaveQuestion}
-              style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
-            >
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: "0.85rem",
-                    marginBottom: "0.3rem",
-                    color: "var(--text-secondary)",
-                  }}
-                >
+            <form onSubmit={handleSaveQuestion} className="space-y-4 pt-2">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground">
                   Question Text *
                 </label>
                 <textarea
@@ -658,38 +513,17 @@ export default function AssessmentQuestionsPage() {
                       },
                     }))
                   }
-                  style={{
-                    width: "100%",
-                    padding: "0.5rem 0.75rem",
-                    borderRadius: "6px",
-                    background: "rgba(0,0,0,0.2)",
-                    border: "1px solid var(--border-color)",
-                    color: "var(--text-primary)",
-                    fontFamily: "inherit",
-                  }}
+                  className="w-full rounded-md border border-input bg-white px-3 py-2 text-xs text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   placeholder="e.g. When approaching complex technical challenges, do you prioritize modular isolation?"
                 />
               </div>
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "1rem",
-                }}
-              >
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "0.85rem",
-                      marginBottom: "0.3rem",
-                      color: "var(--text-secondary)",
-                    }}
-                  >
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-foreground">
                     Target Dimension *
                   </label>
-                  <select
+                  <Select
                     value={questionModal.formData.dimension}
                     onChange={(e) =>
                       setQuestionModal((prev) => ({
@@ -700,35 +534,20 @@ export default function AssessmentQuestionsPage() {
                         },
                       }))
                     }
-                    style={{
-                      width: "100%",
-                      padding: "0.5rem 0.75rem",
-                      borderRadius: "6px",
-                      background: "var(--bg-surface)",
-                      border: "1px solid var(--border-color)",
-                      color: "var(--text-primary)",
-                    }}
                   >
                     {assessment.dimensions?.map((d, i) => (
                       <option key={i} value={d.key || d}>
                         {d.name || d.key || d}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
 
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "0.85rem",
-                      marginBottom: "0.3rem",
-                      color: "var(--text-secondary)",
-                    }}
-                  >
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-foreground">
                     Question Type
                   </label>
-                  <select
+                  <Select
                     value={questionModal.formData.questionType}
                     onChange={(e) =>
                       setQuestionModal((prev) => ({
@@ -739,75 +558,35 @@ export default function AssessmentQuestionsPage() {
                         },
                       }))
                     }
-                    style={{
-                      width: "100%",
-                      padding: "0.5rem 0.75rem",
-                      borderRadius: "6px",
-                      background: "var(--bg-surface)",
-                      border: "1px solid var(--border-color)",
-                      color: "var(--text-primary)",
-                    }}
                   >
                     <option value="LIKERT_SCALE">LIKERT_SCALE</option>
                     <option value="MULTIPLE_CHOICE">MULTIPLE_CHOICE</option>
                     <option value="SINGLE_CHOICE">SINGLE_CHOICE</option>
-                  </select>
+                  </Select>
                 </div>
               </div>
 
               {/* Options List */}
-              <div>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "0.5rem",
-                  }}
-                >
-                  <label
-                    style={{
-                      fontSize: "0.85rem",
-                      color: "var(--text-secondary)",
-                      fontWeight: 600,
-                    }}
-                  >
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-foreground">
                     Options & Scoring (Min 2)
                   </label>
-                  <button
+                  <Button
                     type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={addOption}
-                    style={{
-                      background: "transparent",
-                      border: "1px solid var(--border-color)",
-                      color: "var(--primary, #6366f1)",
-                      padding: "0.2rem 0.5rem",
-                      borderRadius: "4px",
-                      fontSize: "0.75rem",
-                      cursor: "pointer",
-                    }}
+                    className="h-6 text-[11px] px-2"
                   >
                     + Add Option
-                  </button>
+                  </Button>
                 </div>
 
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.5rem",
-                  }}
-                >
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                   {questionModal.formData.options.map((opt, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        display: "flex",
-                        gap: "0.5rem",
-                        alignItems: "center",
-                      }}
-                    >
-                      <input
+                    <div key={i} className="flex items-center gap-2">
+                      <Input
                         type="text"
                         required
                         placeholder="Option Label"
@@ -815,103 +594,70 @@ export default function AssessmentQuestionsPage() {
                         onChange={(e) =>
                           updateOption(i, "label", e.target.value)
                         }
-                        style={{
-                          flex: 2,
-                          padding: "0.4rem 0.6rem",
-                          borderRadius: "4px",
-                          background: "rgba(0,0,0,0.2)",
-                          border: "1px solid var(--border-color)",
-                          color: "var(--text-primary)",
-                          fontSize: "0.85rem",
-                        }}
+                        className="flex-1 h-8 text-xs"
                       />
-                      <input
+                      <Input
                         type="number"
-                        placeholder="Score (0-100)"
+                        placeholder="Score"
                         value={opt.score}
                         onChange={(e) =>
                           updateOption(i, "score", e.target.value)
                         }
-                        style={{
-                          width: "90px",
-                          padding: "0.4rem 0.6rem",
-                          borderRadius: "4px",
-                          background: "rgba(0,0,0,0.2)",
-                          border: "1px solid var(--border-color)",
-                          color: "var(--text-primary)",
-                          fontSize: "0.85rem",
-                        }}
+                        className="w-20 h-8 text-xs"
                       />
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="sm"
                         onClick={() => removeOption(i)}
-                        style={{
-                          background: "transparent",
-                          border: "none",
-                          color: "#f87171",
-                          cursor: "pointer",
-                          fontSize: "1rem",
-                        }}
+                        className="h-8 w-8 p-0 text-red-600 hover:bg-red-50"
                         title="Remove option"
                       >
-                        ×
-                      </button>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: "0.75rem",
-                  marginTop: "1rem",
-                }}
-              >
-                <button
+              <DialogFooter className="pt-2">
+                <Button
                   type="button"
+                  variant="outline"
+                  size="sm"
                   onClick={() =>
                     setQuestionModal((prev) => ({ ...prev, isOpen: false }))
                   }
-                  style={{
-                    background: "transparent",
-                    color: "var(--text-primary)",
-                    border: "1px solid var(--border-color)",
-                    padding: "0.5rem 1rem",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                  }}
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  disabled={questionModal.loading}
-                  className="btn-primary-small"
-                  style={{ padding: "0.5rem 1.25rem" }}
+                  variant="default"
+                  size="sm"
+                  loading={questionModal.loading}
                 >
-                  {questionModal.loading ? "Saving..." : "Save Question"}
-                </button>
-              </div>
+                  Save Question
+                </Button>
+              </DialogFooter>
             </form>
-          </div>
-        </div>
-      )}
+          </DialogContent>
+        </Dialog>
 
-      {/* Delete Question Confirmation Modal */}
-      <ConfirmModal
-        isOpen={deleteModal.isOpen}
-        title="Delete Question"
-        message="Are you sure you want to remove this question from the assessment? This will reduce the assessment question count."
-        confirmLabel="Delete Question"
-        confirmVariant="danger"
-        loading={deleteModal.loading}
-        onConfirm={handleDeleteQuestion}
-        onCancel={() =>
-          setDeleteModal({ isOpen: false, item: null, loading: false })
-        }
-      />
+        {/* Delete Question Confirmation Modal */}
+        <ConfirmModal
+          isOpen={deleteModal.isOpen}
+          title="Delete Question"
+          message="Are you sure you want to remove this question from the assessment? This will reduce the assessment question count."
+          confirmLabel="Delete Question"
+          confirmVariant="danger"
+          loading={deleteModal.loading}
+          onConfirm={handleDeleteQuestion}
+          onCancel={() =>
+            setDeleteModal({ isOpen: false, item: null, loading: false })
+          }
+        />
+      </div>
     </AdminLayout>
   );
 }

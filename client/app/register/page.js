@@ -59,7 +59,7 @@ export default function RegisterPage() {
       toast.success(welcome, "Your student profile has been created.");
       setTimeout(() => {
         router.push("/");
-      }, 900);
+      }, 700);
     } catch (err) {
       const errText =
         err.message || "Registration failed. Please check your information.";
@@ -72,15 +72,15 @@ export default function RegisterPage() {
 
   return (
     <div className="flex-1 flex items-center justify-center p-4 py-12">
-      <Card className="w-full max-w-lg shadow-xl border-border/80 backdrop-blur-sm">
+      <Card className="w-full max-w-lg shadow-md border-border bg-white">
         <CardHeader className="text-center pb-2">
           <div className="mx-auto p-3 rounded-2xl bg-primary/10 text-primary w-fit mb-2">
             <UserPlus className="h-6 w-6" />
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight">
+          <CardTitle className="text-2xl font-bold tracking-tight text-foreground">
             Create Student Account
           </CardTitle>
-          <CardDescription className="text-sm">
+          <CardDescription className="text-sm text-muted-foreground">
             Begin your psychometric assessment & personalized learning path
           </CardDescription>
         </CardHeader>
@@ -99,86 +99,74 @@ export default function RegisterPage() {
           )}
 
           <form onSubmit={handleRegister} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
               <div className="space-y-1.5">
-                <label
-                  className="text-xs font-semibold text-foreground flex items-center gap-1.5"
-                  htmlFor="firstName"
-                >
-                  <User className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span>First Name</span>
+                <label className="text-xs font-semibold text-slate-700">
+                  First Name
                 </label>
-                <Input
-                  id="firstName"
-                  name="firstName"
-                  type="text"
-                  placeholder="Elena"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  required
-                />
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    name="firstName"
+                    required
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    placeholder="Alex"
+                    className="pl-9"
+                    disabled={loading}
+                  />
+                </div>
               </div>
 
               <div className="space-y-1.5">
-                <label
-                  className="text-xs font-semibold text-foreground flex items-center gap-1.5"
-                  htmlFor="lastName"
-                >
-                  <User className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span>Last Name</span>
+                <label className="text-xs font-semibold text-slate-700">
+                  Last Name
                 </label>
                 <Input
-                  id="lastName"
                   name="lastName"
-                  type="text"
-                  placeholder="Rostova"
+                  required
                   value={formData.lastName}
                   onChange={handleChange}
-                  required
+                  placeholder="Chen"
+                  disabled={loading}
                 />
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label
-                className="text-xs font-semibold text-foreground flex items-center gap-1.5"
-                htmlFor="email"
-              >
-                <Mail className="h-3.5 w-3.5 text-muted-foreground" />
-                <span>Email Address</span>
-              </label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="elena@example.com"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                autoComplete="email"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label
-                className="text-xs font-semibold text-foreground flex items-center gap-1.5"
-                htmlFor="password"
-              >
-                <Lock className="h-3.5 w-3.5 text-muted-foreground" />
-                <span>Password (min 8 characters)</span>
+            <div className="space-y-1.5 text-left">
+              <label className="text-xs font-semibold text-slate-700">
+                Email Address
               </label>
               <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="password"
-                  name="password"
+                  type="email"
+                  name="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="alex.chen@example.com"
+                  className="pl-9"
+                  disabled={loading}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5 text-left">
+              <label className="text-xs font-semibold text-slate-700">
+                Password (min 8 characters)
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
                   type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
+                  name="password"
+                  required
                   value={formData.password}
                   onChange={handleChange}
-                  required
-                  minLength={8}
-                  autoComplete="new-password"
-                  className="pr-10"
+                  placeholder="••••••••"
+                  className="pl-9 pr-10"
+                  disabled={loading}
                 />
                 <button
                   type="button"
@@ -195,10 +183,10 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs">
-              <Info className="h-4 w-4 shrink-0" />
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-indigo-50/70 border border-indigo-100 text-xs text-indigo-900 leading-relaxed">
+              <Info className="h-4 w-4 text-indigo-600 shrink-0" />
               <span>
-                All new public registrations are assigned the{" "}
+                New accounts automatically receive the verified{" "}
                 <strong>STUDENT</strong> role.
               </span>
             </div>
@@ -210,19 +198,19 @@ export default function RegisterPage() {
               loading={loading}
               className="w-full text-sm font-semibold"
             >
-              {loading ? "Creating Account..." : "Register as Student"}
+              {loading ? "Creating Account..." : "Create Account"}
             </Button>
           </form>
         </CardContent>
 
-        <CardFooter className="flex justify-center border-t py-4 text-xs text-muted-foreground">
+        <CardFooter className="flex justify-center border-t border-border py-4 text-xs text-muted-foreground">
           <p>
             Already have an account?{" "}
             <Link
               href="/login"
               className="font-semibold text-primary hover:underline"
             >
-              Sign In
+              Sign in
             </Link>
           </p>
         </CardFooter>

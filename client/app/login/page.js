@@ -48,7 +48,7 @@ export default function LoginPage() {
       toast.success(welcome, "You have signed in successfully.");
       setTimeout(() => {
         router.push("/");
-      }, 900);
+      }, 700);
     } catch (err) {
       const errText = err.message || "Invalid email or password";
       setErrorMessage(errText);
@@ -79,15 +79,15 @@ export default function LoginPage() {
 
   return (
     <div className="flex-1 flex items-center justify-center p-4 py-12">
-      <Card className="w-full max-w-md shadow-xl border-border/80 backdrop-blur-sm">
+      <Card className="w-full max-w-md shadow-md border-border bg-white">
         <CardHeader className="text-center pb-2">
           <div className="mx-auto p-3 rounded-2xl bg-primary/10 text-primary w-fit mb-2">
             <LogIn className="h-6 w-6" />
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight">
+          <CardTitle className="text-2xl font-bold tracking-tight text-foreground">
             Sign In to PsychePath
           </CardTitle>
-          <CardDescription className="text-sm">
+          <CardDescription className="text-sm text-muted-foreground">
             Access your personalized learning journey and analytics
           </CardDescription>
         </CardHeader>
@@ -106,43 +106,40 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-1.5">
-              <label
-                className="text-xs font-semibold text-foreground flex items-center gap-1.5"
-                htmlFor="email"
-              >
-                <Mail className="h-3.5 w-3.5 text-muted-foreground" />
-                <span>Email Address</span>
-              </label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label
-                className="text-xs font-semibold text-foreground flex items-center gap-1.5"
-                htmlFor="password"
-              >
-                <Lock className="h-3.5 w-3.5 text-muted-foreground" />
-                <span>Password</span>
+            <div className="space-y-1.5 text-left">
+              <label className="text-xs font-semibold text-slate-700">
+                Email Address
               </label>
               <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="password"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  className="pl-9"
+                  disabled={loading}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5 text-left">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-slate-700">
+                  Password
+                </label>
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
                   type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
+                  required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  required
-                  autoComplete="current-password"
-                  className="pr-10"
+                  placeholder="••••••••"
+                  className="pl-9 pr-10"
+                  disabled={loading}
                 />
                 <button
                   type="button"
@@ -170,7 +167,8 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="pt-4 border-t space-y-2">
+          {/* Quick Fill Demo Helpers */}
+          <div className="pt-4 border-t border-border space-y-2">
             <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-center">
               Quick Fill Demo Accounts
             </p>
@@ -180,9 +178,9 @@ export default function LoginPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => fillCredentials("admin")}
-                className="text-xs border-purple-500/30 text-purple-400 hover:bg-purple-500/10 hover:text-purple-300 gap-1.5"
+                className="text-xs text-slate-700 hover:bg-slate-50 gap-1.5"
               >
-                <Shield className="h-3.5 w-3.5" />
+                <Shield className="h-3.5 w-3.5 text-indigo-600" />
                 <span>Admin Demo</span>
               </Button>
               <Button
@@ -190,16 +188,16 @@ export default function LoginPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => fillCredentials("student")}
-                className="text-xs border-sky-500/30 text-sky-400 hover:bg-sky-500/10 hover:text-sky-300 gap-1.5"
+                className="text-xs text-slate-700 hover:bg-slate-50 gap-1.5"
               >
-                <GraduationCap className="h-3.5 w-3.5" />
+                <GraduationCap className="h-3.5 w-3.5 text-slate-600" />
                 <span>Student Demo</span>
               </Button>
             </div>
           </div>
         </CardContent>
 
-        <CardFooter className="flex justify-center border-t py-4 text-xs text-muted-foreground">
+        <CardFooter className="flex justify-center border-t border-border py-4 text-xs text-muted-foreground">
           <p>
             Don&apos;t have an account?{" "}
             <Link
