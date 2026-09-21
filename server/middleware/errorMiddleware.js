@@ -15,8 +15,10 @@ const notFoundHandler = (req, res, next) => {
  * Centralized error handler middleware
  */
 const errorHandler = (err, req, res, next) => {
-  // Always log error server-side for debugging
-  console.error(`[Error] ${req.method} ${req.originalUrl}:`, err);
+  // Log error server-side for debugging outside of automated tests
+  if (process.env.NODE_ENV !== "test") {
+    console.error(`[Error] ${req.method} ${req.originalUrl}:`, err);
+  }
 
   // Handle malformed JSON in request body
   if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
@@ -24,6 +26,26 @@ const errorHandler = (err, req, res, next) => {
       statusCode: 400,
       message: "Invalid JSON payload in request body",
       errorCode: "INVALID_JSON",
+    });
+  }
+
+  // Handle Mongoose CastError (invalid/malformed MongoDB ObjectId)
+  if (err.name === "CastError") {
+    return errorResponse(res, {
+      statusCode: 400,
+      message: `Invalid identifier format: ${err.value}`,
+      errorCode: "INVALID_ID",
+    });
+  }
+
+  // Handle Mongoose ValidationError
+  if (err.name === "ValidationError") {
+    const details = Object.values(err.errors || {}).map((e) => e.message);
+    return errorResponse(res, {
+      statusCode: 400,
+      message: `Validation error: ${details.join(", ")}`,
+      errorCode: "VALIDATION_ERROR",
+      data: details,
     });
   }
 
