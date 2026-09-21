@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
 const config = require("./config");
 const healthRoutes = require("./routes/healthRoutes");
 const authRoutes = require("./routes/authRoutes");
@@ -16,8 +17,23 @@ const {
   notFoundHandler,
   errorHandler,
 } = require("./middleware/errorMiddleware");
+const {
+  authLimiter,
+  aiLimiter,
+  submissionLimiter,
+  globalLimiter,
+} = require("./middleware/rateLimitMiddleware");
+const { sanitizeRequest } = require("./middleware/sanitizeMiddleware");
 
 const app = express();
+
+// HTTP Security Headers via Helmet
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: false, // Managed by frontend Next.js headers
+  }),
+);
 
 // Configure CORS driven by CLIENT_URL environment setting
 const allowedOrigins = config.clientUrl.split(",").map((url) => url.trim());
@@ -41,22 +57,29 @@ app.use(
   }),
 );
 
-// Body parsing with safe limits
-app.use(express.json({ limit: "10kb" }));
-app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+// Global API rate limiting
+app.use(globalLimiter);
 
-// API route mounts
+// Body parsing with safe size limits (100kb)
+app.use(express.json({ limit: "100kb" }));
+app.use(express.urlencoded({ extended: true, limit: "100kb" }));
+
+// Request parameter and payload sanitization against MongoDB injection
+app.use(sanitizeRequest);
+
+// API route mounts with endpoint-specific rate limits
 app.use("/api/health", healthRoutes);
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/assessments", assessmentRoutes);
 app.use("/api/questions", questionRoutes);
+app.use("/api/attempts/:attemptId/submit", submissionLimiter);
 app.use("/api/attempts", attemptRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/profiles", profileRoutes);
 app.use("/api/curriculum", curriculumRoutes);
-app.use("/api/recommendations", recommendationRoutes);
-app.use("/api/learning-path", learningPathRoutes);
-app.use("/api/learning-paths", learningPathRoutes);
+app.use("/api/recommendations", aiLimiter, recommendationRoutes);
+app.use("/api/learning-path", aiLimiter, learningPathRoutes);
+app.use("/api/learning-paths", aiLimiter, learningPathRoutes);
 app.use("/api/progress", progressRoutes);
 app.use("/api/admin", adminRoutes);
 

@@ -20,13 +20,17 @@
     "test:gemini": "node utils/verifyGemini.js",
     "test:learning-path": "node utils/verifyLearningPath.js",
     "test:progress": "node utils/verifyProgress.js",
-    "test:admin": "node utils/verifyAdmin.js"
+    "test:admin": "node utils/verifyAdmin.js",
+    "seed": "node scripts/seed.js",
+    "seed:reset": "node scripts/seed.js --reset"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.9.5"
   },

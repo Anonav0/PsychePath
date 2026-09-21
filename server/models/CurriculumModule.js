@@ -126,7 +126,7 @@ const curriculumModuleSchema = new mongoose.Schema(
 );
 
 // Indexes for curriculum matching, filtering, and difficulty sequences
-curriculumModuleSchema.index({ category: 1, difficulty: 1 });
+curriculumModuleSchema.index({ category: 1, difficulty: 1, isActive: 1 });
 curriculumModuleSchema.index({ isActive: 1 });
 
 const CurriculumModule =

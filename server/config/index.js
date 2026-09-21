@@ -23,11 +23,18 @@ const config = {
   isProduction: process.env.NODE_ENV === "production",
 };
 
-// Fail fast if JWT_SECRET is missing in development or production
-if (!config.jwtSecret && process.env.NODE_ENV !== "test") {
-  console.error(
-    "[Config Warning] JWT_SECRET is not set in environment variables.",
+// Fail fast if JWT_SECRET is missing or insecure in production
+if (config.isProduction) {
+  if (!config.jwtSecret || config.jwtSecret.length < 32) {
+    throw new Error(
+      "[Fatal] In production, JWT_SECRET must be explicitly set and be at least 32 characters long.",
+    );
+  }
+} else if (!config.jwtSecret && process.env.NODE_ENV !== "test") {
+  console.warn(
+    "[Config Warning] JWT_SECRET is not set in environment variables. Generating fallback for development.",
   );
+  config.jwtSecret = "dev_fallback_secret_must_be_overridden_in_env_file_12345";
 }
 
 module.exports = config;

@@ -11,14 +11,20 @@ const notFoundHandler = (req, res, next) => {
   });
 };
 
+const logger = require("../utils/logger");
+
 /**
  * Centralized error handler middleware
  */
 const errorHandler = (err, req, res, next) => {
-  // Log error server-side for debugging outside of automated tests
-  if (process.env.NODE_ENV !== "test") {
-    console.error(`[Error] ${req.method} ${req.originalUrl}:`, err);
-  }
+  // Log error server-side via structured logger with sensitive data redacted
+  logger.error(`${req.method} ${req.originalUrl} - ${err.message}`, {
+    statusCode: err.statusCode || 500,
+    errorCode: err.errorCode,
+    url: req.originalUrl,
+    method: req.method,
+    ip: req.ip,
+  });
 
   // Handle malformed JSON in request body
   if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
@@ -49,15 +55,27 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
-  // Handle CORS errors or custom operational errors
+  // Handle MongoDB duplicate key error (E11000)
+  if (err.code === 11000) {
+    const field = Object.keys(err.keyPattern || {})[0] || "resource";
+    return errorResponse(res, {
+      statusCode: 409,
+      message: `Duplicate entry: A record with that ${field} already exists`,
+      errorCode: "DUPLICATE_RESOURCE",
+    });
+  }
+
+  // Handle operational vs unexpected errors
   const statusCode = err.statusCode || 500;
-  const message =
-    statusCode === 500
-      ? "Internal server error"
-      : err.message || "An unexpected error occurred";
+  const is500 = statusCode >= 500;
+
+  // Safe messaging in production to prevent leaking internal database schemas or stack traces
+  const message = is500
+    ? "An unexpected internal server error occurred. Please try again later."
+    : err.message || "An unexpected error occurred";
+
   const errorCode =
-    err.errorCode ||
-    (statusCode === 500 ? "INTERNAL_SERVER_ERROR" : "REQUEST_ERROR");
+    err.errorCode || (is500 ? "INTERNAL_SERVER_ERROR" : "REQUEST_ERROR");
 
   return errorResponse(res, {
     statusCode,

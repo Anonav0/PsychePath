@@ -13,6 +13,7 @@
     "build:client": "npm run build --prefix client",
     "install:all": "npm install && npm install --prefix server && npm install --prefix client",
     "seed": "npm run seed --prefix server",
+    "seed:reset": "npm run seed:reset --prefix server",
     "test": "npm run test --prefix server",
     "test:coverage": "npm run test:coverage --prefix server",
     "test:all": "npm run test:all --prefix server",
