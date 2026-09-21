@@ -1,652 +1,291 @@
 # PsychePath — Psychometric Learning Path Recommender
 
-PsychePath is an AI-enhanced personalized learning platform that tailors educational curricula based on learner profile information, psychometric assessment results, cognitive learning preferences, existing skills, and target goals.
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-14.x-black.svg)](https://nextjs.org/)
+[![Express.js](https://img.shields.io/badge/Express.js-4.x-lightgrey.svg)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-7.x-green.svg)](https://www.mongodb.com/)
+[![Gemini AI](https://img.shields.io/badge/Google%20Gemini-1.5%20%2F%202.0-blue.svg)](https://ai.google.dev/)
+[![Tests](https://img.shields.io/badge/Jest-67%2F67%20Passing-success.svg)](https://jestjs.io/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+PsychePath is an AI-augmented educational engineering platform that synthesizes individualized curriculum pathways. By coupling **authoritative psychometric assessment scoring**, **directed acyclic graph (DAG) curriculum filtering**, and **Google Gemini AI contextual rationale generation**, PsychePath solves the two fundamental flaws of modern EdTech: generic static playlists and hallucinated, unverified AI course recommendations.
 
 ---
 
-## Technology Stack
+## Quick Links & Detailed Documentation
 
-- **Frontend**: Next.js (App Router), React, JavaScript, CSS Modules / Modern CSS
-- **Backend**: Node.js, Express.js, JavaScript (REST API)
-- **Database**: MongoDB with Mongoose ODM
-- **AI Integration**: Google Gemini API (Phase 4+)
-- **Authentication**: JWT & Role-Based Access Control (Phase 3+)
+- **[System Architecture & Data Flows](docs/architecture.md)** — Architectural diagrams, layered pipeline, sequence diagrams, and resilience.
+- **[Database Model & ER Diagram](docs/database.md)** — Comprehensive Mongoose schema definitions, indexes, relations, and constraints.
+- **[REST API Reference Manual](docs/api.md)** — Endpoints, request/response payloads, authentication, and validation codes.
+- **[Local Setup & Developer Guide](docs/setup.md)** — Step-by-step setup, environment variables, seeding, and verification.
+- **[UI Showcase & Screenshot Checklist](docs/screenshots.md)** — Interface walkthrough and screenshot capture instructions.
+- **[Technical Decisions & Tradeoffs](docs/technical-decisions.md)** — In-depth architectural rationales and design decisions.
+- **[Interview & Project Explanation Guide](docs/interview-guide.md)** — Concise talking points, technical deep dives, and Q&A.
+- **[Portfolio & Resume Material](docs/portfolio.md)** — Measurable bullet points, one-line summary, and resume blurbs.
 
 ---
 
-## Project Structure
+## 1. Problem Statement
+
+Traditional online learning platforms present major shortcomings for learners:
+
+1. **One-Size-Fits-All Curricula**: Students receive identical linear course playlists regardless of whether they excel with hands-on projects, analytical deep dives, or collaborative exercises.
+2. **The "Black Box" AI Trap**: Prompting Large Language Models directly to generate curriculum plans frequently results in **hallucinated courses**, broken URLs, and illogical prerequisite sequencing (such as placing Advanced Distributed Systems before Basic Networking).
+3. **No Progress Accountability**: Progress systems often allow arbitrary skipping, accidental regressions, or lack an immutable audit trail of learning velocity.
+
+PsychePath addresses these challenges through a **deterministic-first, AI-augmented architecture**:
+
+- **Prerequisites and eligibility** are mathematically proven via **Directed Acyclic Graphs (DAG)**.
+- **Cognitive styles and skill gaps** are authoritatively scored on the server.
+- **Google Gemini** is utilized strictly for contextual rationale synthesis, personalized study strategies, and pacing advice.
+- **Monotonic progress tracking** guarantees regression-proof milestones with an immutable audit log.
+
+---
+
+## 2. Key Features
+
+- **Authoritative Psychometric Assessment Engine**: Timed evaluations assessing four cognitive dimensions: _Analytical_, _Intuitive_, _Collaborative_, and _Practical_. Scoring weights remain hidden from clients to prevent tampering.
+- **Dynamic Learner Profiling**: Automatically translates assessment results into cognitive strengths ($\ge 75\%$) and growth areas ($< 60\%$), combined with user-managed goals and weekly commitments.
+- **DAG-Based Curriculum Graph**: 20 interconnected modules with strict prerequisite dependencies and cycle prevention.
+- **Two-Stage Recommendation Engine**:
+  - _Stage 1_: Deterministic multi-attribute candidate scoring ($40\%$ goal fit, $35\%$ skill gap, $25\%$ cognitive match).
+  - _Stage 2_: Google Gemini 1.5/2.0 contextual rationale generation and pacing strategy synthesis.
+- **Zero-Hallucination & Topological Sequencing**: Strict schema validation prunes any unrecognized module references; a topological sorter guarantees prerequisites are never violated.
+- **Graceful Fallback**: Automatically degrades to a deterministic `RULE_ENGINE` without disruption if AI services time out, hit quota limits, or lack API keys.
+- **Single Active Path Invariant & Versioning**: Automatically archives older learning paths upon new generation and increments version counters.
+- **Monotonic Progress Tracking**: Rejects percentage regressions with HTTP 400 `PROGRESS_REGRESSION` while appending every change to an immutable `ProgressHistory` ledger.
+- **Role-Based Access Control (RBAC)**: Enforces least-privilege security between `STUDENT` and `ADMIN` users.
+- **Comprehensive Admin Dashboard**: Platform-wide KPIs, paginated learner directory with status toggling, and curriculum authoring with prerequisite cycle detection.
+
+---
+
+## 3. Technology Stack
+
+| Layer                  | Technology                       | Purpose                                                                           |
+| ---------------------- | -------------------------------- | --------------------------------------------------------------------------------- |
+| **Frontend**           | **Next.js 14 (App Router)**      | Modern nested layouts, server-side structure, and fast client-side rendering.     |
+| **UI Library**         | **React 18**                     | Interactive assessments, real-time timers, dynamic sliders, and responsive state. |
+| **Styling**            | **Vanilla CSS Modules**          | Modern dark-themed design system with CSS custom properties.                      |
+| **Backend**            | **Node.js & Express.js**         | Non-blocking event-driven REST API server with layered modular architecture.      |
+| **Database**           | **MongoDB 7+**                   | High-performance document database with compound indexing and atomic operations.  |
+| **ODM**                | **Mongoose 8**                   | Schema validation, type safety, query middleware, and model population.           |
+| **AI Personalization** | **Google Gemini API**            | Contextual learning strategies, module rationales, and estimated study schedules. |
+| **Security**           | **Helmet, Rate-Limit, Sanitize** | Defense-in-depth protection against XSS, DoS, brute-force, and NoSQL injection.   |
+| **Testing**            | **Jest & Supertest**             | 67 automated unit and integration tests across 10 test suites.                    |
+
+---
+
+## 4. System Architecture
+
+```mermaid
+graph TD
+    Client["Next.js 14 Frontend (App Router / React 18)"]
+    Security["Security Middleware (Helmet, CORS, Rate Limiters, Mongo Sanitize)"]
+    Express["Express REST API (/api/*)"]
+    Auth["JWT Authentication & RBAC (STUDENT / ADMIN)"]
+    Services["Layered Service Domain (Assessment, Profile, Curriculum, Progress)"]
+    RecEngine["Deterministic Recommendation Engine (DAG Prereq Filter + Scoring)"]
+    Gemini["Google Gemini AI (Rationale & Pacing Synthesis)"]
+    Fallback["Rule Engine Fallback (Graceful Degradation)"]
+    MongoDB[(MongoDB 7+ Persistence Layer)]
+
+    Client --> Security
+    Security --> Express
+    Express --> Auth
+    Auth --> Services
+    Services --> RecEngine
+    RecEngine --> Gemini
+    Gemini -.->|Timeout / Quota / Failure| Fallback
+    Fallback -.-> Services
+    Gemini -.->|Pruned & Repaired| Services
+    Services --> MongoDB
+```
+
+For complete sequence diagrams and component details, see **[System Architecture & Data Flows](docs/architecture.md)**.
+
+---
+
+## 5. Database Architecture & ER Model
+
+```mermaid
+erDiagram
+    User ||--o| LearnerProfile : "has (1:1)"
+    User ||--o{ AssessmentAttempt : "submits (1:N)"
+    User ||--o{ LearningPath : "owns (1:N)"
+    User ||--o{ Progress : "tracks (1:N)"
+    User ||--o{ ProgressHistory : "audits (1:N)"
+    Assessment ||--|{ Question : "contains (1:N)"
+    Assessment ||--o{ AssessmentAttempt : "records (1:N)"
+    CurriculumModule ||--o{ CurriculumModule : "prerequisites (N:N)"
+    CurriculumModule ||--o{ LearningPath : "embedded in (N:N)"
+    CurriculumModule ||--o{ Progress : "tracked by (1:N)"
+    LearningPath ||--o{ Progress : "composed of (1:N)"
+```
+
+For detailed schema definitions, data types, constraints, and index strategies, see **[Database Architecture](docs/database.md)**.
+
+---
+
+## 6. End-to-End Recommendation & AI Workflow
 
 ```text
-psychepath/
-├── client/                     # Next.js frontend application
-│   ├── app/                    # Next.js App Router (pages & layouts)
-│   ├── components/             # Reusable UI components
-│   ├── features/               # Feature-based modular slices
-│   ├── hooks/                  # Custom React hooks
-│   ├── lib/                    # Shared client utilities
-│   ├── services/               # Centralized API service layer
-│   └── utils/                  # General helper functions
-│
-├── server/                     # Express.js REST API backend
-│   ├── config/                 # Centralized environment & DB configs
-│   ├── controllers/            # Request handlers
-│   ├── middleware/             # Auth, error handling, validation middleware
-│   ├── models/                 # Mongoose data models
-│   │   ├── User.js             # User accounts & RBAC roles
-│   │   ├── Assessment.js       # Assessment definitions & dimensions
-│   │   ├── Question.js         # Assessment questions & option scoring
-│   │   ├── AssessmentAttempt.js# Student attempts & computed scores
-│   │   ├── LearnerProfile.js   # Learner skills, goals & psychometrics
-│   │   ├── CurriculumModule.js # Modules, prerequisites & resources
-│   │   ├── LearningPath.js     # Recommended curriculum paths & AI metadata
-│   │   ├── Progress.js         # Granular module progress (0-100%)
-│   │   └── index.js            # Centralized model exports
-│   ├── routes/                 # API route definitions
-│   ├── services/               # Business logic layer
-│   ├── utils/                  # Response formatters, seeders & verifiers
-│   │   ├── apiResponse.js      # Standard JSON response helpers
-│   │   ├── seed.js             # Development database seeder
-│   │   └── verifyModels.js     # Schema validation & integrity test suite
-│   ├── validators/             # Request payload validators
-│   ├── app.js                  # Express application setup
-│   └── server.js               # Entry point and server lifecycle
-│
-├── .docs/                      # Project documentation and specifications
-│   ├── master.md
-│   ├── prompt1.md
-│   ├── prompt2.md
-│   └── walkthroughs/           # Phase walkthroughs and instructions
-│
-├── package.json                # Monorepo root script runner
-└── README.md
+[1. Candidate Generation]
+  └── Queries active modules (isActive: true)
+  └── Evaluates prerequisite DAG against learner's current skills
+  └── Discards modules whose prerequisites are not yet met
+
+[2. Deterministic Fit Scoring]
+  └── Goal Match Score (40% weight): Matches module skills against target goals
+  └── Skill Gap Score (35% weight): Matches module skills not yet mastered
+  └── Cognitive Style Match (25% weight): Matches module category with profile strengths
+  └── Base Score = 0.40(Goal) + 0.35(Skill) + 0.25(Style)
+
+[3. AI Contextual Synthesis (Google Gemini)]
+  └── Sends top K candidates + learner profile signals into structured prompt
+  └── Gemini synthesizes custom rationales, pacing tips, and focus strategies
+  └── Validates response against strict JSON schema
+
+[4. Post-Processing & Safety Guarantees]
+  └── Hallucination Pruning: Strips any module ID not in the original candidate pool
+  └── Topological Sort Repair: Restores valid prerequisite ordering if AI altered sequence
+  └── Resilient Fallback: Activates deterministic Rule Engine if Gemini times out or errors
 ```
 
 ---
 
-## Database Architecture
+## 7. Security & Hardening Features
+
+- **Multi-Tiered Rate Limiting**:
+  - `authLimiter`: 10 requests / 15 mins (mitigates credential stuffing).
+  - `aiLimiter`: 5 requests / 15 mins (prevents AI cost overruns and API quota exhaustion).
+  - `submissionLimiter`: 20 requests / 15 mins (prevents rapid assessment re-submissions).
+  - `globalLimiter`: 100 requests / 15 mins (general DoS mitigation).
+- **NoSQL Injection Sanitization**: Strips dangerous MongoDB operator keys (`$gt`, `$where`, `$regex`) via `mongo-sanitize`.
+- **HTTP Security Headers**: Uses `helmet` to set CSP, HSTS, X-Frame-Options, and nosniff directives.
+- **Strict Payload Constraints**: Ingress body payloads restricted to `10kb` to thwart buffer exhaustion attacks.
+- **Redacted Logging**: Sensitive fields (`password`, `token`, `authorization`, `cookie`) are redacted prior to log output.
+
+---
+
+## 8. Project Structure
 
 ```text
-       ┌──────────────┐
-       │     User     │
-       └──────┬───────┘
-              │ (1:1)
-              ├─────────────────────────────► LearnerProfile
-              │                                      │
-              │ (1:N)                                │ (latest scores)
-              ├─────────────────────────────► AssessmentAttempt ◄───┐
-              │                                      │               │
-              │ (1:N)                                │               │
-              ├─────────────────────────────► LearningPath           │
-              │                                      │               │
-              │ (1:N)                                │ (ordered)     │
-              └──────────────► Progress              ▼               │
-                                  │           CurriculumModule       │
-                                  │                  │ (prereqs)     │
-                                  └──────────────────┴───────────────┘
-
-Assessment (1:N) ──► Question
-Assessment (1:N) ──► AssessmentAttempt
+PsychePath/
+├── client/                     # Next.js 14 Frontend Application
+│   ├── app/                    # Next.js App Router (18 routes)
+│   │   ├── admin/              # Admin dashboard, learners, curriculum management
+│   │   ├── assessments/        # Catalog, test-taking, results
+│   │   ├── curriculum/         # Curriculum exploration & module details
+│   │   ├── dashboard/          # Student main dashboard
+│   │   ├── learning-path/      # Path visualizer & regeneration
+│   │   ├── login/ & register/  # Authentication forms
+│   │   ├── profile/            # Learner profile & psychometric settings
+│   │   └── progress/           # Monotonic tracker & audit history
+│   ├── components/             # Reusable UI components & layouts
+│   ├── context/                # AuthContext & global state
+│   └── services/               # Centralized API service layer
+│
+├── server/                     # Express.js REST API Backend
+│   ├── config/                 # Centralized configuration & DB connection
+│   ├── controllers/            # HTTP request/response handlers
+│   ├── middleware/             # Auth, RBAC, Rate-Limit, Sanitize, Error handlers
+│   ├── models/                 # Mongoose 8 Data Models (User, Path, Progress, etc.)
+│   ├── routes/                 # Express route definitions
+│   ├── scripts/                # Database seeder (seed.js & seedData.js)
+│   ├── services/               # Pure business logic, recommendation & AI engines
+│   ├── tests/                  # Automated Jest unit and integration suites
+│   ├── utils/                  # Structured logger & legacy verifiers
+│   └── validators/             # Request payload validation schemas
+│
+├── docs/                       # Technical Documentation Suite
+│   ├── architecture.md         # System Architecture & Sequence Diagrams
+│   ├── database.md             # ER Diagram & Schema Specifications
+│   ├── api.md                  # REST API Reference Manual
+│   ├── setup.md                # Local Setup & Developer Guide
+│   ├── screenshots.md          # UI Showcase & Screenshot Guide
+│   ├── technical-decisions.md  # Architectural Rationale & Tradeoffs
+│   ├── interview-guide.md      # Technical Explanation & Interview Guide
+│   └── portfolio.md            # Resume Bullet Points & Portfolio Blurbs
+│
+├── package.json                # Root orchestration runner
+└── README.md                   # Project Overview & Quick Start
 ```
 
 ---
 
-## Prerequisites
+## 9. Quick Start & Local Setup
 
-- **Node.js**: `v18.x` or higher (tested on Node `v20.18.0`)
-- **npm**: `v9.x` or higher
-- **MongoDB**: Local MongoDB daemon running at `mongodb://localhost:27017` or MongoDB Atlas URI
+### 9.1 Prerequisites
 
----
+- **Node.js**: `v18.x` or higher (verified on `v20.18.0 LTS`)
+- **npm**: `v9.x` or higher (verified on `v10.8.2`)
+- **MongoDB**: Running at `mongodb://localhost:27017` or MongoDB Atlas URI
 
-## Environment Configuration
-
-Copy `.env.example` to create your local environment files:
-
-### Backend (`server/.env`)
-
-```env
-PORT=5000
-MONGODB_URI=mongodb://localhost:27017/psychepath
-JWT_SECRET=development_jwt_secret_phase1
-GEMINI_API_KEY=development_gemini_key_phase1
-CLIENT_URL=http://localhost:3000
-NODE_ENV=development
-```
-
-### Frontend (`client/.env.local`)
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:5000/api
-```
-
----
-
-## Installation
-
-Install dependencies across the monorepo root, backend, and frontend:
+### 9.2 Step-by-Step Installation
 
 ```bash
-# From root directory
+# 1. Clone the repository
+git clone https://github.com/Anonav0/PsychePath.git
+cd PsychePath
+
+# 2. Install all dependencies across root, server, and client
 npm run install:all
+
+# 3. Configure environment variables
+cp .env.example server/.env
+# (Optionally add GEMINI_API_KEY in server/.env)
+
+# 4. Seed the database with sample personas and curriculum
+npm run seed:reset
+
+# 5. Start development servers concurrently
+npm run dev
 ```
+
+- **Frontend**: [http://localhost:3000](http://localhost:3000)
+- **Backend API**: [http://localhost:5000](http://localhost:5000)
+- **Health Check**: [http://localhost:5000/api/health](http://localhost:5000/api/health)
+
+For comprehensive setup details, see **[Local Setup Guide](docs/setup.md)**.
 
 ---
 
-## Database Operations (Phase 2)
+## 10. Seed Accounts & Credentials
 
-### Seed Development Data
+The database seeder provisions verified test accounts across distinct lifecycle stages:
 
-Populate the database with realistic sample users, psychometric assessments, questions, curriculum modules, learner profiles, and learning paths:
-
-```bash
-npm run seed
-```
-
-### Run Model Verification & Constraint Tests
-
-Run automated tests verifying schema constraints, unique indexes, enum validations, and document population:
-
-```bash
-npm run test:models
-```
+| Role                    | Email                              | Password        | Lifecycle Stage                                                                          |
+| ----------------------- | ---------------------------------- | --------------- | ---------------------------------------------------------------------------------------- |
+| **Administrator**       | `admin@psychepath.com`             | `AdminPass123!` | Full system access to `/admin` dashboard, learner management, and curriculum DAG editor. |
+| **Student (New)**       | `student.new@psychepath.com`       | `Password123!`  | Fresh account: 0 attempts, no profile, ready to take first assessment.                   |
+| **Student (Assessed)**  | `student.assessed@psychepath.com`  | `Password123!`  | Completed cognitive assessment; ready to generate first learning path.                   |
+| **Student (Active)**    | `student.active@psychepath.com`    | `Password123!`  | Active learning path v1 with 2 modules in progress; ready to test progress updates.      |
+| **Student (Completed)** | `student.completed@psychepath.com` | `Password123!`  | Completed 100% of path v1; contains full immutable progress history.                     |
+| **Student (Inactive)**  | `student.inactive@psychepath.com`  | `Password123!`  | Deactivated account (`isActive: false`) to test login rejection.                         |
 
 ---
 
-## Authentication & Role-Based Access Control (Phase 3)
+## 11. Testing & Quality Assurance
 
-PsychePath provides stateless JWT authentication with bcrypt password hashing and RBAC (`STUDENT` / `ADMIN`).
+### 11.1 Automated Jest Test Suites (67/67 Tests Passing)
 
-### Run Automated Security & Auth Test Suite
-
-```bash
-npm run test:auth
-```
-
-### Authentication REST Endpoints
-
-- `POST /api/auth/register`: Public student registration (role forced to `STUDENT`)
-- `POST /api/auth/login`: Credential authentication returning signed JWT
-- `GET /api/auth/me`: Protected profile query (`Authorization: Bearer <token>`)
-- `GET /api/auth/student-test`: Protected route verifying `STUDENT` role access
-- `GET /api/auth/admin-test`: Protected route verifying `ADMIN` role access (returns 403 for students)
-
----
-
-## Assessment Engine (Phase 4)
-
-PsychePath includes a generic, backend-authoritative psychometric assessment engine.
-
-### Scoring Architecture
-
-> **Security Note**: Scoring is performed entirely on the backend. The client never determines or submits authoritative scores. Client scoring payloads are strictly ignored and sanitized.
-
-```text
-Assessment
-    ↓
-Questions (sanitized: scoring keys hidden from students)
-    ↓
-Student Attempt (IN_PROGRESS)
-    ↓
-Submitted Answers (auto-saved incrementally)
-    ↓
-Backend Validation (completeness check, option verification)
-    ↓
-Scoring Engine (authoritative DB option lookup)
-    ↓
-Dimension Scores & Normalization (0–100%)
-    ↓
-Assessment Result (educational summary, strongest dimensions, development areas)
-```
-
-### Supported Assessment Types
-
-- `LEARNING_STYLE`: Cognitive problem-solving, study habits, collaboration preferences
-- `SKILLS`: Technical skill proficiency evaluations
-- `PERSONALITY_PROFILE`: Self-management, persistence, communication traits
-- `GENERAL`: Extensible generic diagnostics
-
-### Attempt Lifecycle
-
-```text
-[Start Attempt] ──► IN_PROGRESS ──► [Auto-save Answers] ──► [Submit Attempt] ──► COMPLETED (Scored)
-```
-
-- A student has at most one active (`IN_PROGRESS`) attempt per assessment at any given time.
-- Inactive assessments cannot be started.
-- Completed attempts are permanently locked against modifications or re-submissions.
-- Assessment results are protected by strict IDOR checks.
-
-### Run Automated Assessment Test Suite
+Run backend integration and unit tests:
 
 ```bash
-npm run test:assessment
+npm test --prefix server
 ```
 
-### Assessment Engine Endpoints
+### 11.2 Standalone Model & Service Verifiers
 
-| Method   | Endpoint                               | Role             | Purpose                                               |
-| :------- | :------------------------------------- | :--------------- | :---------------------------------------------------- |
-| `GET`    | `/api/assessments`                     | Public / Student | List active assessments (scoring keys stripped)       |
-| `POST`   | `/api/assessments`                     | `ADMIN`          | Create new assessment                                 |
-| `GET`    | `/api/assessments/:id`                 | Public / Student | Get assessment instructions and details               |
-| `PATCH`  | `/api/assessments/:id`                 | `ADMIN`          | Update assessment details                             |
-| `PATCH`  | `/api/assessments/:id/status`          | `ADMIN`          | Activate or deactivate assessment                     |
-| `DELETE` | `/api/assessments/:id`                 | `ADMIN`          | Safe soft-delete / deactivate if attempts exist       |
-| `GET`    | `/api/assessments/:id/questions`       | Public / Student | Get ordered questions (scores stripped for students)  |
-| `POST`   | `/api/assessments/:id/questions`       | `ADMIN`          | Create question with scoring rules                    |
-| `PATCH`  | `/api/questions/:id/order`             | `ADMIN`          | Reorder question sequence                             |
-| `POST`   | `/api/assessments/:id/attempts`        | `STUDENT`        | Start new attempt or resume active attempt            |
-| `GET`    | `/api/assessments/:id/attempts/active` | `STUDENT`        | Get current active attempt                            |
-| `PATCH`  | `/api/attempts/:id/answers`            | `STUDENT`        | Save / update answers (anti-tamper sanitized)         |
-| `POST`   | `/api/attempts/:id/submit`             | `STUDENT`        | Submit attempt, validate completion, calculate scores |
-| `GET`    | `/api/attempts/:id/result`             | `STUDENT`        | View scored results and dimension breakdown           |
-| `GET`    | `/api/attempts/my`                     | `STUDENT`        | View student's assessment attempt history             |
-| `GET`    | `/api/attempts`                        | `ADMIN`          | View all learner attempts across the platform         |
-
----
-
-## Learner Profile System (Phase 5)
-
-PsychePath structures learner data into a clean profile that balances student self-managed information with authoritative assessment-derived psychometrics.
-
-### Data Source Separation
-
-| Category               | Attributes                                                                                                                                              | Controlled By          | Endpoints                                                  |
-| :--------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ | :--------------------- | :--------------------------------------------------------- |
-| **User-Managed**       | `educationLevel`, `experienceLevel`, `currentSkills`, `learningGoals`, `interests`, `learningPreferences`, `preferredDifficulty`, `weeklyLearningHours` | Student                | `PATCH /api/profile/me`                                    |
-| **Assessment-Derived** | `assessmentDimensions`, `strengths`, `improvementAreas`, `lastAssessmentAttempt`, `profileVersion`                                                      | Backend Scoring Engine | `POST /api/profile/me/generate-from-assessment/:attemptId` |
-
-_Note: Direct client attempts to spoof or overwrite assessment-derived fields via `PATCH /api/profile/me` are strictly rejected (`400 PROFILE_UPDATE_INVALID`)._
-
-### Deterministic Thresholds (Non-Clinical)
-
-- **Strengths**: Dimension score $\ge 75\%$
-- **Neutral / Developing**: $60\% \le \text{Score} < 75\%$
-- **Development Areas**: Dimension score $< 60\%$
-
-### Profile Completeness Calculation
-
-Deterministic weighted score (0–100%):
-
-- **Education**: 15%
-- **Current Skills**: 20%
-- **Learning Goals**: 20%
-- **Interests**: 10%
-- **Preferences**: 10%
-- **Assessment**: 25%
-
-### Run Automated Profile Test Suite
+Run the 10 legacy verification suites:
 
 ```bash
-npm run test:profile
+npm run test:all --prefix server
 ```
 
-### Learner Profile Endpoints
+### 11.3 Next.js Frontend Production Build
 
-| Method  | Endpoint                                              | Role               | Purpose                                                       |
-| :------ | :---------------------------------------------------- | :----------------- | :------------------------------------------------------------ |
-| `GET`   | `/api/profile/me`                                     | `STUDENT`, `ADMIN` | Get authenticated student's profile & completeness            |
-| `PATCH` | `/api/profile/me`                                     | `STUDENT`, `ADMIN` | Update user-managed attributes                                |
-| `POST`  | `/api/profile/me`                                     | `STUDENT`, `ADMIN` | Alternative initialization/update                             |
-| `POST`  | `/api/profile/me/generate-from-assessment/:attemptId` | `STUDENT`, `ADMIN` | Convert completed assessment into profile & increment version |
-| `GET`   | `/api/profiles/:userId`                               | `ADMIN`            | Inspect learner profile by user ID                            |
-
----
-
-## Curriculum System (Phase 6)
-
-PsychePath provides a structured curriculum knowledge base representing independently learnable units of software engineering, database systems, AI/data science, and DevOps.
-
-### Graph-Based Prerequisites & Cycle Detection
-
-- **DFS Cycle Detection**: Prerequisites form a Directed Acyclic Graph (DAG). Whenever prerequisites are assigned or updated, the system evaluates all transitive connections to reject self-referencing and circular loops (`400 CURRICULUM_CIRCULAR_DEPENDENCY`).
-- **Safe Soft Deactivation**: Deleting a module that has active dependents does not hard-delete or orphan relationships; instead, it safely soft-deactivates the module (`isActive = false`) to preserve prerequisite integrity.
-- **Resource URL Sanitization**: Enforces strict URL scheme validation (`http://` and `https://` only); dangerous schemes (`javascript:`, `data:`, `file:`) are rejected.
-
-### Run Automated Curriculum Test Suite
-
-```bash
-npm run test:curriculum
-```
-
-### Curriculum REST Endpoints
-
-| Method   | Endpoint                             | Role               | Purpose                                                           |
-| :------- | :----------------------------------- | :----------------- | :---------------------------------------------------------------- |
-| `GET`    | `/api/curriculum/modules`            | `STUDENT`, `ADMIN` | Browse curriculum (filtered, paginated, active-only for students) |
-| `GET`    | `/api/curriculum/modules/:id`        | `STUDENT`, `ADMIN` | Get module details with populated prerequisite metadata           |
-| `POST`   | `/api/curriculum/modules`            | `ADMIN`            | Create module with prerequisite cycle detection                   |
-| `PATCH`  | `/api/curriculum/modules/:id`        | `ADMIN`            | Update module & modify prerequisites with cycle prevention        |
-| `PATCH`  | `/api/curriculum/modules/:id/status` | `ADMIN`            | Toggle module active/inactive status                              |
-| `DELETE` | `/api/curriculum/modules/:id`        | `ADMIN`            | Safe deletion / soft deactivation when dependents exist           |
-
----
-
-## Recommendation Engine (Phase 7)
-
-PsychePath connects learner profiles to the curriculum using a transparent, deterministic rule-based recommendation engine.
-
-### Scoring Architecture
-
-```text
-Learner Profile (Goals, Skills, Psychometrics, Preferences)
-          │
-          ▼
-Candidate Generation & Prerequisite Check
-          │
-          ▼
-Multi-Factor Normalized Scoring (0–100)
-  ├── Goal Match (25%)
-  ├── Skill Match & Gap Detection (25%)
-  ├── Prerequisite Readiness (15%)
-  ├── Assessment Alignment (15%)
-  ├── Difficulty / Experience Alignment (10%)
-  ├── Interest Match (5%)
-  └── Learning Preferences (5%)
-          │
-          ▼
-Deterministic Sorting & Tie-Breaking
-          │
-          ▼
-Actionable Recommendations + Blocked Modules + Grounded Reasons
-```
-
-### Run Automated Recommendation Test Suite
-
-```bash
-npm run test:recommendations
-```
-
-### Recommendation REST Endpoints
-
-| Method | Endpoint                       | Role               | Purpose                                                               |
-| :----- | :----------------------------- | :----------------- | :-------------------------------------------------------------------- |
-| `GET`  | `/api/recommendations`         | `STUDENT`, `ADMIN` | Retrieve ranked recommendations, score breakdown, and blocked modules |
-| `GET`  | `/api/recommendations/modules` | `STUDENT`, `ADMIN` | Alias endpoint for recommendations query                              |
-
----
-
-## AI Recommendation Architecture (Phase 8: Gemini AI Integration)
-
-PsychePath integrates Google Gemini AI as an explainable, personalized recommendation service layer that acts strictly on top of Phase 7's deterministic engine.
-
-> **Core Architectural Principle**:
-> Rules determine what can be recommended; Gemini determines how valid recommendations are personalized and explained.
-
-### AI Personalization Flow
-
-```text
-Learner Profile (Goals, Skills, Psychometrics, Preferences)
-          │
-          ▼
-Deterministic Candidate Selection (Phase 7 Engine)
-          │
-          ▼
-Gemini AI Personalization Service
-  ├── System Directives (Zero Hallucination, Non-Clinical)
-  ├── Untrusted User Data Quarantine (Prompt Injection Defense)
-  └── Candidate Set Payload (max 10 modules)
-          │
-          ▼
-Structured JSON Validation
-  ├── Schema Integrity (summary, focusAreas, learningStrategy, sequence)
-  └── Hallucination Pruning (moduleIds must exist in candidate set)
-          │
-          ▼
-Prerequisite DAG Validation & Reordering
-  └── Kahn's Topological Sort (repairs any inadvertent prerequisite inversions)
-          │
-          ├── (AI Success) ──► HYBRID Response (Personalized Narrative, Focus Areas, Sequence)
-          │
-          └── (Failure / Timeout / Quota) ──► RULE_ENGINE Fallback (Zero Downtime)
-```
-
-### Safety & Integrity Boundaries
-
-- **Curriculum Integrity**: Gemini is strictly prohibited from inventing module IDs, courses, resources, or skills. Any returned module ID not present in the pre-approved candidate list is pruned.
-- **Prerequisite Preservation**: The backend guarantees that prerequisite relationships (DAG) can never be violated by AI ordering. If Gemini suggests Module B before required Module A, the system topologically reorders them.
-- **Prompt Injection Protection**: All learner-provided text (goals, skills, interests) is quarantined in isolated JSON blocks and labeled as untrusted data to analyze, never instructions to follow.
-- **Security & Secret Protection**: `GEMINI_API_KEY` exists strictly on the backend, is omitted from client bundles, excluded from API responses, and sanitized from server logs.
-
-### Configuration & Environment
-
-Add the following to `server/.env`:
-
-```env
-GEMINI_API_KEY=your_gemini_api_key_here
-GEMINI_MODEL=gemini-flash-latest
-GEMINI_TIMEOUT_MS=15000
-GEMINI_MAX_RETRIES=2
-AI_MAX_CANDIDATES=10
-```
-
-### Run Automated Gemini Test Suite
-
-The test suite runs with zero network dependency using isolated mocks and stubs:
-
-```bash
-npm run test:gemini
-```
-
-Or from server directory:
-
-```bash
-npm run test:gemini --prefix server
-```
-
----
-
-## Personalized Learning Path Architecture (Phase 9)
-
-PsychePath combines deterministic candidate scoring with Gemini AI personalization to synthesize and persist official, versioned `LearningPath` documents in MongoDB.
-
-### Learning Path Generation Flow
-
-```text
-                     ┌───────────────────┐
-                     │   Learner Profile │
-                     └─────────┬─────────┘
-                               │
-                               ▼
-                     ┌───────────────────┐
-                     │ Deterministic     │
-                     │ Recommendation    │
-                     │ Engine (Phase 7)  │
-                     └─────────┬─────────┘
-                               │
-                               ▼
-                     ┌───────────────────┐
-                     │ Candidate Modules │
-                     └─────────┬─────────┘
-                               │
-                               ▼
-                     ┌───────────────────┐
-                     │ Gemini AI         │
-                     │ Personalization   │
-                     │ (Phase 8 Layer)   │
-                     └─────────┬─────────┘
-                               │
-                               ▼
-                     ┌───────────────────┐
-                     │ AI Output         │
-                     │ Validation        │
-                     └─────────┬─────────┘
-                               │
-                               ▼
-                     ┌───────────────────┐
-                     │ Prerequisite &    │
-                     │ DAG Topological   │
-                     │ Validation        │
-                     └─────────┬─────────┘
-                               │
-                               ▼
-                     ┌───────────────────┐
-                     │ Learning Path     │
-                     │ Service (Phase 9) │
-                     └─────────┬─────────┘
-                               │
-                               ▼
-                     ┌───────────────────┐
-                     │ LearningPath      │
-                     │ MongoDB Document  │
-                     │ (v1, v2, ...)     │
-                     └───────────────────┘
-```
-
-### Key Architectural Principles
-
-- **Single Active Path Invariant**: At any given time, a student has at most one `ACTIVE` learning path. When a new path is generated or regenerated, previous paths are transitioned to `ARCHIVED` status.
-- **Deterministic Versioning**: Paths are assigned monotonically increasing versions ($v1 \to v2 \to v3$), allowing historical review while keeping the active learning plan unambiguous.
-- **Authoritative Metrics**: Total `estimatedDuration` is calculated strictly by the backend by summing the durations of referenced `CurriculumModule` documents.
-- **Prerequisite DAG Integrity**: Enforces that no module appears before its required prerequisite module in the persisted sequence.
-- **Scope Separation**: In Phase 9, modules in the learning path have initial status `"NOT_STARTED"`. Granular progress tracking (percentage completion, activity logs) is deferred to Phase 10.
-
-### Data Model Relationships
-
-```text
-User
-  │
-  ├── LearnerProfile (skills, goals, psychometrics)
-  │
-  ├── AssessmentAttempt (source assessment answers & scores)
-  │
-  └── LearningPath (v1, v2, ... with status ACTIVE / ARCHIVED)
-          │
-          └── CurriculumModule (references real active curriculum documents)
-```
-
-### Learning Path REST Endpoints
-
-| Method | Endpoint                        | Role               | Purpose                                                        |
-| :----- | :------------------------------ | :----------------- | :------------------------------------------------------------- |
-| `POST` | `/api/learning-path/generate`   | `STUDENT`, `ADMIN` | Generate and persist a new active personalized learning path   |
-| `POST` | `/api/learning-path/regenerate` | `STUDENT`, `ADMIN` | Regenerate learning path, archive previous, increment version  |
-| `GET`  | `/api/learning-path/current`    | `STUDENT`, `ADMIN` | Retrieve currently active learning path with populated modules |
-| `GET`  | `/api/learning-path/history`    | `STUDENT`, `ADMIN` | Retrieve version history of all paths for user (newest first)  |
-| `GET`  | `/api/learning-path/:id`        | `STUDENT`, `ADMIN` | Retrieve specific learning path by ID with ownership check     |
-
-### Run Automated Learning Path Test Suite
-
-```bash
-npm run test:learning-path
-```
-
-Or from server directory:
-
-```bash
-npm run test:learning-path --prefix server
-```
-
----
-
-## Progress Tracking Architecture (Phase 10)
-
-PsychePath enforces a **server-authoritative execution and progress tracking architecture**. The `LearningPath` specifies what the learner should study; the `Progress` collection records what the learner has actually completed, with an immutable `ProgressHistory` audit trail.
-
-```text
-                    ┌──────────────────┐
-                    │  Learning Path   │
-                    └────────┬─────────┘
-                             │
-                             ▼
-                    ┌──────────────────┐
-                    │ Path Modules     │
-                    └────────┬─────────┘
-                             │
-                             ▼
-                    ┌──────────────────┐
-                    │ Progress Service │
-                    └───────┬──────────┘
-                            │
-                ┌───────────┴───────────┐
-                ▼                       ▼
-      ┌─────────────────┐     ┌─────────────────┐
-      │ Current Progress│     │ Progress History│
-      └────────┬────────┘     └─────────────────┘
-               │
-               ▼
-      ┌─────────────────┐
-      │ Progress        │
-      │ Calculation     │
-      └────────┬────────┘
-               │
-               ▼
-      ┌─────────────────┐
-      │ Path Summary    │
-      │ + Overall %     │
-      └─────────────────┘
-```
-
-### Core Progress Rules & Formulas
-
-1. **Server Source of Truth**: Clients cannot declare completion, manipulate percentages arbitrarily, or supply timestamps. The backend derives status and percentages deterministically.
-2. **Monotonic Progression (Anti-Regression)**: Accidental progress decreases (e.g., attempting to lower percentage from $75\%$ to $50\%$) are rejected with `PROGRESS_REGRESSION` (HTTP 400).
-3. **Actionable Modules Progress Formula**:
-   $$\text{actionableModules} = \max(0, \text{totalModules} - \text{skippedModules})$$
-   $$\text{overallProgress} = \text{actionableModules} === 0 ? 0 : \text{round}\left(\frac{\text{completedModules}}{\text{actionableModules}} \times 100\right)$$
-   Skipped modules are excluded from the denominator. When all actionable modules are completed, `overallProgress = 100%` and `isComplete = true`.
-4. **LearningPath Version Isolation**: Progress records are bound to specific `(user, learningPath, module)` tuples. Regenerating a path to $v2$ starts progress tracking afresh for $v2$ while keeping $v1$ progress immutable.
-5. **Archived Path Protection**: Historical/archived learning paths (`status: "ARCHIVED"`) remain fully readable, but mutation attempts (`start`, `update`, `complete`, `skip`) are rejected with `PATH_ARCHIVED` (HTTP 400).
-
-### Progress REST Endpoints
-
-| Method  | Endpoint                                | Role               | Purpose                                                  |
-| :------ | :-------------------------------------- | :----------------- | :------------------------------------------------------- |
-| `POST`  | `/api/progress/start`                   | `STUDENT`, `ADMIN` | Initialize/resume module progress (`IN_PROGRESS`)        |
-| `PATCH` | `/api/progress`                         | `STUDENT`, `ADMIN` | Update module percentage ($0 \to 100\%$)                 |
-| `POST`  | `/api/progress/complete`                | `STUDENT`, `ADMIN` | Explicitly complete module ($100\%$, sets timestamp)     |
-| `POST`  | `/api/progress/skip`                    | `STUDENT`, `ADMIN` | Skip module (marks `SKIPPED`, excluded from denominator) |
-| `GET`   | `/api/progress/current`                 | `STUDENT`, `ADMIN` | Retrieve active path progress and module states          |
-| `GET`   | `/api/progress/:learningPathId`         | `STUDENT`, `ADMIN` | Retrieve path progress for specific path (with archived) |
-| `GET`   | `/api/progress/:learningPathId/history` | `STUDENT`, `ADMIN` | Retrieve paginated immutable progress audit trail        |
-| `GET`   | `/api/progress/summary/:learningPathId` | `STUDENT`, `ADMIN` | Retrieve path summary counts and overall percentage      |
-
-### Run Automated Progress Tracking Test Suite
-
-```bash
-npm run test:progress
-```
-
-Or from server directory:
-
-```bash
-npm run test:progress --prefix server
-```
-
----
-
-## Phase 11: Student Frontend Application
-
-The student-facing frontend is built with Next.js App Router, providing a clean, accessible, and responsive user experience consuming backend APIs across Phases 1–10.
-
-### Route Architecture
-
-| Route                    | Access  | Description                                                                               |
-| :----------------------- | :-----: | :---------------------------------------------------------------------------------------- |
-| `/`                      | Public  | SaaS Landing page with 5-stage learner journey, architecture details, and live API status |
-| `/dashboard`             | Student | Central student dashboard with profile meter, active path, and next actionable module     |
-| `/assessments`           | Student | Catalog of available psychometric assessments and active attempt resume                   |
-| `/assessments/[id]/take` | Student | Question flow with auto-saving, progress bar, and anti-tampering verification             |
-| `/results`               | Student | Assessment scores, cognitive alignment meter, strengths, and areas to develop             |
-| `/recommendations`       | Student | Transparent multi-factor curriculum recommendations with Gemini AI rationale              |
-| `/learning-path`         | Student | Interactive learning path with prerequisite timeline, execution controls & regeneration   |
-| `/progress`              | Student | Comprehensive analytics, module-level execution tracker, and immutable audit table        |
-| `/profile`               | Student | Learner preferences, target goals, acquired skills, and psychometric dimensions           |
-
-### Core UI Components
-
-- `ProgressBar`: Accessible progress indicator (`role="progressbar"`, ARIA attributes, gradient/status variants).
-- `StatusBadge`: Semantic status pills for `COMPLETED`, `IN_PROGRESS`, `NOT_STARTED`, `SKIPPED`, and version states.
-- `EmptyState`: Standardized empty state card with contextual icons and actionable CTAs.
-- `Navbar`: Responsive navigation bar displaying active phase badge, navigation links, and student session controls.
-
-### Architectural Principles
-
-1. **Server as Single Source of Truth**: The client never computes assessment scores, recommendation ranks, or path completion percentages. All authoritative calculations originate from server services.
-2. **Strict Route Protection**: All student pages enforce client authentication and redirect guests to `/login?redirect=...`.
-3. **Non-Clinical Framing**: Assessment descriptions and diagnostics explicitly frame insights as cognitive learning preferences rather than medical or psychological diagnoses.
-
-### Build and Verify Frontend
+Confirm all 18 client routes compile with zero errors:
 
 ```bash
 npm run build --prefix client
@@ -654,115 +293,42 @@ npm run build --prefix client
 
 ---
 
-## Phase 12: Admin Dashboard & Management System
+## 12. REST API Overview
 
-Phase 12 delivers an authoritative, responsive, and secure administrative system for managing platform operations, learner accounts, diagnostic assessments, and curriculum catalogs.
+| Method  | Endpoint                                               | Access          | Purpose                                      |
+| ------- | ------------------------------------------------------ | --------------- | -------------------------------------------- |
+| `POST`  | `/api/auth/register`                                   | Public          | Register new student account                 |
+| `POST`  | `/api/auth/login`                                      | Public          | Authenticate user and receive JWT            |
+| `GET`   | `/api/auth/me`                                         | Bearer          | Fetch authenticated user profile             |
+| `GET`   | `/api/assessments`                                     | Public / Bearer | List active assessments                      |
+| `POST`  | `/api/assessments/:id/attempts`                        | Student / Admin | Start new timed assessment attempt           |
+| `POST`  | `/api/attempts/:id/submit`                             | Student / Admin | Authoritative server-side grading            |
+| `GET`   | `/api/profiles/me`                                     | Student / Admin | Fetch current learner profile                |
+| `POST`  | `/api/profiles/me/generate-from-assessment/:attemptId` | Student / Admin | Synthesize profile from assessment scores    |
+| `GET`   | `/api/curriculum`                                      | Student / Admin | Browse curriculum with prerequisite metadata |
+| `GET`   | `/api/recommendations`                                 | Student / Admin | Fetch scored module recommendations          |
+| `POST`  | `/api/learning-paths/generate`                         | Student / Admin | Generate AI-augmented learning path          |
+| `GET`   | `/api/learning-paths/current`                          | Student / Admin | Fetch current active learning path           |
+| `PATCH` | `/api/progress`                                        | Student / Admin | Monotonic module progress update             |
+| `GET`   | `/api/progress/:pathId/history`                        | Student / Admin | Retrieve immutable audit history             |
+| `GET`   | `/api/admin/stats`                                     | Admin Only      | Platform telemetry and analytics             |
+| `GET`   | `/api/admin/learners`                                  | Admin Only      | Paginated learner directory                  |
+| `PATCH` | `/api/admin/learners/:id/status`                       | Admin Only      | Toggle learner active status                 |
 
-### Admin Route Architecture
-
-| Route                     | Access | Description                                                                     |
-| :------------------------ | :----: | :------------------------------------------------------------------------------ |
-| `/admin`                  | Admin  | Real-time platform metrics, engagement counters, and recent activity tables     |
-| `/admin/learners`         | Admin  | Searchable, filterable student directory with pagination and status toggle      |
-| `/admin/learners/[id]`    | Admin  | Deep learner inspection (profile, skills, goals, attempt history, active path)  |
-| `/admin/assessments`      | Admin  | Assessment catalog manager with creation modal, duration, and status toggle     |
-| `/admin/assessments/[id]` | Admin  | Question catalog manager with dynamic scoring options, reordering, and deletion |
-| `/admin/curriculum`       | Admin  | Curriculum catalog manager with prerequisite DAG validation and safe deletion   |
-
-### Admin REST API Endpoints
-
-| Method   | Endpoint                             | Description                                                                           |
-| :------- | :----------------------------------- | :------------------------------------------------------------------------------------ |
-| `GET`    | `/api/admin/stats`                   | Aggregated counters (learners, active learners, assessments, modules, recent records) |
-| `GET`    | `/api/admin/learners`                | Paginated student directory with search and status filtering                          |
-| `GET`    | `/api/admin/learners/:id`            | Read-only inspection of learner profile, attempts, and active progress                |
-| `PATCH`  | `/api/admin/learners/:id/status`     | Enable or disable student account access                                              |
-| `POST`   | `/api/assessments`                   | Create diagnostic assessment                                                          |
-| `PATCH`  | `/api/assessments/:id/status`        | Toggle assessment visibility                                                          |
-| `DELETE` | `/api/assessments/:id`               | Safe assessment deactivation/deletion                                                 |
-| `POST`   | `/api/assessments/:id/questions`     | Add question with option score mappings                                               |
-| `PATCH`  | `/api/questions/:id`                 | Update question text, type, or options                                                |
-| `PATCH`  | `/api/questions/:id/order`           | Reorder question position                                                             |
-| `DELETE` | `/api/questions/:id`                 | Remove question from assessment                                                       |
-| `POST`   | `/api/curriculum/modules`            | Create curriculum module                                                              |
-| `PATCH`  | `/api/curriculum/modules/:id/status` | Toggle module active status                                                           |
-| `DELETE` | `/api/curriculum/modules/:id`        | Safe delete module with dependent protection                                          |
-
-### Run Automated Admin Verification Test Suite
-
-```bash
-npm run test:admin --prefix server
-```
+For complete documentation with JSON payloads, see **[REST API Reference Manual](docs/api.md)**.
 
 ---
 
-## Phase 13: UI/UX Polish & Design System Modernization
+## 13. Future Roadmap & Scope
 
-Phase 13 overhauls the frontend presentation layer into a production-grade, highly responsive user interface following **shadcn/ui** design patterns and design token conventions.
-
-### Key Highlights
-
-- **Design Tokens**: Standardized HSL-based design variables in `client/app/globals.css` with responsive container layouts.
-- **Component Primitives**: Lightweight, accessible shadcn/ui components (`Button`, `Card`, `Badge`, `Input`, `Select`, `Checkbox`, `Dialog`, `Sheet`, `Table`, `Skeleton`, `Alert`, `Tooltip`, `Toaster`).
-- **Global Toast Feedback**: Imperative toast notifications (`toast.success`, `toast.error`, `toast.info`, `toast.warning`) wired across forms, path regeneration, module progress transitions, and administrative status updates.
-- **Responsive Navigation**: Mobile slide-out drawer (`Sheet`) navigation for the student header and administrative console.
-- **Data-Driven States**: Loading skeleton placeholders (`CardSkeleton`, `TableSkeleton`) and unified empty states (`EmptyState`).
-- **Zero Backend Changes**: 100% backend API contract preservation verified by all 10 automated test suites (186/186 tests passing).
-
-### Verify Client Build
-
-```bash
-npm run build --prefix client
-```
+1. **Adaptive Testing (CAT)**: Item Response Theory (IRT) engine dynamically adjusting question difficulty based on real-time student responses.
+2. **Interactive Code Sandboxes**: In-browser WebAssembly-powered coding execution directly inside curriculum modules.
+3. **Multi-Tenant Organizations**: Sub-organizations for universities and enterprises with customized curriculum catalogs and departmental reporting.
+4. **Peer Collaboration Groups**: Cohort-based learning path synchronization connecting learners with complementary cognitive styles.
+5. **Real-Time WebSocket Progress**: Live streak notifications and instructor presence indicators.
 
 ---
 
-## Running the Application
+## 14. License
 
-### Option A: Run Concurrently from Root
-
-```bash
-npm run dev
-```
-
-Starts backend on `http://localhost:5000` and frontend on `http://localhost:3000`.
-
-### Option B: Run Individually
-
-**Start Backend Server**:
-
-```bash
-cd server
-npm run dev
-```
-
-**Start Frontend Application**:
-
-```bash
-cd client
-npm run dev
-```
-
----
-
-## Health Check & Verification
-
-Once both servers are running, verify API health:
-
-```bash
-curl http://localhost:5000/api/health
-```
-
-Expected JSON response:
-
-```json
-{
-  "success": true,
-  "message": "PsychePath API is running",
-  "timestamp": "2026-09-20T18:03:34.973Z",
-  "database": "connected",
-  "uptime": 9
-}
-```
-
-Open `http://localhost:3000` in your browser. The landing page queries `GET /api/health` and displays **Backend Status: Connected** with live response latency and database connection state.
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
