@@ -4,12 +4,35 @@ import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import authService from "../../services/authService";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { cn } from "@/lib/utils";
+import {
+  BarChart3,
+  Users,
+  ClipboardList,
+  BookOpen,
+  ArrowLeft,
+  ShieldAlert,
+  ShieldCheck,
+  Menu,
+} from "lucide-react";
 
 export default function AdminLayout({ children, title, subtitle }) {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     const currentUser = authService.getUser();
@@ -23,14 +46,15 @@ export default function AdminLayout({ children, title, subtitle }) {
 
   if (loading) {
     return (
-      <div
-        style={{
-          textAlign: "center",
-          padding: "5rem",
-          color: "var(--text-muted)",
-        }}
-      >
-        Verifying administrator credentials...
+      <div className="max-w-5xl mx-auto py-12 px-4 space-y-6">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-10 w-10 rounded-lg" />
+          <div className="space-y-2">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-72" />
+          </div>
+        </div>
+        <Skeleton className="h-64 w-full rounded-2xl" />
       </div>
     );
   }
@@ -38,51 +62,35 @@ export default function AdminLayout({ children, title, subtitle }) {
   // Access Denied if authenticated user is not an ADMIN
   if (user && user.role !== "ADMIN") {
     return (
-      <div
-        style={{
-          maxWidth: "500px",
-          margin: "4rem auto",
-          padding: "2.5rem",
-          background: "var(--bg-surface)",
-          border: "1px solid rgba(239, 68, 68, 0.3)",
-          borderRadius: "12px",
-          textAlign: "center",
-        }}
-      >
-        <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>🚫</div>
-        <h2
-          style={{
-            fontSize: "1.5rem",
-            fontWeight: 800,
-            color: "#f87171",
-            marginBottom: "0.5rem",
-          }}
+      <div className="max-w-md mx-auto my-16 p-6">
+        <Alert
+          variant="destructive"
+          className="border-destructive/40 bg-card p-6 rounded-2xl shadow-lg"
         >
-          Access Denied
-        </h2>
-        <p
-          style={{
-            color: "var(--text-secondary)",
-            fontSize: "0.95rem",
-            lineHeight: 1.5,
-            marginBottom: "1.5rem",
-          }}
-        >
-          You do not have administrative permissions to view or manage this
-          section. This area is strictly reserved for platform administrators.
-        </p>
-        <Link href="/dashboard" className="btn-primary-small">
-          Return to Student Dashboard
-        </Link>
+          <ShieldAlert className="h-8 w-8 text-destructive mb-2" />
+          <AlertTitle className="text-xl font-bold mb-2">
+            Access Denied
+          </AlertTitle>
+          <AlertDescription className="text-sm text-muted-foreground leading-relaxed mb-6">
+            You do not have administrative privileges to view or manage this
+            section. This console is strictly reserved for platform
+            administrators.
+          </AlertDescription>
+          <Link href="/dashboard">
+            <Button variant="default" className="w-full">
+              Return to Student Dashboard
+            </Button>
+          </Link>
+        </Alert>
       </div>
     );
   }
 
   const navItems = [
-    { label: "Overview", href: "/admin", icon: "📊" },
-    { label: "Learners", href: "/admin/learners", icon: "👥" },
-    { label: "Assessments", href: "/admin/assessments", icon: "📋" },
-    { label: "Curriculum", href: "/admin/curriculum", icon: "📚" },
+    { label: "Overview", href: "/admin", icon: BarChart3 },
+    { label: "Learners", href: "/admin/learners", icon: Users },
+    { label: "Assessments", href: "/admin/assessments", icon: ClipboardList },
+    { label: "Curriculum", href: "/admin/curriculum", icon: BookOpen },
   ];
 
   const isNavActive = (href) => {
@@ -90,139 +98,139 @@ export default function AdminLayout({ children, title, subtitle }) {
     return pathname.startsWith(href);
   };
 
+  const NavList = ({ onSelect = () => {} }) => (
+    <div className="flex flex-col gap-1.5">
+      {navItems.map((item) => {
+        const active = isNavActive(item.href);
+        const Icon = item.icon;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={onSelect}
+            className={cn(
+              "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors",
+              active
+                ? "bg-purple-600/20 text-purple-300 font-semibold border border-purple-500/30"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
+            )}
+          >
+            <Icon
+              className={cn(
+                "h-4 w-4",
+                active ? "text-purple-400" : "opacity-70",
+              )}
+            />
+            <span>{item.label}</span>
+          </Link>
+        );
+      })}
+    </div>
+  );
+
   return (
-    <div
-      className="admin-container"
-      style={{ display: "flex", minHeight: "calc(100vh - 70px)" }}
-    >
-      {/* Admin Sidebar */}
-      <aside
-        style={{
-          width: "240px",
-          background: "var(--bg-surface, #1e293b)",
-          borderRight: "1px solid var(--border-color, #334155)",
-          padding: "1.5rem 1rem",
-          display: "flex",
-          flexDirection: "column",
-          gap: "1.5rem",
-          flexShrink: 0,
-        }}
-      >
-        <div style={{ padding: "0 0.5rem" }}>
-          <div
-            style={{
-              fontSize: "0.75rem",
-              textTransform: "uppercase",
-              color: "var(--text-muted)",
-              letterSpacing: "0.05em",
-              fontWeight: 700,
-              marginBottom: "0.25rem",
-            }}
-          >
+    <div className="min-h-[calc(100vh-4rem)] flex flex-col md:flex-row bg-background">
+      {/* Mobile Top Bar with Drawer Trigger */}
+      <div className="md:hidden border-b bg-card/60 backdrop-blur-md px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="h-5 w-5 text-purple-400" />
+          <span className="font-bold text-sm tracking-tight">
             Admin Console
-          </div>
-          <div
-            style={{
-              fontSize: "1.1rem",
-              fontWeight: 800,
-              color: "var(--text-primary)",
-            }}
-          >
-            Management
-          </div>
+          </span>
         </div>
 
-        <nav
-          style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}
-        >
-          {navItems.map((item) => {
-            const active = isNavActive(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.75rem",
-                  padding: "0.6rem 0.85rem",
-                  borderRadius: "8px",
-                  fontSize: "0.9rem",
-                  fontWeight: active ? 700 : 500,
-                  color: active ? "#ffffff" : "var(--text-secondary)",
-                  backgroundColor: active
-                    ? "var(--primary, #6366f1)"
-                    : "transparent",
-                  textDecoration: "none",
-                  transition: "all 0.15s ease",
-                }}
-              >
-                <span style={{ fontSize: "1.1rem" }}>{item.icon}</span>
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div
-          style={{
-            marginTop: "auto",
-            borderTop: "1px solid var(--border-color)",
-            paddingTop: "1rem",
-          }}
-        >
-          <Link
-            href="/dashboard"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              padding: "0.5rem 0.75rem",
-              borderRadius: "6px",
-              color: "var(--text-muted)",
-              fontSize: "0.85rem",
-              textDecoration: "none",
-            }}
+        <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+          <SheetTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-2 text-xs">
+              <Menu className="h-4 w-4" />
+              <span>Menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent
+            side="left"
+            className="w-[280px] p-6 flex flex-col justify-between"
           >
-            <span>↩</span>
-            <span>Exit to Student App</span>
+            <div className="space-y-6">
+              <SheetHeader className="text-left pb-4 border-b">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="h-5 w-5 text-purple-400" />
+                  <SheetTitle className="text-base font-bold">
+                    Admin Console
+                  </SheetTitle>
+                </div>
+                <Badge
+                  variant="secondary"
+                  className="w-fit text-[10px] mt-1 bg-purple-500/10 text-purple-300 border-purple-500/20"
+                >
+                  Administrator
+                </Badge>
+              </SheetHeader>
+
+              <NavList onSelect={() => setMobileNavOpen(false)} />
+            </div>
+
+            <div className="pt-4 border-t">
+              <Link href="/dashboard" onClick={() => setMobileNavOpen(false)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start gap-2 text-muted-foreground"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Exit to Student App</span>
+                </Button>
+              </Link>
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex flex-col w-64 border-r bg-card/40 p-5 shrink-0 justify-between">
+        <div className="space-y-6">
+          <div className="px-2">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[11px] font-semibold text-purple-400 uppercase tracking-wider">
+                Console
+              </span>
+              <Badge
+                variant="secondary"
+                className="text-[10px] px-1.5 py-0 bg-purple-500/10 text-purple-300 border-purple-500/20"
+              >
+                Admin
+              </Badge>
+            </div>
+            <h2 className="text-base font-bold text-foreground">Management</h2>
+          </div>
+
+          <NavList />
+        </div>
+
+        <div className="pt-4 border-t">
+          <Link href="/dashboard">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start gap-2 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Exit to Student App</span>
+            </Button>
           </Link>
         </div>
       </aside>
 
-      {/* Admin Content Area */}
-      <main
-        style={{
-          flex: 1,
-          padding: "2rem",
-          overflowX: "auto",
-          background: "var(--bg-main, #0f172a)",
-        }}
-      >
+      {/* Main Content Area */}
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
         {(title || subtitle) && (
-          <div style={{ marginBottom: "2rem" }}>
+          <div className="mb-6 space-y-1">
             {title && (
-              <h1
-                style={{
-                  fontSize: "1.75rem",
-                  fontWeight: 800,
-                  color: "var(--text-primary)",
-                  margin: "0 0 0.25rem 0",
-                }}
-              >
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
                 {title}
               </h1>
             )}
             {subtitle && (
-              <p
-                style={{
-                  color: "var(--text-secondary)",
-                  fontSize: "0.95rem",
-                  margin: 0,
-                }}
-              >
-                {subtitle}
-              </p>
+              <p className="text-sm text-muted-foreground">{subtitle}</p>
             )}
           </div>
         )}

@@ -7,6 +7,23 @@ import adminService from "../../../services/adminService";
 import StatusBadge from "../../../components/ui/StatusBadge";
 import ConfirmModal from "../../../components/admin/ConfirmModal";
 import EmptyState from "../../../components/ui/EmptyState";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import { TableSkeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "@/components/ui/use-toast";
+import { Search, Users, ArrowLeft, ArrowRight, Eye } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function LearnersDirectoryPage() {
   const [learners, setLearners] = useState([]);
@@ -74,6 +91,11 @@ export default function LearnersDirectoryPage() {
         modalState.learner._id,
         modalState.targetStatus,
       );
+      const actionText = modalState.targetStatus ? "activated" : "deactivated";
+      toast.success(
+        "Learner Status Updated",
+        `${modalState.learner.firstName} ${modalState.learner.lastName} has been ${actionText}.`,
+      );
       setModalState({
         isOpen: false,
         learner: null,
@@ -82,7 +104,8 @@ export default function LearnersDirectoryPage() {
       });
       fetchLearners();
     } catch (err) {
-      alert(err.message || "Failed to update learner status");
+      const errMsg = err.message || "Failed to update learner status";
+      toast.error("Status Update Failed", errMsg);
       setModalState((prev) => ({ ...prev, loading: false }));
     }
   };
@@ -92,389 +115,233 @@ export default function LearnersDirectoryPage() {
       title="Learner Directory"
       subtitle="Inspect student profiles, review assessment activity, and manage access status."
     >
-      {/* Search & Filter Controls */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "1rem",
-          marginBottom: "1.5rem",
-          background: "var(--bg-surface, #1e293b)",
-          padding: "1rem 1.25rem",
-          borderRadius: "12px",
-          border: "1px solid var(--border-color, #334155)",
-        }}
-      >
-        {/* Search Input */}
-        <div style={{ flex: 1, minWidth: "260px" }}>
-          <input
-            type="text"
-            placeholder="Search by name or email..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPagination((p) => ({ ...p, page: 1 }));
-            }}
-            style={{
-              width: "100%",
-              padding: "0.55rem 0.85rem",
-              borderRadius: "6px",
-              background: "rgba(0, 0, 0, 0.2)",
-              border: "1px solid var(--border-color)",
-              color: "var(--text-primary)",
-              fontSize: "0.9rem",
-            }}
-          />
-        </div>
+      <div className="space-y-6">
+        {/* Search & Filter Controls */}
+        <Card className="p-4 shadow-sm">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="relative w-full sm:max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search by name or email..."
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPagination((p) => ({ ...p, page: 1 }));
+                }}
+                className="pl-9"
+              />
+            </div>
 
-        {/* Status Filter Pills */}
-        <div style={{ display: "flex", gap: "0.5rem" }}>
-          {["ALL", "ACTIVE", "INACTIVE"].map((st) => (
-            <button
-              key={st}
-              type="button"
-              onClick={() => {
-                setStatusFilter(st);
-                setPagination((p) => ({ ...p, page: 1 }));
-              }}
-              style={{
-                padding: "0.4rem 0.85rem",
-                borderRadius: "6px",
-                fontSize: "0.85rem",
-                fontWeight: 600,
-                border: "1px solid var(--border-color)",
-                background:
-                  statusFilter === st
-                    ? "var(--primary, #6366f1)"
-                    : "transparent",
-                color:
-                  statusFilter === st ? "#ffffff" : "var(--text-secondary)",
-                cursor: "pointer",
-              }}
-            >
-              {st}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {error && (
-        <div
-          style={{
-            background: "rgba(239, 68, 68, 0.1)",
-            border: "1px solid rgba(239, 68, 68, 0.3)",
-            color: "#f87171",
-            padding: "1rem",
-            borderRadius: "8px",
-            marginBottom: "1.5rem",
-          }}
-        >
-          {error}
-        </div>
-      )}
-
-      {loading ? (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "4rem",
-            color: "var(--text-muted)",
-          }}
-        >
-          Loading learners...
-        </div>
-      ) : learners.length === 0 ? (
-        <EmptyState
-          icon="👥"
-          title="No Learners Found"
-          description={
-            search
-              ? `No student matches "${search}".`
-              : "No registered learners found."
-          }
-        />
-      ) : (
-        <div
-          style={{
-            background: "var(--bg-surface, #1e293b)",
-            border: "1px solid var(--border-color, #334155)",
-            borderRadius: "12px",
-            overflow: "hidden",
-          }}
-        >
-          <div style={{ overflowX: "auto" }}>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                textAlign: "left",
-                fontSize: "0.9rem",
-              }}
-            >
-              <thead>
-                <tr
-                  style={{
-                    background: "rgba(255, 255, 255, 0.03)",
-                    borderBottom: "1px solid var(--border-color)",
-                    color: "var(--text-muted)",
-                    fontSize: "0.8rem",
-                    textTransform: "uppercase",
+            {/* Status Filter Buttons */}
+            <div className="flex items-center gap-1.5 w-full sm:w-auto">
+              {["ALL", "ACTIVE", "INACTIVE"].map((st) => (
+                <Button
+                  key={st}
+                  type="button"
+                  size="sm"
+                  variant={statusFilter === st ? "default" : "outline"}
+                  onClick={() => {
+                    setStatusFilter(st);
+                    setPagination((p) => ({ ...p, page: 1 }));
                   }}
+                  className="text-xs h-8 flex-1 sm:flex-initial"
                 >
-                  <th style={{ padding: "0.85rem 1.25rem" }}>Learner</th>
-                  <th style={{ padding: "0.85rem 1rem" }}>Status</th>
-                  <th style={{ padding: "0.85rem 1rem" }}>Assessments</th>
-                  <th style={{ padding: "0.85rem 1rem" }}>Learning Path</th>
-                  <th style={{ padding: "0.85rem 1rem" }}>Registered</th>
-                  <th style={{ padding: "0.85rem 1rem" }}>Last Login</th>
-                  <th
-                    style={{ padding: "0.85rem 1.25rem", textAlign: "right" }}
-                  >
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+                  {st}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </Card>
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {loading ? (
+          <TableSkeleton rows={6} cols={6} />
+        ) : learners.length === 0 ? (
+          <EmptyState
+            icon={Users}
+            title="No Learners Found"
+            description={
+              search
+                ? `No student matches "${search}".`
+                : "No registered learners found."
+            }
+          />
+        ) : (
+          <Card className="overflow-hidden shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Learner</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Assessments</TableHead>
+                  <TableHead>Learning Path</TableHead>
+                  <TableHead>Registered</TableHead>
+                  <TableHead>Last Login</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {learners.map((learner) => (
-                  <tr
-                    key={learner._id}
-                    style={{
-                      borderBottom: "1px solid var(--border-color)",
-                      transition: "background 0.15s ease",
-                    }}
-                  >
+                  <TableRow key={learner._id}>
                     {/* Learner Name & Email */}
-                    <td style={{ padding: "1rem 1.25rem" }}>
-                      <div
-                        style={{
-                          fontWeight: 600,
-                          color: "var(--text-primary)",
-                        }}
-                      >
+                    <TableCell>
+                      <div className="font-semibold text-foreground text-sm">
                         {learner.firstName} {learner.lastName}
                       </div>
-                      <div
-                        style={{
-                          fontSize: "0.8rem",
-                          color: "var(--text-muted)",
-                        }}
-                      >
+                      <div className="text-xs text-muted-foreground">
                         {learner.email}
                       </div>
-                    </td>
+                    </TableCell>
 
                     {/* Status Badge */}
-                    <td style={{ padding: "1rem" }}>
+                    <TableCell>
                       <StatusBadge
                         status={learner.isActive ? "ACTIVE" : "INACTIVE"}
                         size="small"
                       />
-                    </td>
+                    </TableCell>
 
                     {/* Assessment Activity */}
-                    <td style={{ padding: "1rem" }}>
-                      <div style={{ fontWeight: 600 }}>
+                    <TableCell>
+                      <div className="font-medium text-xs text-foreground">
                         {learner.completedAttempts} completed
                       </div>
-                      <div
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "var(--text-muted)",
-                        }}
-                      >
-                        {learner.totalAttempts} total attempts
+                      <div className="text-[11px] text-muted-foreground">
+                        {learner.totalAttempts} total
                       </div>
-                    </td>
+                    </TableCell>
 
                     {/* Active Learning Path */}
-                    <td style={{ padding: "1rem" }}>
+                    <TableCell>
                       {learner.hasActiveLearningPath ? (
-                        <span
-                          style={{
-                            background: "rgba(16, 185, 129, 0.15)",
-                            color: "#10b981",
-                            padding: "0.2rem 0.55rem",
-                            borderRadius: "4px",
-                            fontSize: "0.75rem",
-                            fontWeight: 600,
-                          }}
-                        >
+                        <Badge variant="success" className="text-[10px]">
                           ✓ Active Path
-                        </span>
+                        </Badge>
                       ) : (
-                        <span
-                          style={{
-                            color: "var(--text-muted)",
-                            fontSize: "0.8rem",
-                          }}
-                        >
+                        <span className="text-xs text-muted-foreground">
                           None
                         </span>
                       )}
-                    </td>
+                    </TableCell>
 
                     {/* Registered Date */}
-                    <td
-                      style={{
-                        padding: "1rem",
-                        color: "var(--text-secondary)",
-                        fontSize: "0.85rem",
-                      }}
-                    >
+                    <TableCell className="text-xs text-muted-foreground">
                       {new Date(learner.createdAt).toLocaleDateString()}
-                    </td>
+                    </TableCell>
 
                     {/* Last Login */}
-                    <td
-                      style={{
-                        padding: "1rem",
-                        color: "var(--text-muted)",
-                        fontSize: "0.85rem",
-                      }}
-                    >
+                    <TableCell className="text-xs text-muted-foreground">
                       {learner.lastLoginAt
                         ? new Date(learner.lastLoginAt).toLocaleDateString()
                         : "Never"}
-                    </td>
+                    </TableCell>
 
                     {/* Actions */}
-                    <td style={{ padding: "1rem 1.25rem", textAlign: "right" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "flex-end",
-                          gap: "0.5rem",
-                        }}
-                      >
-                        <Link
-                          href={`/admin/learners/${learner._id}`}
-                          className="btn-secondary-small"
-                          style={{
-                            fontSize: "0.8rem",
-                            padding: "0.3rem 0.65rem",
-                          }}
-                        >
-                          Inspect
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link href={`/admin/learners/${learner._id}`}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs px-2.5 gap-1"
+                          >
+                            <Eye className="h-3 w-3" />
+                            <span>Inspect</span>
+                          </Button>
                         </Link>
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="sm"
                           onClick={() => handleToggleClick(learner)}
-                          style={{
-                            background: "transparent",
-                            border: "1px solid var(--border-color)",
-                            color: learner.isActive ? "#f87171" : "#34d399",
-                            padding: "0.3rem 0.65rem",
-                            borderRadius: "6px",
-                            fontSize: "0.8rem",
-                            cursor: "pointer",
-                          }}
+                          className={cn(
+                            "h-7 text-xs px-2.5",
+                            learner.isActive
+                              ? "text-destructive hover:bg-destructive/10"
+                              : "text-emerald-500 hover:bg-emerald-500/10",
+                          )}
                         >
                           {learner.isActive ? "Deactivate" : "Activate"}
-                        </button>
+                        </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
 
-          {/* Pagination Controls */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "0.85rem 1.25rem",
-              background: "rgba(255, 255, 255, 0.02)",
-              borderTop: "1px solid var(--border-color)",
-              fontSize: "0.85rem",
-            }}
-          >
-            <span style={{ color: "var(--text-muted)" }}>
-              Showing {learners.length} of {pagination.total} learners (Page{" "}
-              {pagination.page} of {pagination.totalPages})
-            </span>
+            {/* Pagination Controls */}
+            <div className="flex items-center justify-between p-4 border-t text-xs text-muted-foreground bg-muted/20">
+              <span>
+                Showing {learners.length} of {pagination.total} learners (Page{" "}
+                {pagination.page} of {pagination.totalPages})
+              </span>
 
-            <div style={{ display: "flex", gap: "0.5rem" }}>
-              <button
-                type="button"
-                disabled={pagination.page <= 1}
-                onClick={() =>
-                  setPagination((p) => ({ ...p, page: p.page - 1 }))
-                }
-                style={{
-                  background: "transparent",
-                  border: "1px solid var(--border-color)",
-                  color:
-                    pagination.page <= 1
-                      ? "var(--text-muted)"
-                      : "var(--text-primary)",
-                  padding: "0.35rem 0.75rem",
-                  borderRadius: "6px",
-                  cursor: pagination.page <= 1 ? "not-allowed" : "pointer",
-                }}
-              >
-                ← Previous
-              </button>
-              <button
-                type="button"
-                disabled={pagination.page >= pagination.totalPages}
-                onClick={() =>
-                  setPagination((p) => ({ ...p, page: p.page + 1 }))
-                }
-                style={{
-                  background: "transparent",
-                  border: "1px solid var(--border-color)",
-                  color:
-                    pagination.page >= pagination.totalPages
-                      ? "var(--text-muted)"
-                      : "var(--text-primary)",
-                  padding: "0.35rem 0.75rem",
-                  borderRadius: "6px",
-                  cursor:
-                    pagination.page >= pagination.totalPages
-                      ? "not-allowed"
-                      : "pointer",
-                }}
-              >
-                Next →
-              </button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={pagination.page <= 1}
+                  onClick={() =>
+                    setPagination((p) => ({ ...p, page: p.page - 1 }))
+                  }
+                  className="h-7 text-xs gap-1"
+                >
+                  <ArrowLeft className="h-3 w-3" />
+                  <span>Previous</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={pagination.page >= pagination.totalPages}
+                  onClick={() =>
+                    setPagination((p) => ({ ...p, page: p.page + 1 }))
+                  }
+                  className="h-7 text-xs gap-1"
+                >
+                  <span>Next</span>
+                  <ArrowRight className="h-3 w-3" />
+                </Button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </Card>
+        )}
 
-      {/* Toggle Status Confirmation Modal */}
-      <ConfirmModal
-        isOpen={modalState.isOpen}
-        title={
-          modalState.targetStatus
-            ? "Activate Learner Account"
-            : "Deactivate Learner Account"
-        }
-        message={
-          modalState.targetStatus
-            ? `Are you sure you want to activate ${modalState.learner?.firstName} ${modalState.learner?.lastName}? They will be able to log in and access learning materials.`
-            : `Are you sure you want to deactivate ${modalState.learner?.firstName} ${modalState.learner?.lastName}? They will be prevented from accessing the platform until reactivated.`
-        }
-        confirmLabel={
-          modalState.targetStatus ? "Activate Account" : "Deactivate Account"
-        }
-        confirmVariant={modalState.targetStatus ? "primary" : "danger"}
-        loading={modalState.loading}
-        onConfirm={confirmToggleStatus}
-        onCancel={() =>
-          setModalState({
-            isOpen: false,
-            learner: null,
-            targetStatus: false,
-            loading: false,
-          })
-        }
-      />
+        {/* Toggle Status Confirmation Modal */}
+        <ConfirmModal
+          isOpen={modalState.isOpen}
+          title={
+            modalState.targetStatus
+              ? "Activate Learner Account"
+              : "Deactivate Learner Account"
+          }
+          message={
+            modalState.targetStatus
+              ? `Are you sure you want to activate ${modalState.learner?.firstName} ${modalState.learner?.lastName}? They will be able to log in and access learning materials.`
+              : `Are you sure you want to deactivate ${modalState.learner?.firstName} ${modalState.learner?.lastName}? They will be prevented from accessing the platform until reactivated.`
+          }
+          confirmLabel={
+            modalState.targetStatus ? "Activate Account" : "Deactivate Account"
+          }
+          confirmVariant={modalState.targetStatus ? "primary" : "danger"}
+          loading={modalState.loading}
+          onConfirm={confirmToggleStatus}
+          onCancel={() =>
+            setModalState({
+              isOpen: false,
+              learner: null,
+              targetStatus: false,
+              loading: false,
+            })
+          }
+        />
+      </div>
     </AdminLayout>
   );
 }

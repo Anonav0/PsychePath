@@ -9,6 +9,33 @@ import progressService from "../../services/progressService";
 import ProgressBar from "../../components/ui/ProgressBar";
 import StatusBadge from "../../components/ui/StatusBadge";
 import EmptyState from "../../components/ui/EmptyState";
+import ConfirmModal from "../../components/admin/ConfirmModal";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { CardSkeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "@/components/ui/use-toast";
+import {
+  Route,
+  RefreshCw,
+  Play,
+  Check,
+  FastForward,
+  Clock,
+  Sparkles,
+  History,
+  BookOpen,
+  CheckCircle2,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function LearningPathPage() {
   const router = useRouter();
@@ -34,17 +61,17 @@ export default function LearningPathPage() {
         learningPathService.getPathHistory(),
       ]);
 
-      if (pathRes.status === "fulfilled" && pathRes.value.success) {
+      if (pathRes.status === "fulfilled" && pathRes.value?.success) {
         setActivePath(pathRes.value.data);
       } else {
         setActivePath(null);
       }
 
-      if (progressRes.status === "fulfilled" && progressRes.value.success) {
+      if (progressRes.status === "fulfilled" && progressRes.value?.success) {
         setProgressData(progressRes.value.data);
       }
 
-      if (histRes.status === "fulfilled" && histRes.value.success) {
+      if (histRes.status === "fulfilled" && histRes.value?.success) {
         setHistoryPaths(histRes.value.data || []);
       }
     } catch (err) {
@@ -72,13 +99,15 @@ export default function LearningPathPage() {
 
       const res = await learningPathService.regeneratePath();
       if (res.success && res.data) {
-        setActionMessage(
-          `Successfully regenerated to Version ${res.data.version}! Previous version archived.`,
-        );
+        const msg = `Successfully regenerated to Version ${res.data.version}! Previous version archived.`;
+        setActionMessage(msg);
+        toast.success("Path Regenerated", msg);
         await fetchPathAndProgress();
       }
     } catch (err) {
-      setError(err.message || "Failed to regenerate learning path");
+      const errMsg = err.message || "Failed to regenerate learning path";
+      setError(errMsg);
+      toast.error("Regeneration Failed", errMsg);
     } finally {
       setRegenerating(false);
     }
@@ -89,9 +118,12 @@ export default function LearningPathPage() {
     if (!pathId) return;
     try {
       await progressService.startModule(pathId, moduleId);
+      toast.info("Module Started", "Status set to In Progress");
       await fetchPathAndProgress();
     } catch (err) {
-      setError(err.message || "Failed to start module");
+      const errMsg = err.message || "Failed to start module";
+      setError(errMsg);
+      toast.error("Action Failed", errMsg);
     }
   };
 
@@ -101,9 +133,12 @@ export default function LearningPathPage() {
     const nextPct = Math.min(100, currentPct + 25);
     try {
       await progressService.updateProgress(pathId, moduleId, nextPct);
+      toast.success("Progress Advanced", `Progress updated to ${nextPct}%`);
       await fetchPathAndProgress();
     } catch (err) {
-      setError(err.message || "Failed to update progress");
+      const errMsg = err.message || "Failed to update progress";
+      setError(errMsg);
+      toast.error("Action Failed", errMsg);
     }
   };
 
@@ -112,9 +147,12 @@ export default function LearningPathPage() {
     if (!pathId) return;
     try {
       await progressService.completeModule(pathId, moduleId);
+      toast.success("Module Completed", "Module status marked as completed!");
       await fetchPathAndProgress();
     } catch (err) {
-      setError(err.message || "Failed to complete module");
+      const errMsg = err.message || "Failed to complete module";
+      setError(errMsg);
+      toast.error("Action Failed", errMsg);
     }
   };
 
@@ -123,126 +161,82 @@ export default function LearningPathPage() {
     if (!pathId) return;
     try {
       await progressService.skipModule(pathId, moduleId);
+      toast.warning("Module Skipped", "Module marked skipped");
       await fetchPathAndProgress();
     } catch (err) {
-      setError(err.message || "Failed to skip module");
+      const errMsg = err.message || "Failed to skip module";
+      setError(errMsg);
+      toast.error("Action Failed", errMsg);
     }
   };
 
   if (loading) {
     return (
-      <div
-        style={{
-          maxWidth: "1000px",
-          margin: "0 auto",
-          padding: "4rem 1rem",
-          textAlign: "center",
-        }}
-      >
-        <p style={{ color: "var(--text-muted)", fontSize: "1.1rem" }}>
-          Loading your personalized learning path...
-        </p>
+      <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+        <div className="rounded-2xl border p-8 bg-card/40 space-y-4">
+          <CardSkeleton count={1} />
+        </div>
+        <CardSkeleton count={3} />
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        maxWidth: "1050px",
-        margin: "0 auto",
-        padding: "1.5rem 1rem 4rem",
-      }}
-    >
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
       {/* 1. Header & Actions */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          flexWrap: "wrap",
-          gap: "1rem",
-          marginBottom: "1.5rem",
-        }}
-      >
-        <div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.6rem",
-              marginBottom: "0.5rem",
-            }}
-          >
-            <h1 style={{ fontSize: "2rem", fontWeight: 800, margin: 0 }}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
               Personalized Learning Path
             </h1>
             {activePath && (
-              <span
-                style={{
-                  fontSize: "0.8rem",
-                  fontWeight: 800,
-                  padding: "0.25rem 0.65rem",
-                  borderRadius: "6px",
-                  background: "rgba(99, 102, 241, 0.2)",
-                  color: "#a5b4fc",
-                  border: "1px solid rgba(99, 102, 241, 0.4)",
-                }}
+              <Badge
+                variant="secondary"
+                className="font-bold text-xs bg-primary/10 text-primary border-primary/20"
               >
                 v{activePath.version}
-              </span>
+              </Badge>
             )}
             {activePath && <StatusBadge status={activePath.status} />}
           </div>
-          <p style={{ color: "var(--text-secondary)", margin: 0 }}>
+          <p className="text-sm text-muted-foreground">
             Curriculum sequence optimized for your skills, goals, and cognitive
             strengths.
           </p>
         </div>
 
         {activePath && (
-          <div style={{ display: "flex", gap: "0.75rem" }}>
-            <button
-              onClick={() => setShowRegenModal(true)}
-              disabled={regenerating}
-              style={{
-                background: "var(--bg-surface-elevated)",
-                border: "1px solid var(--border-color)",
-                color: "var(--text-primary)",
-                padding: "0.6rem 1.25rem",
-                borderRadius: "8px",
-                fontWeight: 600,
-                fontSize: "0.875rem",
-                cursor: regenerating ? "not-allowed" : "pointer",
-              }}
-            >
-              {regenerating ? "Regenerating..." : "🔄 Regenerate Path"}
-            </button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowRegenModal(true)}
+            disabled={regenerating}
+            className="gap-2 shrink-0 text-xs"
+          >
+            <RefreshCw
+              className={cn("h-3.5 w-3.5", regenerating && "animate-spin")}
+            />
+            <span>{regenerating ? "Regenerating..." : "Regenerate Path"}</span>
+          </Button>
         )}
       </div>
 
       {actionMessage && (
-        <div
-          className="alert-box alert-success"
-          style={{ marginBottom: "1.5rem" }}
-        >
-          ✅ {actionMessage}
-        </div>
+        <Alert variant="success">
+          <AlertDescription>{actionMessage}</AlertDescription>
+        </Alert>
       )}
 
       {error && (
-        <div
-          className="alert-box alert-error"
-          style={{ marginBottom: "1.5rem" }}
-        >
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {!activePath ? (
         <EmptyState
-          icon="🗺️"
+          icon={Route}
           title="No Active Learning Path Found"
           description="Your personalized curriculum isn't generated yet. Complete an assessment or view recommendations to build your official path."
           actionText="Generate Learning Path"
@@ -252,197 +246,77 @@ export default function LearningPathPage() {
         <>
           {/* 2. Overall Progress Card */}
           {progressData?.pathSummary && (
-            <div
-              style={{
-                background: "var(--bg-surface)",
-                border: "1px solid var(--border-color)",
-                borderRadius: "12px",
-                padding: "1.5rem",
-                marginBottom: "2rem",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  flexWrap: "wrap",
-                  gap: "0.5rem",
-                  marginBottom: "0.75rem",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                  }}
-                >
-                  <span style={{ fontSize: "1.2rem" }}>📈</span>
-                  <span style={{ fontWeight: 700, fontSize: "1.05rem" }}>
+            <Card className="p-5 space-y-3 bg-card/60 backdrop-blur-sm shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div className="flex items-center gap-2 font-bold text-foreground text-sm">
+                  <span>
                     Overall Path Progress:{" "}
                     {progressData.pathSummary.overallProgress}%
                   </span>
                   {progressData.pathSummary.isComplete && (
-                    <span
-                      style={{
-                        fontSize: "0.75rem",
-                        padding: "0.2rem 0.6rem",
-                        borderRadius: "4px",
-                        background: "rgba(16, 185, 129, 0.2)",
-                        color: "#10b981",
-                        fontWeight: 700,
-                      }}
-                    >
-                      🎉 ALL ACTIONABLE MODULES COMPLETE
-                    </span>
+                    <Badge variant="success" className="text-[10px]">
+                      ALL MODULES COMPLETE
+                    </Badge>
                   )}
                 </div>
-                <div
-                  style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}
-                >
-                  {progressData.pathSummary.completedModules} Completed •{" "}
-                  {progressData.pathSummary.inProgressModules} In Progress •{" "}
+                <div className="text-muted-foreground">
+                  {progressData.pathSummary.completedModules} Completed &bull;{" "}
+                  {progressData.pathSummary.inProgressModules} Active &bull;{" "}
                   {progressData.pathSummary.skippedModules} Skipped (of{" "}
-                  {progressData.pathSummary.totalModules} modules •{" "}
+                  {progressData.pathSummary.totalModules} modules &bull;{" "}
                   {activePath.estimatedDuration} hrs)
                 </div>
               </div>
-
-              <ProgressBar value={progressData.pathSummary.overallProgress} />
-            </div>
+              <ProgressBar
+                value={progressData.pathSummary.overallProgress}
+                height="10px"
+                variant="gradient"
+              />
+            </Card>
           )}
 
-          {/* 3. AI Narrative, Focus Areas & Study Strategy */}
+          {/* 3. AI Narrative & Strategy */}
           {activePath.summary && (
-            <div
-              style={{
-                background:
-                  activePath.generatedBy === "HYBRID"
-                    ? "linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(168, 85, 247, 0.08))"
-                    : "var(--bg-surface)",
-                border: "1px solid rgba(99, 102, 241, 0.3)",
-                borderRadius: "12px",
-                padding: "1.75rem",
-                marginBottom: "2.5rem",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  marginBottom: "0.75rem",
-                }}
-              >
-                <span style={{ fontSize: "1.25rem" }}>
-                  {activePath.generatedBy === "HYBRID" ? "✨" : "🎯"}
-                </span>
-                <h3 style={{ fontSize: "1.15rem", fontWeight: 700, margin: 0 }}>
+            <Card className="border-primary/20 bg-primary/5 p-6 space-y-3 shadow-sm">
+              <div className="flex items-center gap-2 text-primary">
+                <Sparkles className="h-5 w-5" />
+                <h3 className="text-base font-bold text-foreground">
                   {activePath.generatedBy === "HYBRID"
                     ? "AI-Synthesized Narrative & Study Strategy"
                     : "Curriculum Strategy"}
                 </h3>
               </div>
-
-              <p
-                style={{
-                  color: "var(--text-secondary)",
-                  lineHeight: 1.6,
-                  marginBottom: "1.25rem",
-                }}
-              >
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 {activePath.summary}
               </p>
 
               {activePath.focusAreas && activePath.focusAreas.length > 0 && (
-                <div style={{ marginBottom: "1rem" }}>
-                  <span
-                    style={{
-                      fontSize: "0.85rem",
-                      fontWeight: 600,
-                      color: "var(--text-muted)",
-                    }}
-                  >
-                    Focus Areas:{" "}
+                <div className="flex items-center gap-2 flex-wrap pt-2">
+                  <span className="text-xs font-semibold text-foreground">
+                    Focus Areas:
                   </span>
-                  <div
-                    style={{
-                      display: "inline-flex",
-                      flexWrap: "wrap",
-                      gap: "0.4rem",
-                      marginTop: "0.25rem",
-                    }}
-                  >
-                    {activePath.focusAreas.map((fa, i) => (
-                      <span
-                        key={i}
-                        style={{
-                          fontSize: "0.8rem",
-                          padding: "0.2rem 0.6rem",
-                          borderRadius: "6px",
-                          background: "rgba(99, 102, 241, 0.15)",
-                          color: "#818cf8",
-                          fontWeight: 600,
-                        }}
-                      >
-                        {fa}
-                      </span>
-                    ))}
-                  </div>
+                  {activePath.focusAreas.map((fa, i) => (
+                    <Badge
+                      key={i}
+                      variant="secondary"
+                      className="text-[11px] bg-primary/10 text-primary border-primary/20"
+                    >
+                      {fa}
+                    </Badge>
+                  ))}
                 </div>
               )}
-
-              {activePath.learningStrategy &&
-                activePath.learningStrategy.length > 0 && (
-                  <div>
-                    <span
-                      style={{
-                        fontSize: "0.85rem",
-                        fontWeight: 600,
-                        color: "var(--text-muted)",
-                        display: "block",
-                        marginBottom: "0.35rem",
-                      }}
-                    >
-                      Recommended Study Approach:
-                    </span>
-                    <ul
-                      style={{
-                        margin: 0,
-                        paddingLeft: "1.25rem",
-                        color: "var(--text-secondary)",
-                        fontSize: "0.9rem",
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      {activePath.learningStrategy.map((strat, idx) => (
-                        <li key={idx} style={{ marginBottom: "0.25rem" }}>
-                          {strat}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-            </div>
+            </Card>
           )}
 
           {/* 4. Ordered Module Sequence Timeline */}
-          <div style={{ marginBottom: "3rem" }}>
-            <h2
-              style={{
-                fontSize: "1.35rem",
-                fontWeight: 700,
-                marginBottom: "1.25rem",
-              }}
-            >
+          <div className="space-y-4">
+            <h2 className="text-lg font-bold text-foreground">
               Module Execution Timeline ({activePath.modules?.length || 0}{" "}
               Modules)
             </h2>
 
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
-            >
+            <div className="space-y-4">
               {(progressData?.modules || activePath.modules || []).map(
                 (item, idx) => {
                   const mod = item.module || item;
@@ -451,215 +325,123 @@ export default function LearningPathPage() {
                   const percentage = item.percentage || 0;
 
                   return (
-                    <div
+                    <Card
                       key={modId || idx}
-                      style={{
-                        background: "var(--bg-surface)",
-                        border: "1px solid var(--border-color)",
-                        borderRadius: "12px",
-                        padding: "1.5rem",
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "1rem",
-                      }}
+                      className="p-5 shadow-sm hover:border-primary/40 transition-all space-y-4"
                     >
-                      {/* Top Row: Order, Category, Difficulty, Duration */}
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          flexWrap: "wrap",
-                          gap: "0.5rem",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.5rem",
-                          }}
-                        >
-                          <span
-                            style={{
-                              fontSize: "0.8rem",
-                              fontWeight: 800,
-                              padding: "0.2rem 0.5rem",
-                              borderRadius: "4px",
-                              background: "rgba(99, 102, 241, 0.2)",
-                              color: "#818cf8",
-                            }}
+                      {/* Top Row */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge
+                            variant="default"
+                            className="text-[10px] font-bold"
                           >
                             STEP #{item.order || idx + 1}
-                          </span>
-                          <span className="category-tag">{mod.category}</span>
-                          <span className="difficulty-tag">
+                          </Badge>
+                          <Badge variant="secondary" className="text-[10px]">
+                            {mod.category}
+                          </Badge>
+                          <Badge variant="outline" className="text-[10px]">
                             {mod.difficulty}
-                          </span>
+                          </Badge>
                         </div>
 
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.75rem",
-                          }}
-                        >
-                          <span
-                            style={{
-                              fontSize: "0.85rem",
-                              color: "var(--text-muted)",
-                            }}
-                          >
-                            ⏱️ {mod.estimatedDuration} hrs
+                        <div className="flex items-center gap-3 text-xs">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            <span>{mod.estimatedDuration} hrs</span>
                           </span>
-                          <StatusBadge status={status} />
+                          <StatusBadge status={status} size="small" />
                         </div>
                       </div>
 
-                      {/* Title and Reason */}
-                      <div>
-                        <h3
-                          style={{
-                            fontSize: "1.2rem",
-                            fontWeight: 700,
-                            margin: "0 0 0.35rem",
-                          }}
-                        >
+                      {/* Content */}
+                      <div className="space-y-2">
+                        <h3 className="text-base font-bold text-foreground">
                           {mod.title}
                         </h3>
                         {mod.description && (
-                          <p
-                            style={{
-                              color: "var(--text-secondary)",
-                              fontSize: "0.9rem",
-                              margin: "0 0 0.5rem",
-                              lineHeight: 1.5,
-                            }}
-                          >
+                          <p className="text-xs text-muted-foreground leading-relaxed">
                             {mod.description}
                           </p>
                         )}
                         {item.reason && (
-                          <div
-                            className="rec-reason-box"
-                            style={{ fontSize: "0.85rem" }}
-                          >
-                            💡 <strong>Placement Rationale:</strong>{" "}
+                          <div className="p-2.5 rounded-lg bg-muted/40 border text-xs text-muted-foreground">
+                            💡{" "}
+                            <strong className="text-foreground">
+                              Placement Rationale:
+                            </strong>{" "}
                             {item.reason}
                           </div>
                         )}
                       </div>
 
-                      {/* Progress Bar & Actions */}
-                      <div
-                        style={{
-                          paddingTop: "0.75rem",
-                          borderTop: "1px solid var(--border-color)",
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          flexWrap: "wrap",
-                          gap: "1rem",
-                        }}
-                      >
-                        <div style={{ flex: "1 1 200px" }}>
-                          <ProgressBar value={percentage} showLabel />
+                      {/* Progress Controls */}
+                      <div className="pt-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex-1 max-w-sm">
+                          <ProgressBar
+                            value={percentage}
+                            showLabel
+                            height="6px"
+                          />
                         </div>
 
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "0.5rem",
-                            flexWrap: "wrap",
-                          }}
-                        >
+                        <div className="flex items-center gap-2">
                           {(status === "NOT_STARTED" ||
                             status === "SKIPPED") && (
-                            <button
+                            <Button
+                              size="sm"
+                              variant="default"
                               onClick={() => handleStartModule(modId)}
-                              style={{
-                                padding: "0.4rem 0.9rem",
-                                fontSize: "0.8rem",
-                                fontWeight: 600,
-                                borderRadius: "6px",
-                                border: "1px solid var(--primary)",
-                                background: "var(--primary)",
-                                color: "#fff",
-                                cursor: "pointer",
-                              }}
+                              className="text-xs gap-1 h-8"
                             >
-                              ▶ Start Module
-                            </button>
+                              <Play className="h-3 w-3" />
+                              <span>Start Module</span>
+                            </Button>
                           )}
 
                           {status === "IN_PROGRESS" && (
                             <>
-                              <button
+                              <Button
+                                size="sm"
+                                variant="outline"
                                 onClick={() =>
                                   handleUpdatePercentage(modId, percentage)
                                 }
                                 disabled={percentage >= 100}
-                                style={{
-                                  padding: "0.4rem 0.9rem",
-                                  fontSize: "0.8rem",
-                                  fontWeight: 600,
-                                  borderRadius: "6px",
-                                  border: "1px solid rgba(99, 102, 241, 0.4)",
-                                  background: "rgba(99, 102, 241, 0.15)",
-                                  color: "#818cf8",
-                                  cursor: "pointer",
-                                }}
+                                className="text-xs h-8"
                               >
                                 +25% Progress
-                              </button>
-                              <button
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="success"
                                 onClick={() => handleCompleteModule(modId)}
-                                style={{
-                                  padding: "0.4rem 0.9rem",
-                                  fontSize: "0.8rem",
-                                  fontWeight: 600,
-                                  borderRadius: "6px",
-                                  border: "none",
-                                  background: "#10b981",
-                                  color: "#fff",
-                                  cursor: "pointer",
-                                }}
+                                className="text-xs h-8 gap-1"
                               >
-                                ✓ Complete
-                              </button>
-                              <button
+                                <Check className="h-3 w-3" />
+                                <span>Complete</span>
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
                                 onClick={() => handleSkipModule(modId)}
-                                style={{
-                                  padding: "0.4rem 0.9rem",
-                                  fontSize: "0.8rem",
-                                  fontWeight: 600,
-                                  borderRadius: "6px",
-                                  border: "1px solid rgba(245, 158, 11, 0.4)",
-                                  background: "transparent",
-                                  color: "#f59e0b",
-                                  cursor: "pointer",
-                                }}
+                                className="text-xs text-muted-foreground h-8"
                               >
-                                ⏭ Skip
-                              </button>
+                                Skip
+                              </Button>
                             </>
                           )}
 
                           {status === "COMPLETED" && (
-                            <span
-                              style={{
-                                fontSize: "0.85rem",
-                                color: "#10b981",
-                                fontWeight: 700,
-                              }}
-                            >
-                              ✓ Module Completed
+                            <span className="text-xs font-semibold text-emerald-500 flex items-center gap-1">
+                              <CheckCircle2 className="h-4 w-4" />
+                              <span>Completed</span>
                             </span>
                           )}
                         </div>
                       </div>
-                    </div>
+                    </Card>
                   );
                 },
               )}
@@ -668,69 +450,33 @@ export default function LearningPathPage() {
 
           {/* 5. Version History Section */}
           {historyPaths.length > 0 && (
-            <div style={{ marginTop: "3rem" }}>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: 700,
-                  marginBottom: "1rem",
-                }}
-              >
-                Learning Path Version History
-              </h2>
-              <div
-                style={{
-                  background: "var(--bg-surface)",
-                  border: "1px solid var(--border-color)",
-                  borderRadius: "12px",
-                  overflow: "hidden",
-                }}
-              >
+            <div className="pt-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <History className="h-5 w-5 text-muted-foreground" />
+                <h2 className="text-lg font-bold text-foreground">
+                  Learning Path Version History
+                </h2>
+              </div>
+
+              <Card className="divide-y overflow-hidden shadow-sm">
                 {historyPaths.map((p, idx) => (
                   <div
                     key={p.id || p._id || idx}
-                    style={{
-                      padding: "1rem 1.25rem",
-                      borderBottom:
-                        idx === historyPaths.length - 1
-                          ? "none"
-                          : "1px solid var(--border-color)",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      flexWrap: "wrap",
-                      gap: "0.5rem",
-                    }}
+                    className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:bg-muted/30 transition-colors"
                   >
                     <div>
-                      <span style={{ fontWeight: 700, fontSize: "0.95rem" }}>
+                      <span className="font-bold text-foreground text-sm">
                         Version {p.version}
                       </span>
-                      <span
-                        style={{
-                          color: "var(--text-muted)",
-                          fontSize: "0.85rem",
-                          marginLeft: "0.75rem",
-                        }}
-                      >
-                        {p.modules?.length || 0} modules • {p.estimatedDuration}{" "}
-                        hrs • Source: {p.generatedBy}
+                      <span className="text-muted-foreground ml-3">
+                        {p.modules?.length || 0} modules &bull;{" "}
+                        {p.estimatedDuration} hrs &bull; {p.generatedBy}
                       </span>
                     </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.75rem",
-                      }}
-                    >
+
+                    <div className="flex items-center gap-3">
                       <StatusBadge status={p.status} size="small" />
-                      <span
-                        style={{
-                          color: "var(--text-muted)",
-                          fontSize: "0.8rem",
-                        }}
-                      >
+                      <span className="text-muted-foreground">
                         {new Date(
                           p.createdAt || p.generatedAt,
                         ).toLocaleDateString()}
@@ -738,109 +484,23 @@ export default function LearningPathPage() {
                     </div>
                   </div>
                 ))}
-              </div>
+              </Card>
             </div>
           )}
         </>
       )}
 
       {/* Confirmation Modal for Regeneration */}
-      {showRegenModal && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0, 0, 0, 0.75)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "1rem",
-            zIndex: 100,
-          }}
-        >
-          <div
-            style={{
-              background: "var(--bg-surface)",
-              border: "1px solid var(--border-color)",
-              borderRadius: "14px",
-              padding: "2rem",
-              maxWidth: "500px",
-              width: "100%",
-            }}
-          >
-            <h3
-              style={{
-                fontSize: "1.3rem",
-                fontWeight: 700,
-                marginBottom: "0.75rem",
-              }}
-            >
-              Regenerate Learning Path?
-            </h3>
-            <p
-              style={{
-                color: "var(--text-secondary)",
-                fontSize: "0.9rem",
-                lineHeight: 1.6,
-                marginBottom: "1.5rem",
-              }}
-            >
-              Regenerating your path will create{" "}
-              <strong>Version {activePath ? activePath.version + 1 : 2}</strong>{" "}
-              using your latest profile skills, career goals, and assessment
-              results.
-              <br />
-              <br />
-              Your current active path (v{activePath?.version}) will be safely{" "}
-              <strong>ARCHIVED</strong> and remain accessible in your version
-              history.
-            </p>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: "0.75rem",
-              }}
-            >
-              <button
-                onClick={() => setShowRegenModal(false)}
-                style={{
-                  background: "transparent",
-                  border: "1px solid var(--border-color)",
-                  color: "var(--text-primary)",
-                  padding: "0.6rem 1.2rem",
-                  borderRadius: "8px",
-                  fontSize: "0.9rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleRegeneratePath}
-                disabled={regenerating}
-                style={{
-                  background: "linear-gradient(135deg, #6366f1, #a855f7)",
-                  color: "#ffffff",
-                  border: "none",
-                  padding: "0.6rem 1.4rem",
-                  borderRadius: "8px",
-                  fontSize: "0.9rem",
-                  fontWeight: 600,
-                  cursor: regenerating ? "not-allowed" : "pointer",
-                }}
-              >
-                {regenerating ? "Generating..." : "Confirm & Regenerate"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={showRegenModal}
+        title="Regenerate Learning Path?"
+        message={`Regenerating will create Version ${activePath ? activePath.version + 1 : 2} using your latest profile signals. Your current active path (v${activePath?.version}) will be safely ARCHIVED and remain accessible in version history.`}
+        confirmLabel="Regenerate Path"
+        confirmVariant="primary"
+        onConfirm={handleRegeneratePath}
+        onCancel={() => setShowRegenModal(false)}
+        loading={regenerating}
+      />
     </div>
   );
 }

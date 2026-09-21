@@ -6,6 +6,33 @@ import curriculumService from "../../../services/curriculumService";
 import StatusBadge from "../../../components/ui/StatusBadge";
 import ConfirmModal from "../../../components/admin/ConfirmModal";
 import EmptyState from "../../../components/ui/EmptyState";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import { TableSkeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { toast } from "@/components/ui/use-toast";
+import { BookOpen, Plus, Search, Trash2, Edit, Clock } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const CATEGORIES = [
   "FRONTEND",
@@ -87,9 +114,14 @@ export default function AdminCurriculumPage() {
   const handleToggleStatus = async (mod) => {
     try {
       await curriculumService.toggleStatus(mod._id, !mod.isActive);
+      toast.success(
+        "Module Status Updated",
+        `"${mod.title}" is now ${!mod.isActive ? "active" : "inactive"}.`,
+      );
       fetchModules();
     } catch (err) {
-      alert(err.message || "Failed to update module status");
+      const errMsg = err.message || "Failed to update module status";
+      toast.error("Update Failed", errMsg);
     }
   };
 
@@ -174,14 +206,23 @@ export default function AdminCurriculumPage() {
 
       if (moduleModal.isEdit) {
         await curriculumService.updateModule(moduleModal.moduleId, payload);
+        toast.success(
+          "Module Updated",
+          `"${payload.title}" saved successfully.`,
+        );
       } else {
         await curriculumService.createModule(payload);
+        toast.success(
+          "Module Created",
+          `"${payload.title}" created in curriculum catalog.`,
+        );
       }
 
       setModuleModal((prev) => ({ ...prev, isOpen: false, loading: false }));
       fetchModules();
     } catch (err) {
-      alert(err.message || "Failed to save curriculum module");
+      const errMsg = err.message || "Failed to save curriculum module";
+      toast.error("Save Failed", errMsg);
       setModuleModal((prev) => ({ ...prev, loading: false }));
     }
   };
@@ -191,10 +232,15 @@ export default function AdminCurriculumPage() {
     try {
       setDeleteModal((prev) => ({ ...prev, loading: true }));
       await curriculumService.deleteModule(deleteModal.item._id);
+      toast.success(
+        "Module Removed",
+        `"${deleteModal.item.title}" was deleted or deactivated.`,
+      );
       setDeleteModal({ isOpen: false, item: null, loading: false });
       fetchModules();
     } catch (err) {
-      alert(err.message || "Failed to delete module");
+      const errMsg = err.message || "Failed to delete module";
+      toast.error("Deletion Failed", errMsg);
       setDeleteModal((prev) => ({ ...prev, loading: false }));
     }
   };
@@ -217,317 +263,197 @@ export default function AdminCurriculumPage() {
       title="Curriculum Management"
       subtitle="Author catalog modules, configure prerequisite DAG relationships, and manage learning objectives."
     >
-      {/* Top Search & Filter Bar */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "1rem",
-          marginBottom: "1.5rem",
-          background: "var(--bg-surface, #1e293b)",
-          padding: "1rem 1.25rem",
-          borderRadius: "12px",
-          border: "1px solid var(--border-color, #334155)",
-        }}
-      >
-        <div style={{ flex: 1, minWidth: "220px" }}>
-          <input
-            type="text"
-            placeholder="Search by module title or skill..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "0.5rem 0.75rem",
-              borderRadius: "6px",
-              background: "rgba(0, 0, 0, 0.2)",
-              border: "1px solid var(--border-color)",
-              color: "var(--text-primary)",
-              fontSize: "0.9rem",
-            }}
-          />
-        </div>
+      <div className="space-y-6">
+        {/* Top Search & Filter Bar */}
+        <Card className="p-4 shadow-sm">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="relative w-full sm:max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search module or skill..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
 
-        <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-          {/* Category Filter */}
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            style={{
-              padding: "0.5rem 0.75rem",
-              borderRadius: "6px",
-              background: "var(--bg-surface)",
-              border: "1px solid var(--border-color)",
-              color: "var(--text-primary)",
-              fontSize: "0.85rem",
-            }}
-          >
-            <option value="ALL">All Categories</option>
-            {CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-
-          {/* Difficulty Filter */}
-          <select
-            value={difficultyFilter}
-            onChange={(e) => setDifficultyFilter(e.target.value)}
-            style={{
-              padding: "0.5rem 0.75rem",
-              borderRadius: "6px",
-              background: "var(--bg-surface)",
-              border: "1px solid var(--border-color)",
-              color: "var(--text-primary)",
-              fontSize: "0.85rem",
-            }}
-          >
-            <option value="ALL">All Difficulties</option>
-            {DIFFICULTIES.map((diff) => (
-              <option key={diff} value={diff}>
-                {diff}
-              </option>
-            ))}
-          </select>
-
-          <button
-            type="button"
-            onClick={openCreateModal}
-            className="btn-primary-small"
-            style={{ padding: "0.5rem 1rem", fontSize: "0.85rem" }}
-          >
-            + Create Module
-          </button>
-        </div>
-      </div>
-
-      {error && (
-        <div
-          style={{
-            background: "rgba(239, 68, 68, 0.1)",
-            border: "1px solid rgba(239, 68, 68, 0.3)",
-            color: "#f87171",
-            padding: "1rem",
-            borderRadius: "8px",
-            marginBottom: "1.5rem",
-          }}
-        >
-          {error}
-        </div>
-      )}
-
-      {loading ? (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "4rem",
-            color: "var(--text-muted)",
-          }}
-        >
-          Loading curriculum catalog...
-        </div>
-      ) : modules.length === 0 ? (
-        <EmptyState
-          icon="📚"
-          title="No Curriculum Modules Found"
-          description={
-            search
-              ? `No modules match "${search}".`
-              : "No curriculum modules created yet."
-          }
-          actionText="Create First Module"
-          onAction={openCreateModal}
-        />
-      ) : (
-        <div
-          style={{
-            background: "var(--bg-surface, #1e293b)",
-            border: "1px solid var(--border-color, #334155)",
-            borderRadius: "12px",
-            overflow: "hidden",
-          }}
-        >
-          <div style={{ overflowX: "auto" }}>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                textAlign: "left",
-                fontSize: "0.9rem",
-              }}
-            >
-              <thead>
-                <tr
-                  style={{
-                    background: "rgba(255, 255, 255, 0.03)",
-                    borderBottom: "1px solid var(--border-color)",
-                    color: "var(--text-muted)",
-                    fontSize: "0.8rem",
-                    textTransform: "uppercase",
-                  }}
+            <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto justify-end">
+              <div className="w-36">
+                <Select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
                 >
-                  <th style={{ padding: "0.85rem 1.25rem" }}>
-                    Title & Category
-                  </th>
-                  <th style={{ padding: "0.85rem 1rem" }}>Difficulty</th>
-                  <th style={{ padding: "0.85rem 1rem" }}>Duration</th>
-                  <th style={{ padding: "0.85rem 1rem" }}>Prerequisites</th>
-                  <th style={{ padding: "0.85rem 1rem" }}>Status</th>
-                  <th
-                    style={{ padding: "0.85rem 1.25rem", textAlign: "right" }}
-                  >
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+                  <option value="ALL">All Categories</option>
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+
+              <div className="w-36">
+                <Select
+                  value={difficultyFilter}
+                  onChange={(e) => setDifficultyFilter(e.target.value)}
+                >
+                  <option value="ALL">All Difficulties</option>
+                  {DIFFICULTIES.map((diff) => (
+                    <option key={diff} value={diff}>
+                      {diff}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+
+              <Button
+                type="button"
+                variant="default"
+                size="sm"
+                onClick={openCreateModal}
+                className="gap-1.5 text-xs shadow-sm h-9"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Create Module</span>
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {loading ? (
+          <TableSkeleton rows={6} cols={6} />
+        ) : modules.length === 0 ? (
+          <EmptyState
+            icon={BookOpen}
+            title="No Curriculum Modules Found"
+            description={
+              search
+                ? `No modules match "${search}".`
+                : "No curriculum modules created yet."
+            }
+            actionText="Create First Module"
+            onAction={openCreateModal}
+          />
+        ) : (
+          <Card className="overflow-hidden shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Title & Category</TableHead>
+                  <TableHead>Difficulty</TableHead>
+                  <TableHead>Duration</TableHead>
+                  <TableHead>Prerequisites</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {modules.map((mod) => (
-                  <tr
-                    key={mod._id}
-                    style={{ borderBottom: "1px solid var(--border-color)" }}
-                  >
+                  <TableRow key={mod._id}>
                     {/* Title & Category */}
-                    <td style={{ padding: "1rem 1.25rem" }}>
-                      <div
-                        style={{
-                          fontWeight: 600,
-                          color: "var(--text-primary)",
-                        }}
-                      >
+                    <TableCell>
+                      <div className="font-semibold text-foreground text-sm">
                         {mod.title}
                       </div>
-                      <div
-                        style={{
-                          fontSize: "0.8rem",
-                          color: "var(--text-muted)",
-                        }}
-                      >
-                        {mod.category} • slug: <code>{mod.slug}</code>
+                      <div className="text-[11px] text-muted-foreground">
+                        {mod.category} &bull;{" "}
+                        <code className="text-xs bg-muted px-1 py-0.5 rounded">
+                          {mod.slug}
+                        </code>
                       </div>
-                    </td>
+                    </TableCell>
 
                     {/* Difficulty */}
-                    <td style={{ padding: "1rem" }}>
-                      <span
-                        style={{
-                          background:
-                            mod.difficulty === "BEGINNER"
-                              ? "rgba(16, 185, 129, 0.15)"
-                              : mod.difficulty === "INTERMEDIATE"
-                                ? "rgba(99, 102, 241, 0.15)"
-                                : "rgba(245, 158, 11, 0.15)",
-                          color:
-                            mod.difficulty === "BEGINNER"
-                              ? "#10b981"
-                              : mod.difficulty === "INTERMEDIATE"
-                                ? "#818cf8"
-                                : "#f59e0b",
-                          padding: "0.2rem 0.55rem",
-                          borderRadius: "4px",
-                          fontSize: "0.75rem",
-                          fontWeight: 600,
-                        }}
+                    <TableCell>
+                      <Badge
+                        variant={
+                          mod.difficulty === "BEGINNER"
+                            ? "success"
+                            : mod.difficulty === "INTERMEDIATE"
+                              ? "default"
+                              : "warning"
+                        }
+                        className="text-[10px]"
                       >
                         {mod.difficulty}
-                      </span>
-                    </td>
+                      </Badge>
+                    </TableCell>
 
                     {/* Duration */}
-                    <td
-                      style={{
-                        padding: "1rem",
-                        color: "var(--text-secondary)",
-                        fontSize: "0.85rem",
-                      }}
-                    >
-                      {mod.estimatedDuration} mins
-                    </td>
+                    <TableCell className="text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        <span>{mod.estimatedDuration} hrs</span>
+                      </span>
+                    </TableCell>
 
                     {/* Prerequisites */}
-                    <td style={{ padding: "1rem" }}>
+                    <TableCell>
                       {mod.prerequisites?.length > 0 ? (
-                        <div
-                          style={{
-                            display: "flex",
-                            flexWrap: "wrap",
-                            gap: "0.25rem",
-                          }}
-                        >
+                        <div className="flex flex-wrap gap-1">
                           {mod.prerequisites.map((p, i) => (
-                            <span
+                            <Badge
                               key={i}
-                              style={{
-                                background: "rgba(255, 255, 255, 0.05)",
-                                border: "1px solid var(--border-color)",
-                                padding: "0.15rem 0.4rem",
-                                borderRadius: "4px",
-                                fontSize: "0.75rem",
-                              }}
+                              variant="secondary"
+                              className="text-[10px]"
                             >
                               {p.title || p}
-                            </span>
+                            </Badge>
                           ))}
                         </div>
                       ) : (
-                        <span
-                          style={{
-                            color: "var(--text-muted)",
-                            fontSize: "0.8rem",
-                          }}
-                        >
+                        <span className="text-xs text-muted-foreground">
                           None
                         </span>
                       )}
-                    </td>
+                    </TableCell>
 
                     {/* Status */}
-                    <td style={{ padding: "1rem" }}>
+                    <TableCell>
                       <StatusBadge
                         status={mod.isActive ? "ACTIVE" : "INACTIVE"}
                         size="small"
                       />
-                    </td>
+                    </TableCell>
 
                     {/* Actions */}
-                    <td style={{ padding: "1rem 1.25rem", textAlign: "right" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "flex-end",
-                          gap: "0.5rem",
-                        }}
-                      >
-                        <button
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
                           type="button"
+                          variant="outline"
+                          size="sm"
                           onClick={() => openEditModal(mod)}
-                          className="btn-secondary-small"
-                          style={{
-                            fontSize: "0.8rem",
-                            padding: "0.3rem 0.65rem",
-                          }}
+                          className="h-7 text-xs px-2.5 gap-1"
                         >
-                          Edit
-                        </button>
-                        <button
+                          <Edit className="h-3 w-3" />
+                          <span>Edit</span>
+                        </Button>
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="sm"
                           onClick={() => handleToggleStatus(mod)}
-                          style={{
-                            background: "transparent",
-                            border: "1px solid var(--border-color)",
-                            color: mod.isActive ? "#f87171" : "#34d399",
-                            padding: "0.3rem 0.65rem",
-                            borderRadius: "6px",
-                            fontSize: "0.8rem",
-                            cursor: "pointer",
-                          }}
+                          className={cn(
+                            "h-7 text-xs px-2.5",
+                            mod.isActive
+                              ? "text-destructive hover:bg-destructive/10"
+                              : "text-emerald-500 hover:bg-emerald-500/10",
+                          )}
                         >
                           {mod.isActive ? "Deactivate" : "Activate"}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="sm"
                           onClick={() =>
                             setDeleteModal({
                               isOpen: true,
@@ -535,96 +461,46 @@ export default function AdminCurriculumPage() {
                               loading: false,
                             })
                           }
-                          style={{
-                            background: "transparent",
-                            border: "1px solid rgba(239, 68, 68, 0.3)",
-                            color: "#f87171",
-                            padding: "0.3rem 0.65rem",
-                            borderRadius: "6px",
-                            fontSize: "0.8rem",
-                            cursor: "pointer",
-                          }}
+                          className="h-7 text-xs px-2 text-destructive hover:bg-destructive/10"
                         >
-                          Delete
-                        </button>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+              </TableBody>
+            </Table>
+          </Card>
+        )}
 
-      {/* Create / Edit Module Modal */}
-      {moduleModal.isOpen && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.7)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-            padding: "1rem",
-          }}
-          onClick={() => setModuleModal((prev) => ({ ...prev, isOpen: false }))}
+        {/* Create / Edit Module Dialog */}
+        <Dialog
+          open={moduleModal.isOpen}
+          onOpenChange={(open) =>
+            setModuleModal((prev) => ({ ...prev, isOpen: open }))
+          }
         >
-          <div
-            style={{
-              background: "var(--bg-surface, #1e293b)",
-              border: "1px solid var(--border-color, #334155)",
-              borderRadius: "12px",
-              width: "100%",
-              maxWidth: "640px",
-              padding: "1.75rem",
-              maxHeight: "90vh",
-              overflowY: "auto",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3
-              style={{
-                margin: "0 0 1rem 0",
-                fontSize: "1.25rem",
-                fontWeight: 700,
-              }}
-            >
-              {moduleModal.isEdit
-                ? "Edit Curriculum Module"
-                : "Create Curriculum Module"}
-            </h3>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {moduleModal.isEdit
+                  ? "Edit Curriculum Module"
+                  : "Create Curriculum Module"}
+              </DialogTitle>
+              <DialogDescription className="text-xs">
+                Author module metadata, competencies, and prerequisite
+                dependency requirements.
+              </DialogDescription>
+            </DialogHeader>
 
-            <form
-              onSubmit={handleSaveModule}
-              style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
-            >
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "2fr 1fr",
-                  gap: "1rem",
-                }}
-              >
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "0.85rem",
-                      marginBottom: "0.3rem",
-                      color: "var(--text-secondary)",
-                    }}
-                  >
+            <form onSubmit={handleSaveModule} className="space-y-4 pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-2 space-y-1.5">
+                  <label className="text-xs font-semibold text-foreground">
                     Title *
                   </label>
-                  <input
-                    type="text"
+                  <Input
                     required
                     value={moduleModal.formData.title}
                     onChange={(e) =>
@@ -633,31 +509,15 @@ export default function AdminCurriculumPage() {
                         formData: { ...prev.formData, title: e.target.value },
                       }))
                     }
-                    style={{
-                      width: "100%",
-                      padding: "0.5rem 0.75rem",
-                      borderRadius: "6px",
-                      background: "rgba(0,0,0,0.2)",
-                      border: "1px solid var(--border-color)",
-                      color: "var(--text-primary)",
-                    }}
                     placeholder="e.g. Asynchronous Node.js & Event Loop"
                   />
                 </div>
 
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "0.85rem",
-                      marginBottom: "0.3rem",
-                      color: "var(--text-secondary)",
-                    }}
-                  >
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-foreground">
                     Slug (optional)
                   </label>
-                  <input
-                    type="text"
+                  <Input
                     value={moduleModal.formData.slug}
                     onChange={(e) =>
                       setModuleModal((prev) => ({
@@ -665,28 +525,13 @@ export default function AdminCurriculumPage() {
                         formData: { ...prev.formData, slug: e.target.value },
                       }))
                     }
-                    style={{
-                      width: "100%",
-                      padding: "0.5rem 0.75rem",
-                      borderRadius: "6px",
-                      background: "rgba(0,0,0,0.2)",
-                      border: "1px solid var(--border-color)",
-                      color: "var(--text-primary)",
-                    }}
                     placeholder="auto-generated"
                   />
                 </div>
               </div>
 
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: "0.85rem",
-                    marginBottom: "0.3rem",
-                    color: "var(--text-secondary)",
-                  }}
-                >
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground">
                   Description *
                 </label>
                 <textarea
@@ -702,38 +547,17 @@ export default function AdminCurriculumPage() {
                       },
                     }))
                   }
-                  style={{
-                    width: "100%",
-                    padding: "0.5rem 0.75rem",
-                    borderRadius: "6px",
-                    background: "rgba(0,0,0,0.2)",
-                    border: "1px solid var(--border-color)",
-                    color: "var(--text-primary)",
-                    fontFamily: "inherit",
-                  }}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   placeholder="Explains concepts and practical application"
                 />
               </div>
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr 1fr",
-                  gap: "1rem",
-                }}
-              >
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "0.85rem",
-                      marginBottom: "0.3rem",
-                      color: "var(--text-secondary)",
-                    }}
-                  >
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-foreground">
                     Category
                   </label>
-                  <select
+                  <Select
                     value={moduleModal.formData.category}
                     onChange={(e) =>
                       setModuleModal((prev) => ({
@@ -744,35 +568,20 @@ export default function AdminCurriculumPage() {
                         },
                       }))
                     }
-                    style={{
-                      width: "100%",
-                      padding: "0.5rem 0.75rem",
-                      borderRadius: "6px",
-                      background: "var(--bg-surface)",
-                      border: "1px solid var(--border-color)",
-                      color: "var(--text-primary)",
-                    }}
                   >
                     {CATEGORIES.map((cat) => (
                       <option key={cat} value={cat}>
                         {cat}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
 
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "0.85rem",
-                      marginBottom: "0.3rem",
-                      color: "var(--text-secondary)",
-                    }}
-                  >
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-foreground">
                     Difficulty
                   </label>
-                  <select
+                  <Select
                     value={moduleModal.formData.difficulty}
                     onChange={(e) =>
                       setModuleModal((prev) => ({
@@ -783,35 +592,20 @@ export default function AdminCurriculumPage() {
                         },
                       }))
                     }
-                    style={{
-                      width: "100%",
-                      padding: "0.5rem 0.75rem",
-                      borderRadius: "6px",
-                      background: "var(--bg-surface)",
-                      border: "1px solid var(--border-color)",
-                      color: "var(--text-primary)",
-                    }}
                   >
                     {DIFFICULTIES.map((d) => (
                       <option key={d} value={d}>
                         {d}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
 
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "0.85rem",
-                      marginBottom: "0.3rem",
-                      color: "var(--text-secondary)",
-                    }}
-                  >
-                    Duration (mins)
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-foreground">
+                    Duration (hrs)
                   </label>
-                  <input
+                  <Input
                     type="number"
                     min={1}
                     value={moduleModal.formData.estimatedDuration}
@@ -824,31 +618,15 @@ export default function AdminCurriculumPage() {
                         },
                       }))
                     }
-                    style={{
-                      width: "100%",
-                      padding: "0.5rem 0.75rem",
-                      borderRadius: "6px",
-                      background: "rgba(0,0,0,0.2)",
-                      border: "1px solid var(--border-color)",
-                      color: "var(--text-primary)",
-                    }}
                   />
                 </div>
               </div>
 
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: "0.85rem",
-                    marginBottom: "0.3rem",
-                    color: "var(--text-secondary)",
-                  }}
-                >
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground">
                   Skills (comma-separated)
                 </label>
-                <input
-                  type="text"
+                <Input
                   value={moduleModal.formData.skills}
                   onChange={(e) =>
                     setModuleModal((prev) => ({
@@ -856,27 +634,12 @@ export default function AdminCurriculumPage() {
                       formData: { ...prev.formData, skills: e.target.value },
                     }))
                   }
-                  style={{
-                    width: "100%",
-                    padding: "0.5rem 0.75rem",
-                    borderRadius: "6px",
-                    background: "rgba(0,0,0,0.2)",
-                    border: "1px solid var(--border-color)",
-                    color: "var(--text-primary)",
-                  }}
                   placeholder="e.g. Node.js, Event Loop, Libuv"
                 />
               </div>
 
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: "0.85rem",
-                    marginBottom: "0.3rem",
-                    color: "var(--text-secondary)",
-                  }}
-                >
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground">
                   Learning Objectives (comma-separated)
                 </label>
                 <textarea
@@ -891,44 +654,17 @@ export default function AdminCurriculumPage() {
                       },
                     }))
                   }
-                  style={{
-                    width: "100%",
-                    padding: "0.5rem 0.75rem",
-                    borderRadius: "6px",
-                    background: "rgba(0,0,0,0.2)",
-                    border: "1px solid var(--border-color)",
-                    color: "var(--text-primary)",
-                    fontFamily: "inherit",
-                  }}
-                  placeholder="e.g. Understand task queue vs microtask queue, Avoid blocking the main thread"
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  placeholder="e.g. Understand task queue vs microtask queue, Avoid blocking main thread"
                 />
               </div>
 
               {/* Prerequisites Multi-Select */}
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: "0.85rem",
-                    marginBottom: "0.3rem",
-                    color: "var(--text-secondary)",
-                  }}
-                >
-                  Prerequisites (Select required predecessor modules)
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-foreground block">
+                  Prerequisites (Select predecessor modules)
                 </label>
-                <div
-                  style={{
-                    maxHeight: "150px",
-                    overflowY: "auto",
-                    padding: "0.5rem",
-                    background: "rgba(0,0,0,0.2)",
-                    borderRadius: "6px",
-                    border: "1px solid var(--border-color)",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.35rem",
-                  }}
-                >
+                <div className="max-h-40 overflow-y-auto p-2 rounded-lg border bg-muted/20 space-y-1">
                   {modules
                     .filter(
                       (m) =>
@@ -942,31 +678,21 @@ export default function AdminCurriculumPage() {
                       return (
                         <label
                           key={otherMod._id}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.5rem",
-                            fontSize: "0.85rem",
-                            cursor: "pointer",
-                            padding: "0.25rem 0.4rem",
-                            borderRadius: "4px",
-                            background: isSelected
-                              ? "rgba(99, 102, 241, 0.15)"
-                              : "transparent",
-                          }}
+                          className={cn(
+                            "flex items-center gap-2.5 p-2 rounded-md cursor-pointer text-xs transition-colors",
+                            isSelected
+                              ? "bg-primary/10 text-primary font-medium"
+                              : "hover:bg-muted/40 text-foreground",
+                          )}
                         >
                           <input
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => togglePrereqSelection(otherMod._id)}
+                            className="rounded border-input text-primary focus:ring-primary h-4 w-4"
                           />
                           <span>{otherMod.title}</span>
-                          <span
-                            style={{
-                              color: "var(--text-muted)",
-                              fontSize: "0.75rem",
-                            }}
-                          >
+                          <span className="text-[10px] text-muted-foreground ml-auto">
                             ({otherMod.difficulty})
                           </span>
                         </label>
@@ -975,57 +701,44 @@ export default function AdminCurriculumPage() {
                 </div>
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: "0.75rem",
-                  marginTop: "1rem",
-                }}
-              >
-                <button
+              <DialogFooter className="pt-2">
+                <Button
                   type="button"
+                  variant="outline"
+                  size="sm"
                   onClick={() =>
                     setModuleModal((prev) => ({ ...prev, isOpen: false }))
                   }
-                  style={{
-                    background: "transparent",
-                    color: "var(--text-primary)",
-                    border: "1px solid var(--border-color)",
-                    padding: "0.5rem 1rem",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                  }}
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  disabled={moduleModal.loading}
-                  className="btn-primary-small"
-                  style={{ padding: "0.5rem 1.25rem" }}
+                  variant="default"
+                  size="sm"
+                  loading={moduleModal.loading}
                 >
-                  {moduleModal.loading ? "Saving..." : "Save Module"}
-                </button>
-              </div>
+                  {moduleModal.isEdit ? "Save Changes" : "Create Module"}
+                </Button>
+              </DialogFooter>
             </form>
-          </div>
-        </div>
-      )}
+          </DialogContent>
+        </Dialog>
 
-      {/* Delete Confirmation Modal */}
-      <ConfirmModal
-        isOpen={deleteModal.isOpen}
-        title="Delete Curriculum Module"
-        message={`Are you sure you want to delete "${deleteModal.item?.title}"? If other active modules depend on this as a prerequisite, the backend will safely soft-deactivate it instead of hard deletion.`}
-        confirmLabel="Delete"
-        confirmVariant="danger"
-        loading={deleteModal.loading}
-        onConfirm={handleDeleteModule}
-        onCancel={() =>
-          setDeleteModal({ isOpen: false, item: null, loading: false })
-        }
-      />
+        {/* Delete Confirmation Modal */}
+        <ConfirmModal
+          isOpen={deleteModal.isOpen}
+          title="Delete Curriculum Module"
+          message={`Are you sure you want to delete "${deleteModal.item?.title}"? If other active modules depend on this as a prerequisite, the backend will safely soft-deactivate it instead of hard deletion.`}
+          confirmLabel="Delete"
+          confirmVariant="danger"
+          loading={deleteModal.loading}
+          onConfirm={handleDeleteModule}
+          onCancel={() =>
+            setDeleteModal({ isOpen: false, item: null, loading: false })
+          }
+        />
+      </div>
     </AdminLayout>
   );
 }

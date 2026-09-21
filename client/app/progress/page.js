@@ -9,6 +9,37 @@ import progressService from "../../services/progressService";
 import ProgressBar from "../../components/ui/ProgressBar";
 import StatusBadge from "../../components/ui/StatusBadge";
 import EmptyState from "../../components/ui/EmptyState";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import { CardSkeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "@/components/ui/use-toast";
+import {
+  TrendingUp,
+  CheckCircle2,
+  Play,
+  Check,
+  FastForward,
+  Clock,
+  Activity,
+  History,
+  Target,
+} from "lucide-react";
 
 export default function ProgressPage() {
   const router = useRouter();
@@ -31,14 +62,14 @@ export default function ProgressPage() {
       ]);
 
       let pathObj = null;
-      if (pathRes.status === "fulfilled" && pathRes.value.success) {
+      if (pathRes.status === "fulfilled" && pathRes.value?.success) {
         pathObj = pathRes.value.data;
         setActivePath(pathObj);
       } else {
         setActivePath(null);
       }
 
-      if (progressRes.status === "fulfilled" && progressRes.value.success) {
+      if (progressRes.status === "fulfilled" && progressRes.value?.success) {
         setProgressData(progressRes.value.data);
       }
 
@@ -77,10 +108,14 @@ export default function ProgressPage() {
     if (!pathId) return;
     try {
       await progressService.startModule(pathId, moduleId);
-      setActionSuccess("Module started successfully!");
+      const msg = "Module started successfully!";
+      setActionSuccess(msg);
+      toast.info("Module Started", msg);
       await fetchProgressData();
     } catch (err) {
-      setError(err.message || "Failed to start module");
+      const errMsg = err.message || "Failed to start module";
+      setError(errMsg);
+      toast.error("Action Failed", errMsg);
     }
   };
 
@@ -90,10 +125,14 @@ export default function ProgressPage() {
     const nextPct = Math.min(100, currentPct + 25);
     try {
       await progressService.updateProgress(pathId, moduleId, nextPct);
-      setActionSuccess(`Progress updated to ${nextPct}%!`);
+      const msg = `Progress updated to ${nextPct}%!`;
+      setActionSuccess(msg);
+      toast.success("Progress Updated", msg);
       await fetchProgressData();
     } catch (err) {
-      setError(err.message || "Failed to update progress");
+      const errMsg = err.message || "Failed to update progress";
+      setError(errMsg);
+      toast.error("Action Failed", errMsg);
     }
   };
 
@@ -102,10 +141,14 @@ export default function ProgressPage() {
     if (!pathId) return;
     try {
       await progressService.completeModule(pathId, moduleId);
-      setActionSuccess("Module marked as completed!");
+      const msg = "Module marked as completed!";
+      setActionSuccess(msg);
+      toast.success("Module Complete", msg);
       await fetchProgressData();
     } catch (err) {
-      setError(err.message || "Failed to complete module");
+      const errMsg = err.message || "Failed to complete module";
+      setError(errMsg);
+      toast.error("Action Failed", errMsg);
     }
   };
 
@@ -114,26 +157,24 @@ export default function ProgressPage() {
     if (!pathId) return;
     try {
       await progressService.skipModule(pathId, moduleId);
-      setActionSuccess("Module skipped.");
+      const msg = "Module marked skipped.";
+      setActionSuccess(msg);
+      toast.warning("Module Skipped", msg);
       await fetchProgressData();
     } catch (err) {
-      setError(err.message || "Failed to skip module");
+      const errMsg = err.message || "Failed to skip module";
+      setError(errMsg);
+      toast.error("Action Failed", errMsg);
     }
   };
 
   if (loading) {
     return (
-      <div
-        style={{
-          maxWidth: "1000px",
-          margin: "0 auto",
-          padding: "4rem 1rem",
-          textAlign: "center",
-        }}
-      >
-        <p style={{ color: "var(--text-muted)", fontSize: "1.1rem" }}>
-          Loading your learning progress...
-        </p>
+      <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+        <div className="rounded-2xl border p-8 bg-card/40 space-y-4">
+          <CardSkeleton count={1} />
+        </div>
+        <CardSkeleton count={4} />
       </div>
     );
   }
@@ -141,68 +182,43 @@ export default function ProgressPage() {
   const summary = progressData?.pathSummary;
 
   return (
-    <div
-      style={{
-        maxWidth: "1050px",
-        margin: "0 auto",
-        padding: "1.5rem 1rem 4rem",
-      }}
-    >
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
       {/* 1. Header */}
-      <div style={{ marginBottom: "2rem" }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.6rem",
-            marginBottom: "0.5rem",
-          }}
-        >
-          <h1 style={{ fontSize: "2rem", fontWeight: 800, margin: 0 }}>
+      <div className="space-y-1">
+        <div className="flex items-center gap-3 flex-wrap">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
             Learning Progress & Analytics
           </h1>
           {activePath && (
-            <span
-              style={{
-                fontSize: "0.8rem",
-                fontWeight: 800,
-                padding: "0.2rem 0.6rem",
-                borderRadius: "6px",
-                background: "rgba(99, 102, 241, 0.2)",
-                color: "#a5b4fc",
-              }}
+            <Badge
+              variant="secondary"
+              className="font-bold text-xs bg-primary/10 text-primary border-primary/20"
             >
               v{activePath.version}
-            </span>
+            </Badge>
           )}
         </div>
-        <p style={{ color: "var(--text-secondary)", margin: 0 }}>
+        <p className="text-sm text-muted-foreground">
           Verifiable, monotonic execution records tracked against your active
           personalized curriculum.
         </p>
       </div>
 
       {actionSuccess && (
-        <div
-          className="alert-box alert-success"
-          style={{ marginBottom: "1.5rem" }}
-        >
-          ✅ {actionSuccess}
-        </div>
+        <Alert variant="success">
+          <AlertDescription>{actionSuccess}</AlertDescription>
+        </Alert>
       )}
 
       {error && (
-        <div
-          className="alert-box alert-error"
-          style={{ marginBottom: "1.5rem" }}
-        >
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {!activePath ? (
         <EmptyState
-          icon="📊"
+          icon={TrendingUp}
           title="No Active Progress Records"
           description="You don't have an active learning path yet. Generate your official path to begin tracking module completion."
           actionText="Generate Learning Path"
@@ -211,308 +227,129 @@ export default function ProgressPage() {
       ) : (
         <>
           {/* 2. Metrics Cards Grid */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-              gap: "1rem",
-              marginBottom: "2rem",
-            }}
-          >
-            <div
-              style={{
-                background: "var(--bg-surface)",
-                border: "1px solid var(--border-color)",
-                borderRadius: "10px",
-                padding: "1.25rem",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "0.8rem",
-                  color: "var(--text-muted)",
-                  fontWeight: 600,
-                  textTransform: "uppercase",
-                }}
-              >
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <Card className="p-4 shadow-sm">
+              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                 Overall Progress
-              </div>
-              <div
-                style={{
-                  fontSize: "1.85rem",
-                  fontWeight: 800,
-                  color: "#10b981",
-                  marginTop: "0.25rem",
-                }}
-              >
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-emerald-500 mt-1">
                 {summary?.overallProgress ?? 0}%
               </div>
-              <div
-                style={{
-                  fontSize: "0.75rem",
-                  color: "var(--text-secondary)",
-                  marginTop: "0.25rem",
-                }}
-              >
+              <span className="text-xs text-muted-foreground">
                 Actionable modules
-              </div>
-            </div>
+              </span>
+            </Card>
 
-            <div
-              style={{
-                background: "var(--bg-surface)",
-                border: "1px solid var(--border-color)",
-                borderRadius: "10px",
-                padding: "1.25rem",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "0.8rem",
-                  color: "var(--text-muted)",
-                  fontWeight: 600,
-                  textTransform: "uppercase",
-                }}
-              >
+            <Card className="p-4 shadow-sm">
+              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                 Completed
-              </div>
-              <div
-                style={{
-                  fontSize: "1.85rem",
-                  fontWeight: 800,
-                  color: "var(--text-primary)",
-                  marginTop: "0.25rem",
-                }}
-              >
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-foreground mt-1">
                 {summary?.completedModules ?? 0}
               </div>
-              <div
-                style={{
-                  fontSize: "0.75rem",
-                  color: "var(--text-secondary)",
-                  marginTop: "0.25rem",
-                }}
-              >
+              <span className="text-xs text-muted-foreground">
                 of {summary?.totalModules ?? 0} total
-              </div>
-            </div>
+              </span>
+            </Card>
 
-            <div
-              style={{
-                background: "var(--bg-surface)",
-                border: "1px solid var(--border-color)",
-                borderRadius: "10px",
-                padding: "1.25rem",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "0.8rem",
-                  color: "var(--text-muted)",
-                  fontWeight: 600,
-                  textTransform: "uppercase",
-                }}
-              >
+            <Card className="p-4 shadow-sm">
+              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                 In Progress
-              </div>
-              <div
-                style={{
-                  fontSize: "1.85rem",
-                  fontWeight: 800,
-                  color: "#818cf8",
-                  marginTop: "0.25rem",
-                }}
-              >
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-primary mt-1">
                 {summary?.inProgressModules ?? 0}
               </div>
-              <div
-                style={{
-                  fontSize: "0.75rem",
-                  color: "var(--text-secondary)",
-                  marginTop: "0.25rem",
-                }}
-              >
+              <span className="text-xs text-muted-foreground">
                 active topics
-              </div>
-            </div>
+              </span>
+            </Card>
 
-            <div
-              style={{
-                background: "var(--bg-surface)",
-                border: "1px solid var(--border-color)",
-                borderRadius: "10px",
-                padding: "1.25rem",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "0.8rem",
-                  color: "var(--text-muted)",
-                  fontWeight: 600,
-                  textTransform: "uppercase",
-                }}
-              >
+            <Card className="p-4 shadow-sm">
+              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                 Skipped
-              </div>
-              <div
-                style={{
-                  fontSize: "1.85rem",
-                  fontWeight: 800,
-                  color: "#f59e0b",
-                  marginTop: "0.25rem",
-                }}
-              >
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-amber-500 mt-1">
                 {summary?.skippedModules ?? 0}
               </div>
-              <div
-                style={{
-                  fontSize: "0.75rem",
-                  color: "var(--text-secondary)",
-                  marginTop: "0.25rem",
-                }}
-              >
+              <span className="text-xs text-muted-foreground">
                 excluded from total
-              </div>
-            </div>
+              </span>
+            </Card>
           </div>
 
           {/* 3. Overall Path Progress Bar */}
-          <div
-            style={{
-              background: "var(--bg-surface)",
-              border: "1px solid var(--border-color)",
-              borderRadius: "12px",
-              padding: "1.5rem",
-              marginBottom: "2.5rem",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: "0.5rem",
-              }}
-            >
-              <span style={{ fontWeight: 700, fontSize: "0.95rem" }}>
-                Path Execution Mastery
-              </span>
-              <span style={{ fontWeight: 700, color: "#10b981" }}>
+          <Card className="p-5 shadow-sm space-y-3">
+            <div className="flex justify-between items-center text-sm font-semibold">
+              <span className="text-foreground">Path Execution Mastery</span>
+              <span className="text-emerald-500 font-bold">
                 {summary?.overallProgress ?? 0}%
               </span>
             </div>
-            <ProgressBar value={summary?.overallProgress ?? 0} />
-          </div>
+            <ProgressBar
+              value={summary?.overallProgress ?? 0}
+              height="10px"
+              variant="gradient"
+            />
+          </Card>
 
           {/* 4. Module Execution Tracker */}
-          <div style={{ marginBottom: "3rem" }}>
-            <h2
-              style={{
-                fontSize: "1.35rem",
-                fontWeight: 700,
-                marginBottom: "1.25rem",
-              }}
-            >
+          <div className="space-y-4">
+            <h2 className="text-lg font-bold text-foreground">
               Module Execution Tracker
             </h2>
 
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
-            >
+            <div className="space-y-3">
               {(progressData?.modules || []).map((item, idx) => {
                 const status = item.status || "NOT_STARTED";
                 const percentage = item.percentage || 0;
 
                 return (
-                  <div
+                  <Card
                     key={item.moduleId || idx}
-                    style={{
-                      background: "var(--bg-surface)",
-                      border: "1px solid var(--border-color)",
-                      borderRadius: "10px",
-                      padding: "1.25rem 1.5rem",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "0.75rem",
-                    }}
+                    className="p-4 shadow-sm hover:border-primary/40 transition-all space-y-3"
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        flexWrap: "wrap",
-                        gap: "0.5rem",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.5rem",
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontSize: "0.8rem",
-                            fontWeight: 700,
-                            color: "#818cf8",
-                          }}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge
+                          variant="default"
+                          className="text-[10px] font-bold"
                         >
                           Step #{item.order || idx + 1}
-                        </span>
-                        <h3
-                          style={{
-                            fontSize: "1.1rem",
-                            fontWeight: 700,
-                            margin: 0,
-                          }}
-                        >
+                        </Badge>
+                        <h3 className="text-sm sm:text-base font-bold text-foreground">
                           {item.title}
                         </h3>
                       </div>
-                      <StatusBadge status={status} />
+                      <StatusBadge status={status} size="small" />
                     </div>
 
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "1rem",
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      <div style={{ flex: "1 1 250px" }}>
-                        <ProgressBar value={percentage} showLabel />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
+                      <div className="flex-1 max-w-md">
+                        <ProgressBar
+                          value={percentage}
+                          showLabel
+                          height="6px"
+                        />
                       </div>
 
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "0.5rem",
-                          flexWrap: "wrap",
-                        }}
-                      >
+                      <div className="flex items-center gap-2">
                         {(status === "NOT_STARTED" || status === "SKIPPED") && (
-                          <button
+                          <Button
+                            size="sm"
+                            variant="default"
                             onClick={() => handleStartModule(item.moduleId)}
-                            style={{
-                              padding: "0.35rem 0.8rem",
-                              fontSize: "0.8rem",
-                              fontWeight: 600,
-                              borderRadius: "6px",
-                              border: "1px solid var(--primary)",
-                              background: "var(--primary)",
-                              color: "#fff",
-                              cursor: "pointer",
-                            }}
+                            className="text-xs gap-1 h-7"
                           >
-                            ▶ Start
-                          </button>
+                            <Play className="h-3 w-3" />
+                            <span>Start</span>
+                          </Button>
                         )}
 
                         {status === "IN_PROGRESS" && (
                           <>
-                            <button
+                            <Button
+                              size="sm"
+                              variant="outline"
                               onClick={() =>
                                 handleUpdatePercentage(
                                   item.moduleId,
@@ -520,63 +357,36 @@ export default function ProgressPage() {
                                 )
                               }
                               disabled={percentage >= 100}
-                              style={{
-                                padding: "0.35rem 0.8rem",
-                                fontSize: "0.8rem",
-                                fontWeight: 600,
-                                borderRadius: "6px",
-                                border: "1px solid rgba(99, 102, 241, 0.4)",
-                                background: "rgba(99, 102, 241, 0.15)",
-                                color: "#818cf8",
-                                cursor: "pointer",
-                              }}
+                              className="text-xs h-7"
                             >
                               +25%
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="success"
                               onClick={() =>
                                 handleCompleteModule(item.moduleId)
                               }
-                              style={{
-                                padding: "0.35rem 0.8rem",
-                                fontSize: "0.8rem",
-                                fontWeight: 600,
-                                borderRadius: "6px",
-                                border: "none",
-                                background: "#10b981",
-                                color: "#fff",
-                                cursor: "pointer",
-                              }}
+                              className="text-xs h-7 gap-1"
                             >
-                              ✓ Complete
-                            </button>
-                            <button
+                              <Check className="h-3 w-3" />
+                              <span>Complete</span>
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
                               onClick={() => handleSkipModule(item.moduleId)}
-                              style={{
-                                padding: "0.35rem 0.8rem",
-                                fontSize: "0.8rem",
-                                fontWeight: 600,
-                                borderRadius: "6px",
-                                border: "1px solid rgba(245, 158, 11, 0.4)",
-                                background: "transparent",
-                                color: "#f59e0b",
-                                cursor: "pointer",
-                              }}
+                              className="text-xs text-muted-foreground h-7"
                             >
-                              ⏭ Skip
-                            </button>
+                              Skip
+                            </Button>
                           </>
                         )}
 
                         {status === "COMPLETED" && (
-                          <span
-                            style={{
-                              fontSize: "0.85rem",
-                              color: "#10b981",
-                              fontWeight: 700,
-                            }}
-                          >
-                            ✓ Done
+                          <span className="text-xs font-semibold text-emerald-500 flex items-center gap-1">
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            <span>Done</span>
                           </span>
                         )}
                       </div>
@@ -585,15 +395,7 @@ export default function ProgressPage() {
                     {(item.startedAt ||
                       item.completedAt ||
                       item.lastAccessedAt) && (
-                      <div
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "var(--text-muted)",
-                          display: "flex",
-                          gap: "1rem",
-                          flexWrap: "wrap",
-                        }}
-                      >
+                      <div className="text-[11px] text-muted-foreground flex gap-4 flex-wrap pt-1 border-t">
                         {item.startedAt && (
                           <span>
                             Started:{" "}
@@ -611,83 +413,50 @@ export default function ProgressPage() {
                             Last accessed:{" "}
                             {new Date(item.lastAccessedAt).toLocaleTimeString(
                               [],
-                              { hour: "2-digit", minute: "2-digit" },
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
                             )}
                           </span>
                         )}
                       </div>
                     )}
-                  </div>
+                  </Card>
                 );
               })}
             </div>
           </div>
 
           {/* 5. Immutable Progress History Audit Trail */}
-          <div>
-            <h2
-              style={{
-                fontSize: "1.35rem",
-                fontWeight: 700,
-                marginBottom: "1rem",
-              }}
-            >
-              Immutable Progress Audit Trail
-            </h2>
+          <div className="space-y-4 pt-4">
+            <div className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-muted-foreground" />
+              <h2 className="text-lg font-bold text-foreground">
+                Immutable Progress Audit Trail
+              </h2>
+            </div>
 
             {history.length === 0 ? (
-              <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>
+              <p className="text-xs text-muted-foreground">
                 No progress transitions logged yet. Start or update a module to
                 record activity.
               </p>
             ) : (
-              <div
-                style={{
-                  background: "var(--bg-surface)",
-                  border: "1px solid var(--border-color)",
-                  borderRadius: "12px",
-                  overflowX: "auto",
-                }}
-              >
-                <table
-                  style={{
-                    width: "100%",
-                    borderCollapse: "collapse",
-                    textAlign: "left",
-                    fontSize: "0.85rem",
-                  }}
-                >
-                  <thead>
-                    <tr
-                      style={{
-                        borderBottom: "1px solid var(--border-color)",
-                        background: "var(--bg-surface-elevated)",
-                      }}
-                    >
-                      <th style={{ padding: "0.75rem 1rem" }}>Timestamp</th>
-                      <th style={{ padding: "0.75rem 1rem" }}>Action</th>
-                      <th style={{ padding: "0.75rem 1rem" }}>Module</th>
-                      <th style={{ padding: "0.75rem 1rem" }}>Transition</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+              <Card className="overflow-hidden shadow-sm">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Timestamp</TableHead>
+                      <TableHead>Action</TableHead>
+                      <TableHead>Module</TableHead>
+                      <TableHead>Transition</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {history.map((record, idx) => (
-                      <tr
-                        key={record.id || idx}
-                        style={{
-                          borderBottom:
-                            idx === history.length - 1
-                              ? "none"
-                              : "1px solid var(--border-color)",
-                        }}
-                      >
-                        <td
-                          style={{
-                            padding: "0.75rem 1rem",
-                            color: "var(--text-muted)",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
+                      <TableRow key={record.id || idx}>
+                        <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                           {new Date(record.timestamp).toLocaleString(
                             undefined,
                             {
@@ -697,43 +466,30 @@ export default function ProgressPage() {
                               minute: "2-digit",
                             },
                           )}
-                        </td>
-                        <td style={{ padding: "0.75rem 1rem" }}>
-                          <span
-                            style={{
-                              fontSize: "0.75rem",
-                              fontWeight: 700,
-                              padding: "0.2rem 0.5rem",
-                              borderRadius: "4px",
-                              background: "rgba(99, 102, 241, 0.15)",
-                              color: "#818cf8",
-                            }}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="secondary"
+                            className="text-[10px] font-bold uppercase tracking-wider"
                           >
                             {record.action}
-                          </span>
-                        </td>
-                        <td
-                          style={{ padding: "0.75rem 1rem", fontWeight: 600 }}
-                        >
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="font-semibold text-xs text-foreground">
                           {record.moduleTitle || "Curriculum Module"}
-                        </td>
-                        <td
-                          style={{
-                            padding: "0.75rem 1rem",
-                            color: "var(--text-secondary)",
-                          }}
-                        >
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
                           {record.previousPercentage}% ({record.previousStatus})
-                          →{" "}
-                          <strong>
+                          &rarr;{" "}
+                          <strong className="text-foreground">
                             {record.newPercentage}% ({record.newStatus})
                           </strong>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
-              </div>
+                  </TableBody>
+                </Table>
+              </Card>
             )}
           </div>
         </>

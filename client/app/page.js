@@ -5,6 +5,22 @@ import Link from "next/link";
 import HealthStatus from "../components/HealthStatus";
 import AuthStatusCard from "../components/AuthStatusCard";
 import authService from "../services/authService";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Compass,
+  Brain,
+  UserCheck,
+  Target,
+  Sparkles,
+  Rocket,
+  GitFork,
+  ShieldCheck,
+  Activity,
+  ArrowRight,
+  Info,
+} from "lucide-react";
 
 export default function HomePage() {
   const [user, setUser] = useState(null);
@@ -14,387 +30,211 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "1rem 0" }}>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-16 sm:space-y-24">
       {/* 1. Hero Section */}
-      <section style={{ textAlign: "center", padding: "3rem 1rem 4rem" }}>
-        <div
-          style={{
-            display: "inline-block",
-            fontSize: "0.8rem",
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "0.08em",
-            padding: "0.35rem 0.9rem",
-            borderRadius: "9999px",
-            background: "rgba(99, 102, 241, 0.15)",
-            color: "#818cf8",
-            border: "1px solid rgba(99, 102, 241, 0.3)",
-            marginBottom: "1.5rem",
-          }}
-        >
-          Psychometric Learning Path Recommender
+      <section className="text-center pt-8 pb-4 max-w-4xl mx-auto space-y-6">
+        <div className="inline-flex items-center gap-2">
+          <Badge
+            variant="secondary"
+            className="px-3 py-1 text-xs font-semibold uppercase tracking-wider bg-primary/10 text-primary border-primary/20"
+          >
+            Psychometric Learning Path Recommender
+          </Badge>
         </div>
 
-        <h1
-          style={{
-            fontSize: "clamp(2.2rem, 5vw, 3.75rem)",
-            fontWeight: 800,
-            lineHeight: 1.15,
-            letterSpacing: "-0.03em",
-            marginBottom: "1.25rem",
-            background:
-              "linear-gradient(135deg, #ffffff 0%, #cbd5e1 60%, #94a3b8 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}
-        >
-          Master Software Engineering <br />
-          Tailored to How Your Brain Learns
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.15] text-foreground">
+          Master Software Engineering <br className="hidden sm:inline" />
+          <span className="bg-gradient-to-r from-primary via-purple-400 to-accent bg-clip-text text-transparent">
+            Tailored to How Your Brain Learns
+          </span>
         </h1>
 
-        <p
-          style={{
-            fontSize: "1.15rem",
-            color: "var(--text-secondary)",
-            maxWidth: "680px",
-            margin: "0 auto 2.5rem",
-            lineHeight: 1.6,
-          }}
-        >
+        <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
           PsychePath maps your cognitive strengths, aligns technical goals with
           prerequisite curriculum graphs, and generates personalized, AI-guided
           learning paths with verifiable progress tracking.
         </p>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "1rem",
-            flexWrap: "wrap",
-          }}
-        >
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           {user ? (
-            <Link
-              href="/dashboard"
-              style={{
-                background: "linear-gradient(135deg, #6366f1, #a855f7)",
-                color: "#ffffff",
-                padding: "0.85rem 2rem",
-                borderRadius: "10px",
-                fontWeight: 700,
-                fontSize: "1rem",
-                textDecoration: "none",
-                boxShadow: "0 10px 25px -5px rgba(99, 102, 241, 0.4)",
-              }}
-            >
-              Go to Your Dashboard →
+            <Link href="/dashboard">
+              <Button size="lg" className="gap-2 shadow-lg text-base">
+                <span>Go to Your Dashboard</span>
+                <ArrowRight className="h-4 w-4" />
+              </Button>
             </Link>
           ) : (
             <>
-              <Link
-                href="/register"
-                style={{
-                  background: "linear-gradient(135deg, #6366f1, #a855f7)",
-                  color: "#ffffff",
-                  padding: "0.85rem 2rem",
-                  borderRadius: "10px",
-                  fontWeight: 700,
-                  fontSize: "1rem",
-                  textDecoration: "none",
-                  boxShadow: "0 10px 25px -5px rgba(99, 102, 241, 0.4)",
-                }}
-              >
-                Get Started Free →
+              <Link href="/register">
+                <Button size="lg" className="gap-2 shadow-lg text-base">
+                  <span>Get Started Free</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
               </Link>
-              <Link
-                href="/login"
-                style={{
-                  background: "var(--bg-surface-elevated)",
-                  color: "var(--text-primary)",
-                  border: "1px solid var(--border-color)",
-                  padding: "0.85rem 2rem",
-                  borderRadius: "10px",
-                  fontWeight: 600,
-                  fontSize: "1rem",
-                  textDecoration: "none",
-                }}
-              >
-                Sign In
+              <Link href="/login">
+                <Button variant="outline" size="lg" className="text-base">
+                  Sign In
+                </Button>
               </Link>
             </>
           )}
-          <Link
-            href="/assessments"
-            style={{
-              background: "transparent",
-              color: "var(--text-secondary)",
-              border: "1px solid rgba(255, 255, 255, 0.15)",
-              padding: "0.85rem 1.5rem",
-              borderRadius: "10px",
-              fontWeight: 600,
-              fontSize: "1rem",
-              textDecoration: "none",
-            }}
-          >
-            Explore Diagnostics
+          <Link href="/assessments">
+            <Button
+              variant="ghost"
+              size="lg"
+              className="text-base text-muted-foreground hover:text-foreground"
+            >
+              Explore Diagnostics
+            </Button>
           </Link>
         </div>
       </section>
 
       {/* 2. How It Works (5 Steps) */}
-      <section style={{ marginBottom: "5rem" }}>
-        <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-          <h2
-            style={{
-              fontSize: "1.85rem",
-              fontWeight: 800,
-              marginBottom: "0.5rem",
-            }}
-          >
+      <section className="space-y-8">
+        <div className="text-center space-y-2">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
             The 5-Step Learner Journey
           </h2>
-          <p style={{ color: "var(--text-secondary)", fontSize: "1rem" }}>
+          <p className="text-sm sm:text-base text-muted-foreground">
             From diagnostic self-discovery to progressive curriculum mastery.
           </p>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
-            gap: "1rem",
-          }}
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {[
             {
               step: "01",
               title: "Cognitive Assessment",
               desc: "Complete a 12-question diagnostic assessing processing style, learning pace, and structure preference.",
-              icon: "🧠",
+              icon: Brain,
             },
             {
               step: "02",
               title: "Learner Profile",
               desc: "Define your technical goals, existing skills, and weekly commitment hours.",
-              icon: "👤",
+              icon: UserCheck,
             },
             {
               step: "03",
               title: "Curriculum Scoring",
               desc: "Deterministic multi-factor algorithm filters and scores modules by goals and prerequisite readiness.",
-              icon: "🎯",
+              icon: Target,
             },
             {
               step: "04",
               title: "AI Personalization",
               desc: "Gemini synthesizes a personalized pacing strategy and study approach with DAG integrity guarantees.",
-              icon: "✨",
+              icon: Sparkles,
             },
             {
               step: "05",
               title: "Progress & Mastery",
               desc: "Execute modules, track monotonic percentages, audit transitions, and earn verified path completion.",
-              icon: "🚀",
+              icon: Rocket,
             },
-          ].map((s) => (
-            <div
-              key={s.step}
-              style={{
-                background: "var(--bg-surface)",
-                border: "1px solid var(--border-color)",
-                borderRadius: "12px",
-                padding: "1.5rem",
-                position: "relative",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "0.75rem",
-                  fontWeight: 800,
-                  color: "var(--primary)",
-                  marginBottom: "0.75rem",
-                }}
+          ].map((s) => {
+            const Icon = s.icon;
+            return (
+              <Card
+                key={s.step}
+                className="hover:border-primary/50 transition-colors shadow-sm relative flex flex-col justify-between"
               >
-                STEP {s.step}
-              </div>
-              <div style={{ fontSize: "1.75rem", marginBottom: "0.75rem" }}>
-                {s.icon}
-              </div>
-              <h3
-                style={{
-                  fontSize: "1.05rem",
-                  fontWeight: 700,
-                  marginBottom: "0.5rem",
-                }}
-              >
-                {s.title}
-              </h3>
-              <p
-                style={{
-                  color: "var(--text-secondary)",
-                  fontSize: "0.85rem",
-                  lineHeight: 1.5,
-                }}
-              >
-                {s.desc}
-              </p>
-            </div>
-          ))}
+                <CardContent className="p-5 space-y-3">
+                  <div className="text-[11px] font-bold text-primary tracking-wider">
+                    STEP {s.step}
+                  </div>
+                  <div className="p-2 rounded-lg bg-primary/10 text-primary w-fit">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-sm font-bold text-foreground">
+                    {s.title}
+                  </h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {s.desc}
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </section>
 
       {/* 3. Core Architectural Features */}
-      <section style={{ marginBottom: "5rem" }}>
-        <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-          <h2
-            style={{
-              fontSize: "1.85rem",
-              fontWeight: 800,
-              marginBottom: "0.5rem",
-            }}
-          >
+      <section className="space-y-8">
+        <div className="text-center space-y-2">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
             Engineered for Educational Precision
           </h2>
-          <p style={{ color: "var(--text-secondary)", fontSize: "1rem" }}>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Built on strict computer science guarantees, deterministic rules,
             and AI guardrails.
           </p>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-            gap: "1.5rem",
-          }}
-        >
-          <div
-            style={{
-              background: "var(--bg-surface)",
-              border: "1px solid var(--border-color)",
-              borderRadius: "12px",
-              padding: "2rem",
-            }}
-          >
-            <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>📐</div>
-            <h3
-              style={{
-                fontSize: "1.2rem",
-                fontWeight: 700,
-                marginBottom: "0.5rem",
-              }}
-            >
-              Deterministic Prerequisite DAG
-            </h3>
-            <p
-              style={{
-                color: "var(--text-secondary)",
-                fontSize: "0.9rem",
-                lineHeight: 1.6,
-              }}
-            >
-              Curriculum dependencies form a Directed Acyclic Graph (DAG) with
-              Kahn cycle detection. Prerequisite modules are strictly scheduled
-              before dependent topics, eliminating learning blockers.
-            </p>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="shadow-sm">
+            <CardContent className="p-6 space-y-3">
+              <div className="p-3 rounded-xl bg-primary/10 text-primary w-fit">
+                <GitFork className="h-6 w-6" />
+              </div>
+              <h3 className="text-base font-bold text-foreground">
+                Deterministic Prerequisite DAG
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Curriculum dependencies form a Directed Acyclic Graph (DAG) with
+                Kahn cycle detection. Prerequisite modules are strictly
+                scheduled before dependent topics, eliminating learning
+                blockers.
+              </p>
+            </CardContent>
+          </Card>
 
-          <div
-            style={{
-              background: "var(--bg-surface)",
-              border: "1px solid var(--border-color)",
-              borderRadius: "12px",
-              padding: "2rem",
-            }}
-          >
-            <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>🛡️</div>
-            <h3
-              style={{
-                fontSize: "1.2rem",
-                fontWeight: 700,
-                marginBottom: "0.5rem",
-              }}
-            >
-              Zero-Hallucination AI Architecture
-            </h3>
-            <p
-              style={{
-                color: "var(--text-secondary)",
-                fontSize: "0.9rem",
-                lineHeight: 1.6,
-              }}
-            >
-              Gemini personalizes narrative and study strategy, but cannot
-              invent courses or modify prerequisite rules. All module references
-              and duration totals are authoritative in MongoDB.
-            </p>
-          </div>
+          <Card className="shadow-sm">
+            <CardContent className="p-6 space-y-3">
+              <div className="p-3 rounded-xl bg-purple-500/10 text-purple-400 w-fit">
+                <ShieldCheck className="h-6 w-6" />
+              </div>
+              <h3 className="text-base font-bold text-foreground">
+                Zero-Hallucination AI Architecture
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Gemini personalizes narrative and study strategy, but cannot
+                invent courses or modify prerequisite rules. All module
+                references and duration totals are authoritative in MongoDB.
+              </p>
+            </CardContent>
+          </Card>
 
-          <div
-            style={{
-              background: "var(--bg-surface)",
-              border: "1px solid var(--border-color)",
-              borderRadius: "12px",
-              padding: "2rem",
-            }}
-          >
-            <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>📊</div>
-            <h3
-              style={{
-                fontSize: "1.2rem",
-                fontWeight: 700,
-                marginBottom: "0.5rem",
-              }}
-            >
-              Server Source of Truth Progress
-            </h3>
-            <p
-              style={{
-                color: "var(--text-secondary)",
-                fontSize: "0.9rem",
-                lineHeight: 1.6,
-              }}
-            >
-              Monotonic progress enforcement prevents accidental regression.
-              Every transition is recorded in an immutable audit trail with
-              versioned path isolation.
-            </p>
-          </div>
+          <Card className="shadow-sm">
+            <CardContent className="p-6 space-y-3">
+              <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 w-fit">
+                <Activity className="h-6 w-6" />
+              </div>
+              <h3 className="text-base font-bold text-foreground">
+                Server Source of Truth Progress
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Monotonic progress enforcement prevents accidental regression.
+                Every transition is recorded in an immutable audit trail with
+                versioned path isolation.
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
       {/* 4. Educational Framing Notice */}
-      <section
-        style={{
-          background: "rgba(99, 102, 241, 0.05)",
-          border: "1px solid rgba(99, 102, 241, 0.2)",
-          borderRadius: "12px",
-          padding: "1.75rem 2rem",
-          marginBottom: "4rem",
-        }}
-      >
-        <div style={{ display: "flex", gap: "1rem", alignItems: "flex-start" }}>
-          <span style={{ fontSize: "1.5rem" }}>ℹ️</span>
-          <div>
-            <h4
-              style={{
-                fontSize: "1rem",
-                fontWeight: 700,
-                marginBottom: "0.35rem",
-                color: "#a5b4fc",
-              }}
-            >
+      <section className="rounded-2xl border border-primary/20 bg-primary/5 p-6 sm:p-8">
+        <div className="flex items-start gap-4">
+          <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0 mt-0.5">
+            <Info className="h-5 w-5" />
+          </div>
+          <div className="space-y-1">
+            <h4 className="text-sm font-bold text-primary">
               Educational Scope & Non-Clinical Framing
             </h4>
-            <p
-              style={{
-                color: "var(--text-secondary)",
-                fontSize: "0.875rem",
-                lineHeight: 1.5,
-                margin: 0,
-              }}
-            >
+            <p className="text-xs text-muted-foreground leading-relaxed">
               PsychePath diagnostic assessments are designed purely to model
               learning pace, information processing preferences, and technical
               curriculum alignment. They do not constitute medical,
@@ -405,13 +245,11 @@ export default function HomePage() {
       </section>
 
       {/* 5. Live Architecture & System Status */}
-      <section style={{ marginBottom: "3rem" }}>
-        <h3
-          style={{ fontSize: "1.2rem", fontWeight: 700, marginBottom: "1rem" }}
-        >
+      <section className="space-y-4 pb-8">
+        <h3 className="text-lg font-bold tracking-tight text-foreground">
           Live System Health & API Telemetry
         </h3>
-        <div className="status-grid-container">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <HealthStatus />
           <AuthStatusCard />
         </div>

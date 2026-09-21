@@ -8,6 +8,31 @@ import adminService from "../../../../services/adminService";
 import StatusBadge from "../../../../components/ui/StatusBadge";
 import ProgressBar from "../../../../components/ui/ProgressBar";
 import ConfirmModal from "../../../../components/admin/ConfirmModal";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { CardSkeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "@/components/ui/use-toast";
+import {
+  ArrowLeft,
+  User,
+  Mail,
+  BookOpen,
+  Award,
+  CheckCircle2,
+  Lock,
+  Clock,
+  Briefcase,
+  GraduationCap,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function LearnerDetailPage() {
   const { id } = useParams();
@@ -46,10 +71,16 @@ export default function LearnerDetailPage() {
         data.user._id,
         !data.user.isActive,
       );
+      const actionText = !data.user.isActive ? "activated" : "deactivated";
+      toast.success(
+        "Account Status Updated",
+        `${data.user.firstName} ${data.user.lastName} has been ${actionText}.`,
+      );
       setModalOpen(false);
       fetchDetails();
     } catch (err) {
-      alert(err.message || "Failed to update account status");
+      const errMsg = err.message || "Failed to update account status";
+      toast.error("Status Update Failed", errMsg);
     } finally {
       setToggleLoading(false);
     }
@@ -61,14 +92,9 @@ export default function LearnerDetailPage() {
         title="Learner Details"
         subtitle="Inspecting student profile and learning activity."
       >
-        <div
-          style={{
-            textAlign: "center",
-            padding: "4rem",
-            color: "var(--text-muted)",
-          }}
-        >
-          Loading learner data...
+        <div className="space-y-6">
+          <CardSkeleton count={1} />
+          <CardSkeleton count={2} />
         </div>
       </AdminLayout>
     );
@@ -80,21 +106,17 @@ export default function LearnerDetailPage() {
         title="Learner Not Found"
         subtitle="Requested learner record could not be retrieved."
       >
-        <div
-          style={{
-            background: "rgba(239, 68, 68, 0.1)",
-            border: "1px solid rgba(239, 68, 68, 0.3)",
-            color: "#f87171",
-            padding: "1rem",
-            borderRadius: "8px",
-            marginBottom: "1.5rem",
-          }}
-        >
-          {error || "Learner not found"}
+        <div className="space-y-4 max-w-xl">
+          <Alert variant="destructive">
+            <AlertDescription>{error || "Learner not found"}</AlertDescription>
+          </Alert>
+          <Link href="/admin/learners">
+            <Button variant="outline" size="sm" className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back to Learners Directory</span>
+            </Button>
+          </Link>
         </div>
-        <Link href="/admin/learners" className="btn-secondary-small">
-          ← Back to Learners Directory
-        </Link>
       </AdminLayout>
     );
   }
@@ -103,523 +125,270 @@ export default function LearnerDetailPage() {
 
   return (
     <AdminLayout>
-      {/* Back Navigation */}
-      <div style={{ marginBottom: "1rem" }}>
-        <Link
-          href="/admin/learners"
-          style={{
-            color: "var(--text-muted)",
-            fontSize: "0.85rem",
-            textDecoration: "none",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.25rem",
-          }}
-        >
-          ← Back to Learners Directory
-        </Link>
-      </div>
-
-      {/* Header Banner */}
-      <div
-        style={{
-          background: "var(--bg-surface, #1e293b)",
-          border: "1px solid var(--border-color, #334155)",
-          borderRadius: "12px",
-          padding: "1.75rem",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "1rem",
-          marginBottom: "1.5rem",
-        }}
-      >
+      <div className="space-y-6">
+        {/* Back Navigation */}
         <div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.75rem",
-              marginBottom: "0.25rem",
-            }}
-          >
-            <h1 style={{ fontSize: "1.75rem", fontWeight: 800, margin: 0 }}>
-              {user.firstName} {user.lastName}
-            </h1>
-            <StatusBadge status={user.isActive ? "ACTIVE" : "INACTIVE"} />
-          </div>
-          <div style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>
-            {user.email} • Registered{" "}
-            {new Date(user.createdAt).toLocaleDateString()}
-          </div>
+          <Link href="/admin/learners">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1.5 text-xs text-muted-foreground hover:text-foreground h-8 px-2"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              <span>Back to Learners Directory</span>
+            </Button>
+          </Link>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setModalOpen(true)}
-          style={{
-            background: "transparent",
-            border: "1px solid var(--border-color)",
-            color: user.isActive ? "#f87171" : "#34d399",
-            padding: "0.5rem 1rem",
-            borderRadius: "6px",
-            fontSize: "0.85rem",
-            fontWeight: 600,
-            cursor: "pointer",
-          }}
-        >
-          {user.isActive ? "Deactivate Account" : "Activate Account"}
-        </button>
-      </div>
+        {/* Header Banner */}
+        <Card className="p-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
+                  {user.firstName} {user.lastName}
+                </h1>
+                <StatusBadge status={user.isActive ? "ACTIVE" : "INACTIVE"} />
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {user.email} &bull; Registered{" "}
+                {new Date(user.createdAt).toLocaleDateString()}
+              </div>
+            </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-        {/* Profile & Academic Attributes */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-            gap: "1.5rem",
-          }}
-        >
-          {/* Profile Overview */}
-          <div
-            style={{
-              background: "var(--bg-surface, #1e293b)",
-              border: "1px solid var(--border-color, #334155)",
-              borderRadius: "12px",
-              padding: "1.5rem",
-            }}
-          >
-            <h3
-              style={{
-                margin: "0 0 1rem 0",
-                fontSize: "1.1rem",
-                fontWeight: 700,
-              }}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setModalOpen(true)}
+              className={cn(
+                "text-xs h-8 shrink-0",
+                user.isActive
+                  ? "text-destructive hover:bg-destructive/10"
+                  : "text-emerald-500 hover:bg-emerald-500/10",
+              )}
             >
+              {user.isActive ? "Deactivate Account" : "Activate Account"}
+            </Button>
+          </div>
+        </Card>
+
+        {/* Profile & Academic Attributes Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Profile Overview */}
+          <Card className="p-5 shadow-sm space-y-4">
+            <h3 className="text-base font-bold text-foreground">
               Learner Profile & Preferences
             </h3>
             {profile ? (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "0.75rem",
-                  fontSize: "0.9rem",
-                }}
-              >
-                <div
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <span style={{ color: "var(--text-muted)" }}>
-                    Education Level:
+              <div className="space-y-3 text-xs">
+                <div className="flex justify-between py-1 border-b">
+                  <span className="text-muted-foreground flex items-center gap-1.5">
+                    <GraduationCap className="h-3.5 w-3.5" />
+                    <span>Education Level:</span>
                   </span>
-                  <span style={{ fontWeight: 600 }}>
+                  <span className="font-semibold text-foreground">
                     {profile.educationLevel || "Not specified"}
                   </span>
                 </div>
-                <div
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <span style={{ color: "var(--text-muted)" }}>
-                    Experience Level:
+                <div className="flex justify-between py-1 border-b">
+                  <span className="text-muted-foreground flex items-center gap-1.5">
+                    <Briefcase className="h-3.5 w-3.5" />
+                    <span>Experience Level:</span>
                   </span>
-                  <span style={{ fontWeight: 600 }}>
+                  <span className="font-semibold text-foreground">
                     {profile.experienceLevel || "BEGINNER"}
                   </span>
                 </div>
-                <div
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <span style={{ color: "var(--text-muted)" }}>
-                    Weekly Study Hours:
+                <div className="flex justify-between py-1 border-b">
+                  <span className="text-muted-foreground flex items-center gap-1.5">
+                    <Clock className="h-3.5 w-3.5" />
+                    <span>Weekly Study Hours:</span>
                   </span>
-                  <span style={{ fontWeight: 600 }}>
+                  <span className="font-semibold text-foreground">
                     {profile.weeklyLearningHours || 5} hrs/week
                   </span>
                 </div>
-                <div
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <span style={{ color: "var(--text-muted)" }}>
+                <div className="flex justify-between py-1 border-b">
+                  <span className="text-muted-foreground">
                     Preferred Format:
                   </span>
-                  <span style={{ fontWeight: 600 }}>
+                  <span className="font-semibold text-foreground">
                     {profile.learningPreferences?.preferredFormat || "MIXED"}
                   </span>
                 </div>
-                <div
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <span style={{ color: "var(--text-muted)" }}>
+                <div className="flex justify-between py-1">
+                  <span className="text-muted-foreground">
                     Preferred Difficulty:
                   </span>
-                  <span style={{ fontWeight: 600 }}>
+                  <span className="font-semibold text-foreground">
                     {profile.learningPreferences?.preferredDifficulty ||
                       "BEGINNER"}
                   </span>
                 </div>
               </div>
             ) : (
-              <p
-                style={{
-                  color: "var(--text-muted)",
-                  fontSize: "0.875rem",
-                  margin: 0,
-                }}
-              >
+              <p className="text-xs text-muted-foreground">
                 Learner has not configured their academic profile yet.
               </p>
             )}
-          </div>
+          </Card>
 
           {/* Skills & Goals */}
-          <div
-            style={{
-              background: "var(--bg-surface, #1e293b)",
-              border: "1px solid var(--border-color, #334155)",
-              borderRadius: "12px",
-              padding: "1.5rem",
-            }}
-          >
-            <h3
-              style={{
-                margin: "0 0 1rem 0",
-                fontSize: "1.1rem",
-                fontWeight: 700,
-              }}
-            >
+          <Card className="p-5 shadow-sm space-y-4">
+            <h3 className="text-base font-bold text-foreground">
               Skills & Target Goals
             </h3>
             {profile ? (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "1rem",
-                }}
-              >
+              <div className="space-y-4 text-xs">
                 {/* Skills */}
-                <div>
-                  <div
-                    style={{
-                      fontSize: "0.8rem",
-                      color: "var(--text-muted)",
-                      textTransform: "uppercase",
-                      marginBottom: "0.4rem",
-                    }}
-                  >
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                     Current Skills
-                  </div>
+                  </span>
                   {profile.currentSkills?.length > 0 ? (
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: "0.4rem",
-                      }}
-                    >
+                    <div className="flex flex-wrap gap-1.5">
                       {profile.currentSkills.map((sk, idx) => (
-                        <span
+                        <Badge
                           key={idx}
-                          style={{
-                            background: "rgba(99, 102, 241, 0.15)",
-                            color: "#a5b4fc",
-                            border: "1px solid rgba(99, 102, 241, 0.3)",
-                            padding: "0.2rem 0.55rem",
-                            borderRadius: "4px",
-                            fontSize: "0.8rem",
-                          }}
+                          variant="secondary"
+                          className="text-[11px]"
                         >
                           {sk.name} ({sk.level})
-                        </span>
+                        </Badge>
                       ))}
                     </div>
                   ) : (
-                    <span
-                      style={{
-                        color: "var(--text-muted)",
-                        fontSize: "0.85rem",
-                      }}
-                    >
-                      None listed
-                    </span>
+                    <span className="text-muted-foreground">None listed</span>
                   )}
                 </div>
 
                 {/* Goals */}
-                <div>
-                  <div
-                    style={{
-                      fontSize: "0.8rem",
-                      color: "var(--text-muted)",
-                      textTransform: "uppercase",
-                      marginBottom: "0.4rem",
-                    }}
-                  >
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                     Learning Goals
-                  </div>
+                  </span>
                   {profile.learningGoals?.length > 0 ? (
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: "0.4rem",
-                      }}
-                    >
+                    <div className="flex flex-wrap gap-1.5">
                       {profile.learningGoals.map((g, idx) => (
-                        <span
+                        <Badge
                           key={idx}
-                          style={{
-                            background: "rgba(16, 185, 129, 0.12)",
-                            color: "#34d399",
-                            border: "1px solid rgba(16, 185, 129, 0.25)",
-                            padding: "0.2rem 0.55rem",
-                            borderRadius: "4px",
-                            fontSize: "0.8rem",
-                          }}
+                          variant="outline"
+                          className="text-[11px] text-emerald-500 border-emerald-500/30"
                         >
                           🎯 {g.name}
-                        </span>
+                        </Badge>
                       ))}
                     </div>
                   ) : (
-                    <span
-                      style={{
-                        color: "var(--text-muted)",
-                        fontSize: "0.85rem",
-                      }}
-                    >
-                      None listed
-                    </span>
+                    <span className="text-muted-foreground">None listed</span>
                   )}
                 </div>
               </div>
             ) : (
-              <p
-                style={{
-                  color: "var(--text-muted)",
-                  fontSize: "0.875rem",
-                  margin: 0,
-                }}
-              >
+              <p className="text-xs text-muted-foreground">
                 No skills or goals configured.
               </p>
             )}
-          </div>
+          </Card>
         </div>
 
         {/* Assessment Attempts */}
-        <div
-          style={{
-            background: "var(--bg-surface, #1e293b)",
-            border: "1px solid var(--border-color, #334155)",
-            borderRadius: "12px",
-            padding: "1.5rem",
-          }}
-        >
-          <h3
-            style={{
-              margin: "0 0 1rem 0",
-              fontSize: "1.1rem",
-              fontWeight: 700,
-            }}
-          >
+        <Card className="p-5 shadow-sm space-y-4">
+          <h3 className="text-base font-bold text-foreground">
             Psychometric Assessment History ({attempts.length})
           </h3>
           {attempts.length === 0 ? (
-            <p
-              style={{
-                color: "var(--text-muted)",
-                fontSize: "0.875rem",
-                margin: 0,
-              }}
-            >
+            <p className="text-xs text-muted-foreground">
               Learner has not initiated any assessments yet.
             </p>
           ) : (
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
-            >
+            <div className="space-y-3">
               {attempts.map((att) => (
                 <div
                   key={att._id}
-                  style={{
-                    padding: "1rem",
-                    background: "rgba(255, 255, 255, 0.02)",
-                    border: "1px solid var(--border-color)",
-                    borderRadius: "8px",
-                  }}
+                  className="p-3.5 rounded-xl border bg-muted/20 space-y-2 text-xs"
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: "0.5rem",
-                    }}
-                  >
+                  <div className="flex items-center justify-between">
                     <div>
-                      <span style={{ fontWeight: 700, fontSize: "0.95rem" }}>
+                      <span className="font-semibold text-foreground text-sm">
                         {att.assessment?.title || "Assessment"}
                       </span>
-                      <span
-                        style={{
-                          fontSize: "0.8rem",
-                          color: "var(--text-muted)",
-                          marginLeft: "0.5rem",
-                        }}
-                      >
+                      <span className="text-muted-foreground ml-2">
                         ({att.assessment?.type})
                       </span>
                     </div>
                     <StatusBadge status={att.status} size="small" />
                   </div>
 
-                  <div
-                    style={{
-                      fontSize: "0.8rem",
-                      color: "var(--text-muted)",
-                      marginBottom: "0.5rem",
-                    }}
-                  >
+                  <div className="text-muted-foreground text-[11px]">
                     Started: {new Date(att.createdAt).toLocaleString()}
                     {att.submittedAt &&
                       ` • Submitted: ${new Date(att.submittedAt).toLocaleString()}`}
                   </div>
 
                   {att.scores && Object.keys(att.scores).length > 0 && (
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: "0.5rem",
-                        marginTop: "0.5rem",
-                      }}
-                    >
+                    <div className="flex flex-wrap gap-1.5 pt-1">
                       {Object.entries(att.scores).map(([dim, score]) => (
-                        <span
+                        <Badge
                           key={dim}
-                          style={{
-                            background: "rgba(255, 255, 255, 0.05)",
-                            border: "1px solid var(--border-color)",
-                            padding: "0.2rem 0.5rem",
-                            borderRadius: "4px",
-                            fontSize: "0.75rem",
-                          }}
+                          variant="secondary"
+                          className="text-[10px]"
                         >
                           <strong>{dim}:</strong> {score}%
-                        </span>
+                        </Badge>
                       ))}
                     </div>
                   )}
 
                   {att.resultSummary && (
-                    <p
-                      style={{
-                        margin: "0.5rem 0 0 0",
-                        fontSize: "0.85rem",
-                        color: "var(--text-secondary)",
-                        fontStyle: "italic",
-                      }}
-                    >
-                      "{att.resultSummary}"
+                    <p className="text-muted-foreground italic pt-1">
+                      &ldquo;{att.resultSummary}&rdquo;
                     </p>
                   )}
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Active Learning Path & Progress */}
-        <div
-          style={{
-            background: "var(--bg-surface, #1e293b)",
-            border: "1px solid var(--border-color, #334155)",
-            borderRadius: "12px",
-            padding: "1.5rem",
-          }}
-        >
-          <h3
-            style={{
-              margin: "0 0 1rem 0",
-              fontSize: "1.1rem",
-              fontWeight: 700,
-            }}
-          >
+        <Card className="p-5 shadow-sm space-y-4">
+          <h3 className="text-base font-bold text-foreground">
             Active Learning Path & Progress
           </h3>
           {learningPath ? (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "1.25rem",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  flexWrap: "wrap",
-                  gap: "0.5rem",
-                }}
-              >
+            <div className="space-y-4">
+              <div className="flex items-center justify-between flex-wrap gap-2 text-xs">
                 <div>
-                  <span style={{ fontWeight: 700, fontSize: "1rem" }}>
+                  <span className="font-bold text-foreground text-sm">
                     Version {learningPath.version}
                   </span>
-                  <span
-                    style={{
-                      fontSize: "0.8rem",
-                      color: "var(--text-muted)",
-                      marginLeft: "0.5rem",
-                    }}
-                  >
+                  <span className="text-muted-foreground ml-2">
                     Generated by: {learningPath.generatedBy}
                   </span>
                 </div>
-                <div
-                  style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}
-                >
-                  Duration: {learningPath.estimatedDuration} mins
-                </div>
+                <span className="text-muted-foreground">
+                  Duration: {learningPath.estimatedDuration} hrs
+                </span>
               </div>
 
               {progressSummary && (
-                <div>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      fontSize: "0.85rem",
-                      marginBottom: "0.4rem",
-                    }}
-                  >
-                    <span style={{ color: "var(--text-muted)" }}>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs font-semibold">
+                    <span className="text-muted-foreground">
                       Overall Path Completion:
                     </span>
-                    <span style={{ fontWeight: 700, color: "#10b981" }}>
+                    <span className="text-emerald-500 font-bold">
                       {progressSummary.overallProgress}%
                     </span>
                   </div>
                   <ProgressBar
                     value={progressSummary.overallProgress}
-                    max={100}
                     height="8px"
+                    variant="gradient"
                   />
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "1rem",
-                      fontSize: "0.8rem",
-                      color: "var(--text-muted)",
-                      marginTop: "0.4rem",
-                    }}
-                  >
+                  <div className="flex gap-3 text-xs text-muted-foreground pt-1">
                     <span>✓ Completed: {progressSummary.completedModules}</span>
                     <span>
                       ▶ In Progress: {progressSummary.inProgressModules}
@@ -630,57 +399,24 @@ export default function LearnerDetailPage() {
               )}
 
               {/* Module List */}
-              <div style={{ marginTop: "0.5rem" }}>
-                <div
-                  style={{
-                    fontSize: "0.8rem",
-                    color: "var(--text-muted)",
-                    textTransform: "uppercase",
-                    marginBottom: "0.5rem",
-                  }}
-                >
+              <div className="space-y-2 pt-2">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
                   Curriculum Sequence ({learningPath.modules?.length} Modules)
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.5rem",
-                  }}
-                >
+                </span>
+                <div className="space-y-1.5">
                   {learningPath.modules?.map((item, idx) => (
                     <div
                       key={idx}
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        padding: "0.6rem 0.85rem",
-                        background: "rgba(255, 255, 255, 0.02)",
-                        borderRadius: "6px",
-                        border: "1px solid var(--border-color)",
-                        fontSize: "0.85rem",
-                      }}
+                      className="p-2.5 rounded-lg border bg-muted/15 flex items-center justify-between text-xs"
                     >
-                      <div>
-                        <span
-                          style={{
-                            color: "var(--text-muted)",
-                            marginRight: "0.5rem",
-                          }}
-                        >
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground font-mono">
                           #{item.order}
                         </span>
-                        <span style={{ fontWeight: 600 }}>
+                        <span className="font-medium text-foreground">
                           {item.module?.title || "Module"}
                         </span>
-                        <span
-                          style={{
-                            color: "var(--text-muted)",
-                            marginLeft: "0.5rem",
-                            fontSize: "0.75rem",
-                          }}
-                        >
+                        <span className="text-[10px] text-muted-foreground">
                           ({item.module?.difficulty})
                         </span>
                       </div>
@@ -694,34 +430,19 @@ export default function LearnerDetailPage() {
               </div>
             </div>
           ) : (
-            <p
-              style={{
-                color: "var(--text-muted)",
-                fontSize: "0.875rem",
-                margin: 0,
-              }}
-            >
+            <p className="text-xs text-muted-foreground">
               Learner does not currently have an active learning path generated.
             </p>
           )}
-        </div>
+        </Card>
 
         {/* Non-Destructive Administrative Notice */}
-        <div
-          style={{
-            padding: "0.85rem 1rem",
-            background: "rgba(255, 255, 255, 0.02)",
-            border: "1px solid var(--border-color)",
-            borderRadius: "8px",
-            fontSize: "0.8rem",
-            color: "var(--text-muted)",
-            textAlign: "center",
-          }}
-        >
-          🔒 <strong>Read-Only Inspection:</strong> Administrative inspection
-          preserves the integrity of student-owned execution records. Module
-          progress and assessment attempts cannot be manually modified by
-          administrators.
+        <div className="p-3.5 rounded-xl border bg-muted/20 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
+          <Lock className="h-4 w-4 shrink-0" />
+          <span>
+            <strong>Read-Only Inspection:</strong> Administrative inspection
+            preserves the integrity of student-owned execution records.
+          </span>
         </div>
       </div>
 

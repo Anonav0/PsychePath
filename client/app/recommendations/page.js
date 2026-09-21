@@ -6,6 +6,40 @@ import recommendationService from "../../services/recommendationService";
 import learningPathService from "../../services/learningPathService";
 import progressService from "../../services/progressService";
 import authService from "../../services/authService";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Select } from "@/components/ui/select";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { CardSkeleton } from "@/components/ui/skeleton";
+import { toast } from "@/components/ui/use-toast";
+import ProgressBar from "@/components/ui/ProgressBar";
+import EmptyState from "@/components/ui/EmptyState";
+import StatusBadge from "@/components/ui/StatusBadge";
+import { cn } from "@/lib/utils";
+import {
+  Sparkles,
+  Cpu,
+  Clock,
+  ArrowRight,
+  Play,
+  Check,
+  FastForward,
+  Lock,
+  RefreshCw,
+  ChevronDown,
+  ChevronUp,
+  AlertCircle,
+  BookOpen,
+  CheckCircle2,
+} from "lucide-react";
 
 const CATEGORIES = [
   "ALL",
@@ -108,13 +142,15 @@ export default function RecommendationsPage() {
 
       if (res.success && res.data) {
         setActivePath(res.data);
-        setPathMessage(
-          `Official Learning Path (v${res.data.version}) saved to MongoDB! ${res.data.modules.length} modules, ${res.data.estimatedDuration} total hours.`,
-        );
+        const msg = `Official Learning Path (v${res.data.version}) saved to MongoDB! ${res.data.modules.length} modules, ${res.data.estimatedDuration} total hours.`;
+        setPathMessage(msg);
+        toast.success("Learning Path Generated", msg);
         await fetchProgress();
       }
     } catch (err) {
-      setError(err.message || "Failed to generate learning path");
+      const errMsg = err.message || "Failed to generate learning path";
+      setError(errMsg);
+      toast.error("Path Generation Error", errMsg);
     } finally {
       setGeneratingPath(false);
     }
@@ -125,9 +161,12 @@ export default function RecommendationsPage() {
     if (!pathId) return;
     try {
       await progressService.startModule(pathId, moduleId);
+      toast.info("Module Started", "Module status updated to In Progress");
       await fetchProgress();
     } catch (err) {
-      setError(err.message || "Failed to start module");
+      const errMsg = err.message || "Failed to start module";
+      setError(errMsg);
+      toast.error("Action Failed", errMsg);
     }
   };
 
@@ -137,9 +176,12 @@ export default function RecommendationsPage() {
     const nextPct = Math.min(100, currentPct + 25);
     try {
       await progressService.updateProgress(pathId, moduleId, nextPct);
+      toast.success("Progress Updated", `Progress advanced to ${nextPct}%`);
       await fetchProgress();
     } catch (err) {
-      setError(err.message || "Failed to update progress");
+      const errMsg = err.message || "Failed to update progress";
+      setError(errMsg);
+      toast.error("Action Failed", errMsg);
     }
   };
 
@@ -148,9 +190,12 @@ export default function RecommendationsPage() {
     if (!pathId) return;
     try {
       await progressService.completeModule(pathId, moduleId);
+      toast.success("Module Completed", "Module marked completed (100%)");
       await fetchProgress();
     } catch (err) {
-      setError(err.message || "Failed to complete module");
+      const errMsg = err.message || "Failed to complete module";
+      setError(errMsg);
+      toast.error("Action Failed", errMsg);
     }
   };
 
@@ -159,9 +204,12 @@ export default function RecommendationsPage() {
     if (!pathId) return;
     try {
       await progressService.skipModule(pathId, moduleId);
+      toast.warning("Module Skipped", "Module marked skipped");
       await fetchProgress();
     } catch (err) {
-      setError(err.message || "Failed to skip module");
+      const errMsg = err.message || "Failed to skip module";
+      setError(errMsg);
+      toast.error("Action Failed", errMsg);
     }
   };
 
@@ -171,391 +219,197 @@ export default function RecommendationsPage() {
 
   if (!user) {
     return (
-      <div
-        className="recommendation-container"
-        style={{ textAlign: "center", padding: "4rem 1rem" }}
-      >
-        <h1 style={{ fontSize: "2rem", fontWeight: 800, marginBottom: "1rem" }}>
-          Personalized Recommendations
-        </h1>
-        <p
-          style={{
-            color: "var(--text-secondary)",
-            marginBottom: "2rem",
-            maxWidth: "500px",
-            margin: "0 auto 2rem",
-          }}
-        >
-          Sign in or create an account to view curriculum modules tailored to
-          your cognitive strengths, learning preferences, and technical goals.
-        </p>
-        <Link
-          href="/login"
-          className="login-btn"
-          style={{ padding: "0.75rem 2rem", textDecoration: "none" }}
-        >
-          Sign In to View Recommendations
-        </Link>
+      <div className="max-w-2xl mx-auto px-4 py-16 text-center space-y-6">
+        <EmptyState
+          icon={Sparkles}
+          title="Personalized Recommendations"
+          description="Sign in or create an account to view curriculum modules tailored to your cognitive strengths, learning preferences, and technical goals."
+          actionText="Sign In to View Recommendations"
+          actionHref="/login"
+        />
       </div>
     );
   }
 
   return (
-    <div className="recommendation-container">
-      <div style={{ marginBottom: "2rem" }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.75rem",
-            flexWrap: "wrap",
-            marginBottom: "0.5rem",
-          }}
-        >
-          <h1
-            style={{
-              fontSize: "2.2rem",
-              fontWeight: 800,
-              margin: 0,
-            }}
-          >
-            Recommended for You
-          </h1>
-          {data?.source && (
-            <span
-              style={{
-                fontSize: "0.8rem",
-                fontWeight: 700,
-                padding: "0.25rem 0.75rem",
-                borderRadius: "9999px",
-                background:
-                  data.source === "HYBRID"
-                    ? "linear-gradient(135deg, #6366f1, #a855f7)"
-                    : "var(--bg-surface-elevated)",
-                color: "#ffffff",
-                border:
-                  data.source === "HYBRID"
-                    ? "none"
-                    : "1px solid var(--border-color)",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.35rem",
-              }}
-            >
-              {data.source === "HYBRID"
-                ? "✨ AI-Personalized (Gemini)"
-                : "⚙️ Deterministic (Rule Engine)"}
-            </span>
-          )}
-        </div>
-        <p style={{ color: "var(--text-secondary)", maxWidth: "750px" }}>
-          {data?.source === "HYBRID"
-            ? "AI-synthesized learning sequence and study strategies powered by Gemini, grounded strictly in pre-computed deterministic recommendations."
-            : "Deterministic, rule-based curriculum recommendations matching your verified skills, learning goals, cognitive assessment dimensions, and prerequisite readiness."}
-        </p>
-
-        {/* Learning Path Generation & Status Bar (Phase 9) */}
-        {data && data.recommendations && data.recommendations.length > 0 && (
-          <div
-            style={{
-              marginTop: "1.25rem",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-              gap: "1rem",
-              background: "var(--bg-surface)",
-              border: "1px solid var(--border-color)",
-              padding: "1rem 1.25rem",
-              borderRadius: "10px",
-            }}
-          >
-            <div>
-              {activePath ? (
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    flexWrap: "wrap",
-                  }}
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+      {/* Header */}
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+                Recommended for You
+              </h1>
+              {data?.source && (
+                <Badge
+                  variant={data.source === "HYBRID" ? "default" : "secondary"}
+                  className="gap-1.5 text-xs font-semibold"
                 >
-                  <span style={{ fontSize: "1rem" }}>📘</span>
-                  <span style={{ fontWeight: 600, fontSize: "0.95rem" }}>
-                    Active Learning Path: Version {activePath.version}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: "0.75rem",
-                      padding: "0.2rem 0.5rem",
-                      borderRadius: "4px",
-                      background: "rgba(16, 185, 129, 0.15)",
-                      color: "#10b981",
-                      fontWeight: 700,
-                    }}
-                  >
-                    ACTIVE
-                  </span>
-                  <span
-                    style={{
-                      fontSize: "0.85rem",
-                      color: "var(--text-muted)",
-                    }}
-                  >
-                    ({activePath.modules?.length || 0} modules •{" "}
-                    {activePath.estimatedDuration} hrs)
-                  </span>
-                </div>
-              ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                  }}
-                >
-                  <span style={{ fontSize: "1rem" }}>💡</span>
-                  <span
-                    style={{
-                      color: "var(--text-secondary)",
-                      fontSize: "0.9rem",
-                    }}
-                  >
-                    Turn these recommendations into an official versioned
-                    Learning Path.
-                  </span>
-                </div>
+                  {data.source === "HYBRID" ? (
+                    <>
+                      <Sparkles className="h-3.5 w-3.5" />
+                      <span>AI-Personalized (Gemini)</span>
+                    </>
+                  ) : (
+                    <>
+                      <Cpu className="h-3.5 w-3.5" />
+                      <span>Deterministic (Rule Engine)</span>
+                    </>
+                  )}
+                </Badge>
               )}
             </div>
-
-            <button
-              onClick={handleSavePath}
-              disabled={generatingPath}
-              style={{
-                background: "linear-gradient(135deg, #6366f1, #a855f7)",
-                color: "#ffffff",
-                border: "none",
-                padding: "0.6rem 1.4rem",
-                borderRadius: "8px",
-                fontWeight: 600,
-                fontSize: "0.9rem",
-                cursor: generatingPath ? "not-allowed" : "pointer",
-                opacity: generatingPath ? 0.7 : 1,
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.4rem",
-              }}
-            >
-              {generatingPath
-                ? "Persisting to Database..."
-                : activePath
-                  ? "🔄 Regenerate Learning Path"
-                  : "💾 Save as Official Learning Path"}
-            </button>
+            <p className="text-sm text-muted-foreground max-w-3xl leading-relaxed">
+              {data?.source === "HYBRID"
+                ? "AI-synthesized learning sequence and study strategies powered by Gemini, grounded strictly in pre-computed deterministic recommendations."
+                : "Deterministic, rule-based curriculum recommendations matching your verified skills, learning goals, cognitive assessment dimensions, and prerequisite readiness."}
+            </p>
           </div>
-        )}
+        </div>
 
-        {pathMessage && (
-          <div
-            style={{
-              marginTop: "1rem",
-              padding: "0.75rem 1.25rem",
-              borderRadius: "8px",
-              background: "rgba(16, 185, 129, 0.1)",
-              border: "1px solid rgba(16, 185, 129, 0.3)",
-              color: "#10b981",
-              fontSize: "0.9rem",
-            }}
-          >
-            ✅ {pathMessage}
-          </div>
-        )}
+        {/* Learning Path Action Bar */}
+        {data && data.recommendations && data.recommendations.length > 0 && (
+          <Card className="p-4 sm:p-5 bg-card/60 backdrop-blur-sm border-border/80 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0">
+                  <BookOpen className="h-5 w-5" />
+                </div>
+                <div>
+                  {activePath ? (
+                    <div className="flex items-center gap-2 flex-wrap text-sm font-semibold text-foreground">
+                      <span>Active Learning Path (v{activePath.version})</span>
+                      <StatusBadge status="ACTIVE" size="small" />
+                      <span className="text-xs text-muted-foreground">
+                        &bull; {activePath.modules?.length || 0} modules &bull;{" "}
+                        {activePath.estimatedDuration} hrs
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">
+                      Turn these recommendations into an official versioned
+                      Learning Path.
+                    </div>
+                  )}
+                </div>
+              </div>
 
-        {/* Phase 10: Server-Authoritative Path Progress Widget */}
-        {activePath && progressData?.pathSummary && (
-          <div
-            style={{
-              marginTop: "1rem",
-              background: "var(--bg-surface)",
-              border: "1px solid var(--border-color)",
-              padding: "1.25rem",
-              borderRadius: "10px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                flexWrap: "wrap",
-                gap: "0.5rem",
-                marginBottom: "0.75rem",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                }}
+              <Button
+                variant="default"
+                size="default"
+                onClick={handleSavePath}
+                loading={generatingPath}
+                className="gap-2 shrink-0 shadow-md text-xs sm:text-sm"
               >
-                <span style={{ fontSize: "1.2rem" }}>📈</span>
-                <span style={{ fontWeight: 700, fontSize: "1rem" }}>
-                  Learning Path Progress:{" "}
-                  {progressData.pathSummary.overallProgress}%
+                <RefreshCw
+                  className={cn("h-4 w-4", generatingPath && "animate-spin")}
+                />
+                <span>
+                  {activePath
+                    ? "Regenerate Path"
+                    : "Save as Official Learning Path"}
                 </span>
-                {progressData.pathSummary.isComplete && (
-                  <span
-                    style={{
-                      fontSize: "0.75rem",
-                      padding: "0.2rem 0.6rem",
-                      borderRadius: "4px",
-                      background: "rgba(16, 185, 129, 0.2)",
-                      color: "#10b981",
-                      fontWeight: 700,
-                    }}
-                  >
-                    🎉 COMPLETED
-                  </span>
-                )}
-              </div>
-              <div
-                style={{
-                  fontSize: "0.85rem",
-                  color: "var(--text-muted)",
-                }}
-              >
-                {progressData.pathSummary.completedModules} Completed •{" "}
-                {progressData.pathSummary.inProgressModules} In Progress •{" "}
-                {progressData.pathSummary.skippedModules} Skipped •{" "}
-                {progressData.pathSummary.notStartedModules} Not Started (of{" "}
-                {progressData.pathSummary.totalModules} total)
-              </div>
+              </Button>
             </div>
 
-            {/* Progress Track */}
-            <div
-              style={{
-                width: "100%",
-                height: "10px",
-                background: "rgba(255, 255, 255, 0.08)",
-                borderRadius: "5px",
-                overflow: "hidden",
-              }}
-            >
-              <div
-                style={{
-                  width: `${progressData.pathSummary.overallProgress}%`,
-                  height: "100%",
-                  background:
-                    progressData.pathSummary.overallProgress === 100
-                      ? "#10b981"
-                      : "linear-gradient(90deg, #6366f1, #a855f7)",
-                  transition: "width 0.4s ease",
-                }}
-              />
-            </div>
-          </div>
+            {pathMessage && (
+              <div className="mt-3 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                <span>{pathMessage}</span>
+              </div>
+            )}
+
+            {/* Path Progress Widget */}
+            {activePath && progressData?.pathSummary && (
+              <div className="mt-4 pt-4 border-t space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-2 font-semibold text-foreground">
+                    <span>
+                      Progress: {progressData.pathSummary.overallProgress}%
+                    </span>
+                    {progressData.pathSummary.isComplete && (
+                      <Badge variant="success" className="text-[10px]">
+                        COMPLETED
+                      </Badge>
+                    )}
+                  </div>
+                  <span className="text-muted-foreground">
+                    {progressData.pathSummary.completedModules} Done &bull;{" "}
+                    {progressData.pathSummary.inProgressModules} Active &bull;{" "}
+                    {progressData.pathSummary.skippedModules} Skipped &bull;{" "}
+                    {progressData.pathSummary.notStartedModules} To-Do
+                  </span>
+                </div>
+                <ProgressBar
+                  value={progressData.pathSummary.overallProgress}
+                  height="8px"
+                  variant="gradient"
+                />
+              </div>
+            )}
+          </Card>
         )}
       </div>
 
-      {/* Filter Controls */}
-      <div className="curriculum-filter-bar" style={{ marginBottom: "2rem" }}>
-        <div style={{ flex: "1 1 180px" }}>
-          <select
+      {/* Filter Controls Bar */}
+      <div className="flex flex-wrap items-center gap-3 bg-muted/40 p-3 rounded-xl border border-border/60">
+        <div className="w-44">
+          <Select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            style={{ width: "100%" }}
           >
             {CATEGORIES.map((cat) => (
               <option key={cat} value={cat}>
                 {cat === "ALL" ? "All Categories" : cat.replace("_", " ")}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
-        <div style={{ flex: "1 1 180px" }}>
-          <select
+        <div className="w-44">
+          <Select
             value={selectedDifficulty}
             onChange={(e) => setSelectedDifficulty(e.target.value)}
-            style={{ width: "100%" }}
           >
             {DIFFICULTIES.map((diff) => (
               <option key={diff} value={diff}>
                 {diff === "ALL" ? "All Difficulties" : diff}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         {(selectedCategory !== "ALL" || selectedDifficulty !== "ALL") && (
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => {
               setSelectedCategory("ALL");
               setSelectedDifficulty("ALL");
             }}
-            style={{
-              background: "transparent",
-              border: "1px solid var(--border-color)",
-              color: "var(--text-secondary)",
-              padding: "0.6rem 1rem",
-              borderRadius: "8px",
-              cursor: "pointer",
-            }}
+            className="text-xs text-muted-foreground hover:text-foreground"
           >
             Reset Filters
-          </button>
+          </Button>
         )}
       </div>
 
       {/* Profile Not Ready Card */}
       {notReadyError && (
-        <div
-          className="profile-card"
-          style={{
-            borderLeft: "4px solid var(--warning)",
-            padding: "2rem",
-            marginBottom: "2rem",
-          }}
-        >
-          <h2
-            style={{
-              fontSize: "1.25rem",
-              fontWeight: 700,
-              marginBottom: "0.5rem",
-              color: "#fbbf24",
-            }}
-          >
+        <Alert variant="warning" className="p-6">
+          <AlertCircle className="h-5 w-5 text-amber-500" />
+          <AlertTitle className="text-base font-bold">
             Profile Setup Required
-          </h2>
-          <p
-            style={{ color: "var(--text-secondary)", marginBottom: "1.25rem" }}
-          >
-            The recommendation engine requires a complete learner profile before
-            it can compute personalized candidates.
-          </p>
-
-          <div style={{ marginBottom: "1.5rem" }}>
-            <div
-              style={{
-                fontSize: "0.85rem",
-                fontWeight: 600,
-                color: "var(--text-muted)",
-                marginBottom: "0.5rem",
-              }}
-            >
-              Missing Required Signals:
-            </div>
-            <ul
-              style={{
-                paddingLeft: "1.2rem",
-                color: "var(--text-secondary)",
-                fontSize: "0.9rem",
-              }}
-            >
+          </AlertTitle>
+          <AlertDescription className="text-xs text-muted-foreground mt-1 space-y-3">
+            <p>
+              The recommendation engine requires complete learner signals before
+              computing personalized candidates.
+            </p>
+            <ul className="list-disc pl-5 space-y-1">
               {notReadyError.data?.missingFields?.map((f) => (
-                <li key={f} style={{ marginBottom: "0.35rem" }}>
+                <li key={f}>
                   {f === "learningGoals" &&
                     "Learning Goals (Set your career & technical targets in Profile)"}
                   {f === "currentSkills" &&
@@ -565,551 +419,284 @@ export default function RecommendationsPage() {
                 </li>
               ))}
             </ul>
-          </div>
-
-          <div style={{ display: "flex", gap: "1rem" }}>
-            <Link
-              href="/profile"
-              style={{
-                background: "var(--primary)",
-                color: "#fff",
-                padding: "0.6rem 1.25rem",
-                borderRadius: "8px",
-                textDecoration: "none",
-                fontSize: "0.9rem",
-                fontWeight: 600,
-              }}
-            >
-              Update Profile
-            </Link>
-            <Link
-              href="/assessments"
-              style={{
-                background: "var(--bg-surface-elevated)",
-                border: "1px solid var(--border-color)",
-                color: "var(--text-primary)",
-                padding: "0.6rem 1.25rem",
-                borderRadius: "8px",
-                textDecoration: "none",
-                fontSize: "0.9rem",
-              }}
-            >
-              Take Assessment
-            </Link>
-          </div>
-        </div>
+            <div className="flex items-center gap-2 pt-2">
+              <Link href="/profile">
+                <Button size="sm" variant="default" className="text-xs">
+                  Update Profile
+                </Button>
+              </Link>
+              <Link href="/assessments">
+                <Button size="sm" variant="outline" className="text-xs">
+                  Take Assessment
+                </Button>
+              </Link>
+            </div>
+          </AlertDescription>
+        </Alert>
       )}
 
       {error && (
-        <div className="alert-box alert-error" style={{ marginBottom: "2rem" }}>
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
-      {loading && (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "4rem",
-            color: "var(--text-muted)",
-          }}
-        >
-          Computing personalized curriculum recommendations...
-        </div>
-      )}
+      {loading && <CardSkeleton count={3} />}
 
+      {/* AI / Deterministic Strategy Summary */}
       {!loading && data && data.summary && (
-        <div
-          style={{
-            background:
-              data.source === "HYBRID"
-                ? "linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(168, 85, 247, 0.08))"
-                : "var(--bg-surface)",
-            border:
-              data.source === "HYBRID"
-                ? "1px solid rgba(99, 102, 241, 0.3)"
-                : "1px solid var(--border-color)",
-            borderRadius: "12px",
-            padding: "1.5rem",
-            marginBottom: "2rem",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              marginBottom: "0.75rem",
-            }}
-          >
-            <span style={{ fontSize: "1.25rem" }}>
-              {data.source === "HYBRID" ? "✨" : "🎯"}
-            </span>
-            <h2
-              style={{
-                fontSize: "1.15rem",
-                fontWeight: 700,
-                margin: 0,
-                color: "var(--text-primary)",
-              }}
-            >
+        <Card className="border-primary/20 bg-primary/5 p-6 space-y-4 shadow-sm">
+          <div className="flex items-center gap-2.5 text-primary">
+            {data.source === "HYBRID" ? (
+              <Sparkles className="h-5 w-5" />
+            ) : (
+              <Cpu className="h-5 w-5" />
+            )}
+            <h2 className="text-base font-bold text-foreground">
               {data.source === "HYBRID"
                 ? "Personalized Learning Narrative & Strategy"
                 : "Deterministic Recommendation Strategy"}
             </h2>
           </div>
-
-          <p
-            style={{
-              color: "var(--text-secondary)",
-              lineHeight: 1.6,
-              marginBottom: "1.25rem",
-            }}
-          >
+          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
             {data.summary}
           </p>
 
           {data.focusAreas && data.focusAreas.length > 0 && (
-            <div style={{ marginBottom: "1rem" }}>
-              <span
-                style={{
-                  fontSize: "0.85rem",
-                  fontWeight: 600,
-                  color: "var(--text-muted)",
-                  marginRight: "0.5rem",
-                }}
-              >
+            <div className="flex items-center gap-2 flex-wrap pt-2">
+              <span className="text-xs font-semibold text-foreground">
                 Focus Areas:
               </span>
-              <div
-                style={{
-                  display: "inline-flex",
-                  flexWrap: "wrap",
-                  gap: "0.4rem",
-                  marginTop: "0.25rem",
-                }}
-              >
-                {data.focusAreas.map((fa, i) => (
-                  <span
-                    key={i}
-                    style={{
-                      fontSize: "0.8rem",
-                      padding: "0.2rem 0.6rem",
-                      borderRadius: "6px",
-                      background: "rgba(99, 102, 241, 0.15)",
-                      color: "var(--accent-primary, #6366f1)",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {fa}
-                  </span>
-                ))}
-              </div>
+              {data.focusAreas.map((fa, i) => (
+                <Badge
+                  key={i}
+                  variant="secondary"
+                  className="text-[11px] bg-primary/10 text-primary border-primary/20"
+                >
+                  {fa}
+                </Badge>
+              ))}
             </div>
           )}
-
-          {data.learningStrategy && data.learningStrategy.length > 0 && (
-            <div>
-              <span
-                style={{
-                  fontSize: "0.85rem",
-                  fontWeight: 600,
-                  color: "var(--text-muted)",
-                  display: "block",
-                  marginBottom: "0.4rem",
-                }}
-              >
-                Recommended Study Approach:
-              </span>
-              <ul
-                style={{
-                  margin: 0,
-                  paddingLeft: "1.25rem",
-                  color: "var(--text-secondary)",
-                  fontSize: "0.9rem",
-                  lineHeight: 1.5,
-                }}
-              >
-                {data.learningStrategy.map((strat, idx) => (
-                  <li key={idx} style={{ marginBottom: "0.25rem" }}>
-                    {strat}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
+        </Card>
       )}
 
+      {/* Recommendations Cards Grid */}
       {!loading && data && data.recommendations && (
         <>
           {data.recommendations.length === 0 ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "4rem",
-                background: "var(--bg-surface)",
-                borderRadius: "12px",
-                border: "1px solid var(--border-color)",
-                marginBottom: "2rem",
-              }}
-            >
-              <p style={{ color: "var(--text-muted)", fontSize: "1.1rem" }}>
-                No active recommendations match your current filters.
-              </p>
-            </div>
+            <EmptyState
+              icon={BookOpen}
+              title="No Recommendations Match Filters"
+              description="Try adjusting your category or difficulty filter selection."
+            />
           ) : (
-            <div>
+            <div className="space-y-4">
               {data.recommendations.map((rec) => {
                 const isBreakdownOpen = expandedScoreId === rec.module.id;
-                const diffClass =
-                  rec.module.difficulty === "BEGINNER"
-                    ? "difficulty-beginner"
-                    : rec.module.difficulty === "INTERMEDIATE"
-                      ? "difficulty-intermediate"
-                      : "difficulty-advanced";
+                const modId = rec.module.id || rec.module._id;
+                const modProgress = progressData?.modules?.find(
+                  (m) => m.moduleId === modId,
+                );
 
                 return (
-                  <div key={rec.module.id} className="rec-card">
-                    {/* Score badge */}
-                    <div className="rec-score-badge">
-                      <span className="rec-score-val">{rec.score}</span>
-                      <span className="rec-score-lbl">Score</span>
-                    </div>
+                  <Card
+                    key={rec.module.id}
+                    className="p-5 hover:border-primary/40 transition-all shadow-sm"
+                  >
+                    <div className="flex flex-col md:flex-row md:items-start gap-4 justify-between">
+                      {/* Left: Score Badge */}
+                      <div className="flex md:flex-col items-center justify-center p-3 rounded-xl border bg-muted/30 shrink-0 w-fit md:w-20 text-center gap-1">
+                        <span className="text-2xl font-black text-primary leading-none">
+                          {rec.score}
+                        </span>
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                          Match
+                        </span>
+                      </div>
 
-                    {/* Module content */}
-                    <div style={{ flex: 1 }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.5rem",
-                          marginBottom: "0.5rem",
-                        }}
-                      >
-                        {rec.aiPriority && (
-                          <span
-                            style={{
-                              fontSize: "0.75rem",
-                              fontWeight: 700,
-                              padding: "0.2rem 0.5rem",
-                              borderRadius: "4px",
-                              background: "rgba(99, 102, 241, 0.2)",
-                              color: "#818cf8",
-                              border: "1px solid rgba(99, 102, 241, 0.3)",
-                            }}
-                          >
-                            Step #{rec.aiPriority}
+                      {/* Middle: Details */}
+                      <div className="flex-1 space-y-2.5">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {rec.aiPriority && (
+                            <Badge
+                              variant="default"
+                              className="text-[10px] font-bold"
+                            >
+                              Step #{rec.aiPriority}
+                            </Badge>
+                          )}
+                          <Badge variant="secondary" className="text-[10px]">
+                            {rec.module.category}
+                          </Badge>
+                          <Badge variant="outline" className="text-[10px]">
+                            {rec.module.difficulty}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground ml-auto flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            <span>{rec.module.estimatedDuration} hrs</span>
                           </span>
-                        )}
-                        <span className="category-tag">
-                          {rec.module.category}
-                        </span>
-                        <span className={`difficulty-tag ${diffClass}`}>
-                          {rec.module.difficulty}
-                        </span>
-                        <span
-                          style={{
-                            fontSize: "0.8rem",
-                            color: "var(--text-muted)",
-                            marginLeft: "auto",
-                          }}
-                        >
-                          ⏱️ {rec.module.estimatedDuration} hrs
-                        </span>
-                      </div>
+                        </div>
 
-                      <h3
-                        style={{
-                          fontSize: "1.3rem",
-                          fontWeight: 700,
-                          marginBottom: "0.4rem",
-                        }}
-                      >
-                        {rec.module.title}
-                      </h3>
+                        <h3 className="text-lg font-bold text-foreground">
+                          {rec.module.title}
+                        </h3>
 
-                      {/* Grounded explanation reason */}
-                      <div className="rec-reason-box">
-                        💡 <strong>Why Recommended:</strong> {rec.reason}
-                      </div>
+                        <div className="p-3 rounded-lg bg-muted/40 border text-xs text-muted-foreground leading-relaxed">
+                          💡{" "}
+                          <strong className="text-foreground">
+                            Why Recommended:
+                          </strong>{" "}
+                          {rec.reason}
+                        </div>
 
-                      {/* Skills match & gap tags */}
-                      <div
-                        style={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: "0.5rem",
-                          margin: "0.75rem 0",
-                        }}
-                      >
-                        {rec.matchedSkills &&
-                          rec.matchedSkills.map((s, idx) => (
-                            <span
+                        {/* Skills and Gaps */}
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {rec.matchedSkills?.map((s, idx) => (
+                            <Badge
                               key={idx}
-                              className="skill-pill"
-                              style={{ padding: "0.2rem 0.6rem" }}
+                              variant="success"
+                              className="text-[10px]"
                             >
                               ✓ {s}
-                            </span>
+                            </Badge>
                           ))}
-                        {rec.skillGaps &&
-                          rec.skillGaps.map((g, idx) => (
-                            <span key={idx} className="skill-gap-pill">
-                              + Skill Gap: {g}
-                            </span>
+                          {rec.skillGaps?.map((g, idx) => (
+                            <Badge
+                              key={idx}
+                              variant="secondary"
+                              className="text-[10px] bg-amber-500/10 text-amber-500 border-amber-500/20"
+                            >
+                              + Gap: {g}
+                            </Badge>
                           ))}
+                        </div>
+
+                        {/* Score Breakdown Toggle */}
+                        <button
+                          type="button"
+                          onClick={() => toggleScoreBreakdown(rec.module.id)}
+                          className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 pt-1"
+                        >
+                          <span>
+                            {isBreakdownOpen
+                              ? "Hide Score Breakdown"
+                              : "View Scoring Breakdown"}
+                          </span>
+                          {isBreakdownOpen ? (
+                            <ChevronUp className="h-3.5 w-3.5" />
+                          ) : (
+                            <ChevronDown className="h-3.5 w-3.5" />
+                          )}
+                        </button>
+
+                        {isBreakdownOpen && rec.scoreBreakdown && (
+                          <div className="p-3 rounded-lg bg-muted/30 border grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs mt-2">
+                            <div>
+                              Goal:{" "}
+                              <strong>
+                                {rec.scoreBreakdown.goalMatch}/100
+                              </strong>
+                            </div>
+                            <div>
+                              Skill:{" "}
+                              <strong>
+                                {rec.scoreBreakdown.skillMatch}/100
+                              </strong>
+                            </div>
+                            <div>
+                              Prereq:{" "}
+                              <strong>
+                                {rec.scoreBreakdown.prerequisiteReadiness}/100
+                              </strong>
+                            </div>
+                            <div>
+                              Assessment:{" "}
+                              <strong>
+                                {rec.scoreBreakdown.assessmentAlignment}/100
+                              </strong>
+                            </div>
+                            <div>
+                              Difficulty:{" "}
+                              <strong>
+                                {rec.scoreBreakdown.difficultyAlignment}/100
+                              </strong>
+                            </div>
+                            <div>
+                              Interests:{" "}
+                              <strong>
+                                {rec.scoreBreakdown.interestMatch}/100
+                              </strong>
+                            </div>
+                          </div>
+                        )}
                       </div>
 
-                      {/* Toggle breakdown */}
-                      <button
-                        onClick={() => toggleScoreBreakdown(rec.module.id)}
-                        style={{
-                          background: "transparent",
-                          border: "none",
-                          color: "var(--primary)",
-                          cursor: "pointer",
-                          fontSize: "0.825rem",
-                          fontWeight: 600,
-                          padding: 0,
-                          marginTop: "0.5rem",
-                        }}
-                      >
-                        {isBreakdownOpen
-                          ? "Hide Score Breakdown ▲"
-                          : "View Scoring Breakdown ▼"}
-                      </button>
+                      {/* Right: Progress Controls */}
+                      {modProgress && (
+                        <div className="shrink-0 p-3 rounded-xl border bg-muted/20 flex flex-col gap-2 min-w-[160px]">
+                          <div className="flex items-center justify-between">
+                            <StatusBadge
+                              status={modProgress.status}
+                              size="small"
+                            />
+                            <span className="text-xs font-bold">
+                              {modProgress.percentage}%
+                            </span>
+                          </div>
 
-                      {/* Component score breakdown */}
-                      {isBreakdownOpen && rec.scoreBreakdown && (
-                        <div
-                          style={{
-                            marginTop: "0.75rem",
-                            padding: "1rem",
-                            background: "var(--bg-surface-elevated)",
-                            borderRadius: "8px",
-                            display: "grid",
-                            gridTemplateColumns:
-                              "repeat(auto-fill, minmax(180px, 1fr))",
-                            gap: "0.75rem",
-                            fontSize: "0.8rem",
-                          }}
-                        >
-                          <div>
-                            <span style={{ color: "var(--text-muted)" }}>
-                              Goal Match (25%):{" "}
-                            </span>
-                            <strong>{rec.scoreBreakdown.goalMatch}/100</strong>
-                          </div>
-                          <div>
-                            <span style={{ color: "var(--text-muted)" }}>
-                              Skill Match (25%):{" "}
-                            </span>
-                            <strong>{rec.scoreBreakdown.skillMatch}/100</strong>
-                          </div>
-                          <div>
-                            <span style={{ color: "var(--text-muted)" }}>
-                              Prerequisites (15%):{" "}
-                            </span>
-                            <strong>
-                              {rec.scoreBreakdown.prerequisiteReadiness}/100
-                            </strong>
-                          </div>
-                          <div>
-                            <span style={{ color: "var(--text-muted)" }}>
-                              Assessment (15%):{" "}
-                            </span>
-                            <strong>
-                              {rec.scoreBreakdown.assessmentAlignment}/100
-                            </strong>
-                          </div>
-                          <div>
-                            <span style={{ color: "var(--text-muted)" }}>
-                              Difficulty (10%):{" "}
-                            </span>
-                            <strong>
-                              {rec.scoreBreakdown.difficultyAlignment}/100
-                            </strong>
-                          </div>
-                          <div>
-                            <span style={{ color: "var(--text-muted)" }}>
-                              Interests (5%):{" "}
-                            </span>
-                            <strong>
-                              {rec.scoreBreakdown.interestMatch}/100
-                            </strong>
-                          </div>
+                          {(modProgress.status === "NOT_STARTED" ||
+                            modProgress.status === "SKIPPED") && (
+                            <Button
+                              size="sm"
+                              variant="default"
+                              onClick={() => handleStartModule(modId)}
+                              className="text-xs gap-1 h-8"
+                            >
+                              <Play className="h-3 w-3" />
+                              <span>Start</span>
+                            </Button>
+                          )}
+
+                          {modProgress.status === "IN_PROGRESS" && (
+                            <div className="flex flex-col gap-1.5">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() =>
+                                  handleUpdatePercentage(
+                                    modId,
+                                    modProgress.percentage,
+                                  )
+                                }
+                                disabled={modProgress.percentage >= 100}
+                                className="text-xs h-7"
+                              >
+                                +25% Progress
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="success"
+                                onClick={() => handleCompleteModule(modId)}
+                                className="text-xs h-7 gap-1"
+                              >
+                                <Check className="h-3 w-3" />
+                                <span>Complete</span>
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleSkipModule(modId)}
+                                className="text-xs text-muted-foreground h-7"
+                              >
+                                Skip
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       )}
-
-                      {/* Phase 10: Module Progress Controls */}
-                      {(() => {
-                        const modId = rec.module.id || rec.module._id;
-                        const modProgress = progressData?.modules?.find(
-                          (m) => m.moduleId === modId,
-                        );
-                        if (!modProgress) return null;
-
-                        return (
-                          <div
-                            style={{
-                              marginTop: "1rem",
-                              padding: "0.75rem 1rem",
-                              background: "var(--bg-surface-elevated)",
-                              border: "1px solid var(--border-color)",
-                              borderRadius: "8px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "space-between",
-                              flexWrap: "wrap",
-                              gap: "0.75rem",
-                            }}
-                          >
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "0.6rem",
-                              }}
-                            >
-                              <span
-                                style={{
-                                  fontSize: "0.75rem",
-                                  fontWeight: 700,
-                                  padding: "0.2rem 0.6rem",
-                                  borderRadius: "4px",
-                                  background:
-                                    modProgress.status === "COMPLETED"
-                                      ? "rgba(16, 185, 129, 0.2)"
-                                      : modProgress.status === "IN_PROGRESS"
-                                        ? "rgba(99, 102, 241, 0.2)"
-                                        : modProgress.status === "SKIPPED"
-                                          ? "rgba(245, 158, 11, 0.2)"
-                                          : "rgba(148, 163, 184, 0.2)",
-                                  color:
-                                    modProgress.status === "COMPLETED"
-                                      ? "#10b981"
-                                      : modProgress.status === "IN_PROGRESS"
-                                        ? "#818cf8"
-                                        : modProgress.status === "SKIPPED"
-                                          ? "#f59e0b"
-                                          : "#94a3b8",
-                                }}
-                              >
-                                {modProgress.status}
-                              </span>
-                              <span
-                                style={{
-                                  fontSize: "0.85rem",
-                                  fontWeight: 600,
-                                  color: "var(--text-primary)",
-                                }}
-                              >
-                                {modProgress.percentage}%
-                              </span>
-                            </div>
-
-                            <div
-                              style={{
-                                display: "flex",
-                                gap: "0.5rem",
-                                flexWrap: "wrap",
-                              }}
-                            >
-                              {(modProgress.status === "NOT_STARTED" ||
-                                modProgress.status === "SKIPPED") && (
-                                <button
-                                  onClick={() => handleStartModule(modId)}
-                                  style={{
-                                    padding: "0.35rem 0.8rem",
-                                    fontSize: "0.8rem",
-                                    fontWeight: 600,
-                                    borderRadius: "6px",
-                                    border: "1px solid var(--primary)",
-                                    background: "var(--primary)",
-                                    color: "#fff",
-                                    cursor: "pointer",
-                                  }}
-                                >
-                                  ▶ Start Module
-                                </button>
-                              )}
-
-                              {modProgress.status === "IN_PROGRESS" && (
-                                <>
-                                  <button
-                                    onClick={() =>
-                                      handleUpdatePercentage(
-                                        modId,
-                                        modProgress.percentage,
-                                      )
-                                    }
-                                    disabled={modProgress.percentage >= 100}
-                                    style={{
-                                      padding: "0.35rem 0.8rem",
-                                      fontSize: "0.8rem",
-                                      fontWeight: 600,
-                                      borderRadius: "6px",
-                                      border:
-                                        "1px solid rgba(99, 102, 241, 0.4)",
-                                      background: "rgba(99, 102, 241, 0.15)",
-                                      color: "#818cf8",
-                                      cursor: "pointer",
-                                    }}
-                                  >
-                                    +25% Progress
-                                  </button>
-                                  <button
-                                    onClick={() => handleCompleteModule(modId)}
-                                    style={{
-                                      padding: "0.35rem 0.8rem",
-                                      fontSize: "0.8rem",
-                                      fontWeight: 600,
-                                      borderRadius: "6px",
-                                      border: "none",
-                                      background: "#10b981",
-                                      color: "#fff",
-                                      cursor: "pointer",
-                                    }}
-                                  >
-                                    ✓ Complete
-                                  </button>
-                                  <button
-                                    onClick={() => handleSkipModule(modId)}
-                                    style={{
-                                      padding: "0.35rem 0.8rem",
-                                      fontSize: "0.8rem",
-                                      fontWeight: 600,
-                                      borderRadius: "6px",
-                                      border:
-                                        "1px solid rgba(245, 158, 11, 0.4)",
-                                      background: "transparent",
-                                      color: "#f59e0b",
-                                      cursor: "pointer",
-                                    }}
-                                  >
-                                    ⏭ Skip
-                                  </button>
-                                </>
-                              )}
-
-                              {modProgress.status === "COMPLETED" && (
-                                <span
-                                  style={{
-                                    fontSize: "0.85rem",
-                                    color: "#10b981",
-                                    fontWeight: 600,
-                                  }}
-                                >
-                                  ✓ Completed
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })()}
                     </div>
-                  </div>
+                  </Card>
                 );
               })}
             </div>
@@ -1117,110 +704,61 @@ export default function RecommendationsPage() {
 
           {/* Blocked Modules Section */}
           {data.blockedModules && data.blockedModules.length > 0 && (
-            <div style={{ marginTop: "3rem" }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "1rem",
-                }}
-              >
+            <div className="pt-8 space-y-4">
+              <div className="flex items-center justify-between">
                 <div>
-                  <h2 style={{ fontSize: "1.3rem", fontWeight: 700 }}>
-                    Prerequisite-Blocked Relevant Modules (
-                    {data.blockedModules.length})
+                  <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                    <Lock className="h-4 w-4 text-destructive" />
+                    <span>
+                      Prerequisite-Blocked Modules ({data.blockedModules.length}
+                      )
+                    </span>
                   </h2>
-                  <p
-                    style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}
-                  >
+                  <p className="text-xs text-muted-foreground">
                     These modules match your goals, but require foundational
                     prerequisites first.
                   </p>
                 </div>
-                <button
-                  onClick={() => setShowBlocked((prev) => !prev)}
-                  style={{
-                    background: "var(--bg-surface-elevated)",
-                    border: "1px solid var(--border-color)",
-                    color: "var(--text-primary)",
-                    padding: "0.4rem 0.8rem",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontSize: "0.85rem",
-                  }}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowBlocked(!showBlocked)}
+                  className="text-xs"
                 >
                   {showBlocked ? "Hide Blocked" : "Show Blocked"}
-                </button>
+                </Button>
               </div>
 
               {showBlocked && (
-                <div>
+                <div className="space-y-3">
                   {data.blockedModules.map((blk) => (
-                    <div key={blk.module.id} className="rec-card blocked-card">
-                      <div
-                        className="rec-score-badge"
-                        style={{ borderColor: "var(--text-muted)" }}
-                      >
-                        <span
-                          className="rec-score-val"
-                          style={{ color: "var(--text-muted)" }}
-                        >
-                          {blk.score}
-                        </span>
-                        <span className="rec-score-lbl">Score</span>
-                      </div>
-
-                      <div style={{ flex: 1 }}>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.5rem",
-                            marginBottom: "0.4rem",
-                          }}
-                        >
-                          <span className="category-tag">
+                    <Card
+                      key={blk.module.id}
+                      className="p-4 border-destructive/30 bg-destructive/5 space-y-2"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="destructive" className="text-[10px]">
                             {blk.module.category}
-                          </span>
-                          <span className="difficulty-tag difficulty-intermediate">
-                            {blk.module.difficulty}
-                          </span>
+                          </Badge>
+                          <h4 className="text-sm font-bold text-foreground">
+                            {blk.module.title}
+                          </h4>
                         </div>
-
-                        <h4
-                          style={{
-                            fontSize: "1.15rem",
-                            fontWeight: 700,
-                            marginBottom: "0.4rem",
-                          }}
-                        >
-                          {blk.module.title}
-                        </h4>
-
-                        <div
-                          style={{
-                            fontSize: "0.85rem",
-                            color: "#f87171",
-                            margin: "0.5rem 0",
-                          }}
-                        >
-                          ⚠️ <strong>Missing Prerequisite:</strong>{" "}
-                          {blk.missingPrerequisites
-                            .map((p) => p.title)
-                            .join(", ")}
-                        </div>
-
-                        <p
-                          style={{
-                            fontSize: "0.825rem",
-                            color: "var(--text-secondary)",
-                          }}
-                        >
-                          Complete the prerequisite above to unlock this module.
-                        </p>
+                        <span className="text-xs text-muted-foreground">
+                          Score: {blk.score}
+                        </span>
                       </div>
-                    </div>
+                      <div className="text-xs text-destructive flex items-center gap-1.5">
+                        <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                        <span>
+                          Missing Prerequisite:{" "}
+                          {blk.missingPrerequisites
+                            ?.map((p) => p.title)
+                            .join(", ")}
+                        </span>
+                      </div>
+                    </Card>
                   ))}
                 </div>
               )}

@@ -7,6 +7,32 @@ import assessmentService from "../../../services/assessmentService";
 import StatusBadge from "../../../components/ui/StatusBadge";
 import ConfirmModal from "../../../components/admin/ConfirmModal";
 import EmptyState from "../../../components/ui/EmptyState";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import { TableSkeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { toast } from "@/components/ui/use-toast";
+import { ClipboardList, Plus, Clock, Trash2, HelpCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function AdminAssessmentsPage() {
   const [assessments, setAssessments] = useState([]);
@@ -55,9 +81,14 @@ export default function AdminAssessmentsPage() {
   const handleToggleStatus = async (item) => {
     try {
       await assessmentService.toggleStatus(item._id, !item.isActive);
+      toast.success(
+        "Status Updated",
+        `"${item.title}" is now ${!item.isActive ? "active" : "inactive"}.`,
+      );
       fetchAssessments();
     } catch (err) {
-      alert(err.message || "Failed to update assessment status");
+      const errMsg = err.message || "Failed to update assessment status";
+      toast.error("Update Failed", errMsg);
     }
   };
 
@@ -88,6 +119,10 @@ export default function AdminAssessmentsPage() {
 
       const res = await assessmentService.createAssessment(payload);
       if (res?.success) {
+        toast.success(
+          "Assessment Created",
+          `"${formData.title}" created successfully.`,
+        );
         setCreateModalOpen(false);
         setFormData({
           title: "",
@@ -101,7 +136,8 @@ export default function AdminAssessmentsPage() {
         fetchAssessments();
       }
     } catch (err) {
-      alert(err.message || "Failed to create assessment");
+      const errMsg = err.message || "Failed to create assessment";
+      toast.error("Creation Failed", errMsg);
     } finally {
       setCreateLoading(false);
     }
@@ -112,10 +148,15 @@ export default function AdminAssessmentsPage() {
     try {
       setDeleteModal((prev) => ({ ...prev, loading: true }));
       await assessmentService.deleteAssessment(deleteModal.item._id);
+      toast.success(
+        "Assessment Removed",
+        `"${deleteModal.item.title}" was deleted or deactivated.`,
+      );
       setDeleteModal({ isOpen: false, item: null, loading: false });
       fetchAssessments();
     } catch (err) {
-      alert(err.message || "Failed to delete assessment");
+      const errMsg = err.message || "Failed to delete assessment";
+      toast.error("Deletion Failed", errMsg);
       setDeleteModal((prev) => ({ ...prev, loading: false }));
     }
   };
@@ -125,214 +166,134 @@ export default function AdminAssessmentsPage() {
       title="Assessment Management"
       subtitle="Create diagnostic evaluations, define psychometric dimensions, and manage question catalogs."
     >
-      {/* Top Actions */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "1.5rem",
-        }}
-      >
-        <div style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>
-          Showing {assessments.length} assessment
-          {assessments.length !== 1 ? "s" : ""}
+      <div className="space-y-6">
+        {/* Top Actions */}
+        <div className="flex items-center justify-between">
+          <div className="text-xs text-muted-foreground">
+            Showing {assessments.length} assessment
+            {assessments.length !== 1 ? "s" : ""}
+          </div>
+          <Button
+            type="button"
+            variant="default"
+            size="sm"
+            onClick={() => setCreateModalOpen(true)}
+            className="gap-1.5 text-xs shadow-sm"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Create Assessment</span>
+          </Button>
         </div>
-        <button
-          type="button"
-          onClick={() => setCreateModalOpen(true)}
-          className="btn-primary-small"
-          style={{ padding: "0.5rem 1rem", fontSize: "0.85rem" }}
-        >
-          + Create Assessment
-        </button>
-      </div>
 
-      {error && (
-        <div
-          style={{
-            background: "rgba(239, 68, 68, 0.1)",
-            border: "1px solid rgba(239, 68, 68, 0.3)",
-            color: "#f87171",
-            padding: "1rem",
-            borderRadius: "8px",
-            marginBottom: "1.5rem",
-          }}
-        >
-          {error}
-        </div>
-      )}
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-      {loading ? (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "4rem",
-            color: "var(--text-muted)",
-          }}
-        >
-          Loading assessment catalog...
-        </div>
-      ) : assessments.length === 0 ? (
-        <EmptyState
-          icon="📋"
-          title="No Assessments Created"
-          description="Create your first psychometric assessment to evaluate learner cognitive styles."
-          actionText="Create Assessment"
-          onAction={() => setCreateModalOpen(true)}
-        />
-      ) : (
-        <div
-          style={{
-            background: "var(--bg-surface, #1e293b)",
-            border: "1px solid var(--border-color, #334155)",
-            borderRadius: "12px",
-            overflow: "hidden",
-          }}
-        >
-          <div style={{ overflowX: "auto" }}>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                textAlign: "left",
-                fontSize: "0.9rem",
-              }}
-            >
-              <thead>
-                <tr
-                  style={{
-                    background: "rgba(255, 255, 255, 0.03)",
-                    borderBottom: "1px solid var(--border-color)",
-                    color: "var(--text-muted)",
-                    fontSize: "0.8rem",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  <th style={{ padding: "0.85rem 1.25rem" }}>Title & Type</th>
-                  <th style={{ padding: "0.85rem 1rem" }}>Questions</th>
-                  <th style={{ padding: "0.85rem 1rem" }}>Dimensions</th>
-                  <th style={{ padding: "0.85rem 1rem" }}>Duration</th>
-                  <th style={{ padding: "0.85rem 1rem" }}>Status</th>
-                  <th
-                    style={{ padding: "0.85rem 1.25rem", textAlign: "right" }}
-                  >
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+        {loading ? (
+          <TableSkeleton rows={5} cols={5} />
+        ) : assessments.length === 0 ? (
+          <EmptyState
+            icon={ClipboardList}
+            title="No Assessments Created"
+            description="Create your first psychometric assessment to evaluate learner cognitive styles."
+            actionText="Create Assessment"
+            onAction={() => setCreateModalOpen(true)}
+          />
+        ) : (
+          <Card className="overflow-hidden shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Title & Type</TableHead>
+                  <TableHead>Questions</TableHead>
+                  <TableHead>Dimensions</TableHead>
+                  <TableHead>Duration</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {assessments.map((item) => (
-                  <tr
-                    key={item._id}
-                    style={{ borderBottom: "1px solid var(--border-color)" }}
-                  >
+                  <TableRow key={item._id}>
                     {/* Title */}
-                    <td style={{ padding: "1rem 1.25rem" }}>
-                      <div
-                        style={{
-                          fontWeight: 600,
-                          color: "var(--text-primary)",
-                        }}
-                      >
+                    <TableCell>
+                      <div className="font-semibold text-foreground text-sm">
                         {item.title}
                       </div>
-                      <div
-                        style={{
-                          fontSize: "0.8rem",
-                          color: "var(--text-muted)",
-                        }}
-                      >
+                      <div className="text-[11px] text-muted-foreground">
                         Type: {item.type}
                       </div>
-                    </td>
+                    </TableCell>
 
                     {/* Question Count */}
-                    <td style={{ padding: "1rem", fontWeight: 600 }}>
+                    <TableCell className="font-semibold text-xs text-foreground">
                       {item.questionCount || 0} questions
-                    </td>
+                    </TableCell>
 
                     {/* Dimensions */}
-                    <td style={{ padding: "1rem" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: "0.3rem",
-                        }}
-                      >
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
                         {item.dimensions?.map((d, i) => (
-                          <span
+                          <Badge
                             key={i}
-                            style={{
-                              background: "rgba(99, 102, 241, 0.12)",
-                              color: "#a5b4fc",
-                              padding: "0.15rem 0.4rem",
-                              borderRadius: "4px",
-                              fontSize: "0.75rem",
-                            }}
+                            variant="secondary"
+                            className="text-[10px]"
                           >
                             {d.name || d.key || d}
-                          </span>
+                          </Badge>
                         ))}
                       </div>
-                    </td>
+                    </TableCell>
 
                     {/* Duration */}
-                    <td
-                      style={{
-                        padding: "1rem",
-                        color: "var(--text-secondary)",
-                        fontSize: "0.85rem",
-                      }}
-                    >
-                      {item.estimatedDuration} mins
-                    </td>
+                    <TableCell className="text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        <span>{item.estimatedDuration} mins</span>
+                      </span>
+                    </TableCell>
 
                     {/* Status */}
-                    <td style={{ padding: "1rem" }}>
+                    <TableCell>
                       <StatusBadge
                         status={item.isActive ? "ACTIVE" : "INACTIVE"}
                         size="small"
                       />
-                    </td>
+                    </TableCell>
 
                     {/* Actions */}
-                    <td style={{ padding: "1rem 1.25rem", textAlign: "right" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "flex-end",
-                          gap: "0.5rem",
-                        }}
-                      >
-                        <Link
-                          href={`/admin/assessments/${item._id}`}
-                          className="btn-primary-small"
-                          style={{
-                            fontSize: "0.8rem",
-                            padding: "0.3rem 0.65rem",
-                          }}
-                        >
-                          Questions ({item.questionCount || 0})
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link href={`/admin/assessments/${item._id}`}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs px-2.5 gap-1"
+                          >
+                            <HelpCircle className="h-3 w-3" />
+                            <span>Questions ({item.questionCount || 0})</span>
+                          </Button>
                         </Link>
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="sm"
                           onClick={() => handleToggleStatus(item)}
-                          style={{
-                            background: "transparent",
-                            border: "1px solid var(--border-color)",
-                            color: item.isActive ? "#f87171" : "#34d399",
-                            padding: "0.3rem 0.65rem",
-                            borderRadius: "6px",
-                            fontSize: "0.8rem",
-                            cursor: "pointer",
-                          }}
+                          className={cn(
+                            "h-7 text-xs px-2.5",
+                            item.isActive
+                              ? "text-destructive hover:bg-destructive/10"
+                              : "text-emerald-500 hover:bg-emerald-500/10",
+                          )}
                         >
                           {item.isActive ? "Deactivate" : "Activate"}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="sm"
                           onClick={() =>
                             setDeleteModal({
                               isOpen: true,
@@ -340,166 +301,79 @@ export default function AdminAssessmentsPage() {
                               loading: false,
                             })
                           }
-                          style={{
-                            background: "transparent",
-                            border: "1px solid rgba(239, 68, 68, 0.3)",
-                            color: "#f87171",
-                            padding: "0.3rem 0.65rem",
-                            borderRadius: "6px",
-                            fontSize: "0.8rem",
-                            cursor: "pointer",
-                          }}
+                          className="h-7 text-xs px-2 text-destructive hover:bg-destructive/10"
                         >
-                          Delete
-                        </button>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+              </TableBody>
+            </Table>
+          </Card>
+        )}
 
-      {/* Create Assessment Modal */}
-      {createModalOpen && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.7)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-            padding: "1rem",
-          }}
-          onClick={() => setCreateModalOpen(false)}
-        >
-          <div
-            style={{
-              background: "var(--bg-surface, #1e293b)",
-              border: "1px solid var(--border-color, #334155)",
-              borderRadius: "12px",
-              width: "100%",
-              maxWidth: "540px",
-              padding: "1.75rem",
-              maxHeight: "90vh",
-              overflowY: "auto",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3
-              style={{
-                margin: "0 0 1rem 0",
-                fontSize: "1.25rem",
-                fontWeight: 700,
-              }}
-            >
-              Create Psychometric Assessment
-            </h3>
+        {/* Create Assessment Dialog */}
+        <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create Psychometric Assessment</DialogTitle>
+              <DialogDescription className="text-xs">
+                Configure diagnostic parameters, dimension mappings, and
+                duration.
+              </DialogDescription>
+            </DialogHeader>
 
-            <form
-              onSubmit={handleCreateSubmit}
-              style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
-            >
-              <div>
+            <form onSubmit={handleCreateSubmit} className="space-y-4 pt-2">
+              <div className="space-y-1.5">
                 <label
-                  style={{
-                    display: "block",
-                    fontSize: "0.85rem",
-                    marginBottom: "0.3rem",
-                    color: "var(--text-secondary)",
-                  }}
+                  className="text-xs font-semibold text-foreground"
+                  htmlFor="create-title"
                 >
                   Title *
                 </label>
-                <input
-                  type="text"
+                <Input
+                  id="create-title"
                   required
                   value={formData.title}
                   onChange={(e) =>
                     setFormData({ ...formData, title: e.target.value })
                   }
-                  style={{
-                    width: "100%",
-                    padding: "0.5rem 0.75rem",
-                    borderRadius: "6px",
-                    background: "rgba(0,0,0,0.2)",
-                    border: "1px solid var(--border-color)",
-                    color: "var(--text-primary)",
-                  }}
                   placeholder="e.g. Cognitive Problem Solving Diagnostic"
                 />
               </div>
 
-              <div>
+              <div className="space-y-1.5">
                 <label
-                  style={{
-                    display: "block",
-                    fontSize: "0.85rem",
-                    marginBottom: "0.3rem",
-                    color: "var(--text-secondary)",
-                  }}
+                  className="text-xs font-semibold text-foreground"
+                  htmlFor="create-desc"
                 >
                   Description *
                 </label>
                 <textarea
+                  id="create-desc"
                   required
                   rows={3}
                   value={formData.description}
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
-                  style={{
-                    width: "100%",
-                    padding: "0.5rem 0.75rem",
-                    borderRadius: "6px",
-                    background: "rgba(0,0,0,0.2)",
-                    border: "1px solid var(--border-color)",
-                    color: "var(--text-primary)",
-                    fontFamily: "inherit",
-                  }}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   placeholder="Describes evaluation focus and target outcomes"
                 />
               </div>
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "1rem",
-                }}
-              >
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "0.85rem",
-                      marginBottom: "0.3rem",
-                      color: "var(--text-secondary)",
-                    }}
-                  >
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-foreground">
                     Type
                   </label>
-                  <select
+                  <Select
                     value={formData.type}
                     onChange={(e) =>
                       setFormData({ ...formData, type: e.target.value })
                     }
-                    style={{
-                      width: "100%",
-                      padding: "0.5rem 0.75rem",
-                      borderRadius: "6px",
-                      background: "var(--bg-surface)",
-                      border: "1px solid var(--border-color)",
-                      color: "var(--text-primary)",
-                    }}
                   >
                     <option value="LEARNING_STYLE">LEARNING_STYLE</option>
                     <option value="SKILLS">SKILLS</option>
@@ -507,21 +381,14 @@ export default function AdminAssessmentsPage() {
                       PERSONALITY_PROFILE
                     </option>
                     <option value="GENERAL">GENERAL</option>
-                  </select>
+                  </Select>
                 </div>
 
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "0.85rem",
-                      marginBottom: "0.3rem",
-                      color: "var(--text-secondary)",
-                    }}
-                  >
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-foreground">
                     Est. Duration (mins)
                   </label>
-                  <input
+                  <Input
                     type="number"
                     min={1}
                     max={120}
@@ -532,57 +399,26 @@ export default function AdminAssessmentsPage() {
                         estimatedDuration: e.target.value,
                       })
                     }
-                    style={{
-                      width: "100%",
-                      padding: "0.5rem 0.75rem",
-                      borderRadius: "6px",
-                      background: "rgba(0,0,0,0.2)",
-                      border: "1px solid var(--border-color)",
-                      color: "var(--text-primary)",
-                    }}
                   />
                 </div>
               </div>
 
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: "0.85rem",
-                    marginBottom: "0.3rem",
-                    color: "var(--text-secondary)",
-                  }}
-                >
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground">
                   Dimensions (comma-separated keys) *
                 </label>
-                <input
-                  type="text"
+                <Input
                   required
                   value={formData.dimensions}
                   onChange={(e) =>
                     setFormData({ ...formData, dimensions: e.target.value })
                   }
-                  style={{
-                    width: "100%",
-                    padding: "0.5rem 0.75rem",
-                    borderRadius: "6px",
-                    background: "rgba(0,0,0,0.2)",
-                    border: "1px solid var(--border-color)",
-                    color: "var(--text-primary)",
-                  }}
                   placeholder="analytical, intuitive, structured, collaborative"
                 />
               </div>
 
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: "0.85rem",
-                    marginBottom: "0.3rem",
-                    color: "var(--text-secondary)",
-                  }}
-                >
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground">
                   Instructions
                 </label>
                 <textarea
@@ -591,67 +427,46 @@ export default function AdminAssessmentsPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, instructions: e.target.value })
                   }
-                  style={{
-                    width: "100%",
-                    padding: "0.5rem 0.75rem",
-                    borderRadius: "6px",
-                    background: "rgba(0,0,0,0.2)",
-                    border: "1px solid var(--border-color)",
-                    color: "var(--text-primary)",
-                    fontFamily: "inherit",
-                  }}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 />
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: "0.75rem",
-                  marginTop: "1rem",
-                }}
-              >
-                <button
+              <DialogFooter className="pt-2">
+                <Button
                   type="button"
+                  variant="outline"
+                  size="sm"
                   onClick={() => setCreateModalOpen(false)}
-                  style={{
-                    background: "transparent",
-                    color: "var(--text-primary)",
-                    border: "1px solid var(--border-color)",
-                    padding: "0.5rem 1rem",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                  }}
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  disabled={createLoading}
-                  className="btn-primary-small"
-                  style={{ padding: "0.5rem 1.25rem" }}
+                  variant="default"
+                  size="sm"
+                  loading={createLoading}
                 >
-                  {createLoading ? "Creating..." : "Save Assessment"}
-                </button>
-              </div>
+                  Save Assessment
+                </Button>
+              </DialogFooter>
             </form>
-          </div>
-        </div>
-      )}
+          </DialogContent>
+        </Dialog>
 
-      {/* Delete Confirmation Modal */}
-      <ConfirmModal
-        isOpen={deleteModal.isOpen}
-        title="Delete Assessment"
-        message={`Are you sure you want to delete "${deleteModal.item?.title}"? If students have completed attempts on this assessment, the backend will safely soft-deactivate it instead of hard deletion.`}
-        confirmLabel="Delete"
-        confirmVariant="danger"
-        loading={deleteModal.loading}
-        onConfirm={handleDeleteConfirm}
-        onCancel={() =>
-          setDeleteModal({ isOpen: false, item: null, loading: false })
-        }
-      />
+        {/* Delete Confirmation Modal */}
+        <ConfirmModal
+          isOpen={deleteModal.isOpen}
+          title="Delete Assessment"
+          message={`Are you sure you want to delete "${deleteModal.item?.title}"? If students have completed attempts on this assessment, the backend will safely soft-deactivate it instead of hard deletion.`}
+          confirmLabel="Delete"
+          confirmVariant="danger"
+          loading={deleteModal.loading}
+          onConfirm={handleDeleteConfirm}
+          onCancel={() =>
+            setDeleteModal({ isOpen: false, item: null, loading: false })
+          }
+        />
+      </div>
     </AdminLayout>
   );
 }

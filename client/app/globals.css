@@ -1,4 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
+  /* shadcn/ui Design Tokens (HSL) */
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 7%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 7%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 238.7 83.5% 66.7%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 22%;
+  --input: 217.2 32.6% 22%;
+  --ring: 238.7 83.5% 66.7%;
+  --radius: 0.5rem;
+
+  /* Backward-compatible variables for existing components */
   --bg-primary: #0f172a;
   --bg-surface: #1e293b;
   --bg-surface-elevated: #334155;
@@ -6,7 +33,7 @@
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
   --border-color: #334155;
-  --primary: #6366f1;
+  --primary-color: #6366f1;
   --primary-hover: #4f46e5;
   --success: #10b981;
   --success-bg: rgba(16, 185, 129, 0.15);
@@ -79,9 +106,49 @@ body {
 .main-content {
   flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+}
+
+.page-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 2rem 1.5rem;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s infinite;
 }
 
 .hero-container {
@@ -355,7 +422,7 @@ body {
 }
 
 .register-nav-btn {
-  background: var(--primary);
+  background: hsl(var(--primary));
   color: white;
   text-decoration: none;
   padding: 0.4rem 0.9rem;
@@ -517,11 +584,11 @@ body {
 }
 
 .form-input:focus {
-  border-color: var(--primary);
+  border-color: hsl(var(--primary));
 }
 
 .auth-submit-btn {
-  background: var(--primary);
+  background: hsl(var(--primary));
   color: white;
   border: none;
   border-radius: 6px;
@@ -683,7 +750,7 @@ body {
 }
 
 .btn-primary-small {
-  background: var(--primary);
+  background: hsl(var(--primary));
   color: white;
   text-decoration: none;
   padding: 0.4rem 0.85rem;
@@ -732,7 +799,7 @@ body {
 }
 
 .assessment-card:hover {
-  border-color: var(--primary);
+  border-color: hsl(var(--primary));
   transform: translateY(-2px);
 }
 
@@ -831,14 +898,14 @@ body {
 }
 
 .option-button:hover {
-  border-color: var(--primary);
+  border-color: hsl(var(--primary));
   background: rgba(99, 102, 241, 0.1);
 }
 
 .option-button.active {
   background: rgba(99, 102, 241, 0.2);
-  border-color: var(--primary);
-  box-shadow: 0 0 0 1px var(--primary);
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 1px hsl(var(--primary));
 }
 
 .quiz-nav-row {
@@ -875,7 +942,7 @@ body {
   height: 120px;
   border-radius: 50%;
   background: rgba(99, 102, 241, 0.15);
-  border: 3px solid var(--primary);
+  border: 3px solid hsl(var(--primary));
   margin-bottom: 1rem;
 }
 
@@ -1046,7 +1113,7 @@ body {
 
 .curriculum-card:hover {
   transform: translateY(-2px);
-  border-color: var(--primary);
+  border-color: hsl(var(--primary));
 }
 
 .curriculum-card-header {
@@ -1128,7 +1195,7 @@ body {
 }
 
 .rec-card:hover {
-  border-color: var(--primary);
+  border-color: hsl(var(--primary));
   transform: translateY(-2px);
 }
 
@@ -1141,7 +1208,7 @@ body {
   min-height: 90px;
   border-radius: 14px;
   background: rgba(99, 102, 241, 0.12);
-  border: 2px solid var(--primary);
+  border: 2px solid hsl(var(--primary));
 }
 
 .rec-score-val {
@@ -1161,7 +1228,7 @@ body {
 
 .rec-reason-box {
   background: rgba(99, 102, 241, 0.08);
-  border-left: 3px solid var(--primary);
+  border-left: 3px solid hsl(var(--primary));
   padding: 0.75rem 1rem;
   border-radius: 0 8px 8px 0;
   font-size: 0.875rem;

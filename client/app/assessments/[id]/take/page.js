@@ -5,6 +5,28 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import assessmentService from "../../../../services/assessmentService";
 import authService from "../../../../services/authService";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import ProgressBar from "@/components/ui/ProgressBar";
+import { toast } from "@/components/ui/use-toast";
+import {
+  Brain,
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  CheckCircle2,
+  Loader2,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function TakeAssessmentPage() {
   const { id } = useParams();
@@ -114,9 +136,9 @@ export default function TakeAssessmentPage() {
       (q) => q.isRequired && !selectedAnswers[q._id],
     );
     if (unanswered.length > 0) {
-      setError(
-        `Please answer all questions before submitting. ${unanswered.length} question(s) remaining.`,
-      );
+      const msg = `Please answer all questions before submitting. ${unanswered.length} question(s) remaining.`;
+      setError(msg);
+      toast.warning("Unanswered Questions", msg);
       return;
     }
 
@@ -125,182 +147,197 @@ export default function TakeAssessmentPage() {
       setError(null);
       const res = await assessmentService.submitAttempt(attempt._id);
       if (res.success) {
+        toast.success(
+          "Assessment Completed",
+          "Your cognitive profile has been scored!",
+        );
         router.push(`/assessments/result/${attempt._id}`);
       }
     } catch (err) {
-      setError(err.message || "Failed to submit assessment");
+      const errMsg = err.message || "Failed to submit assessment";
+      setError(errMsg);
+      toast.error("Submission Failed", errMsg);
       setSubmitting(false);
     }
   };
 
   if (loading) {
     return (
-      <div
-        style={{
-          textAlign: "center",
-          padding: "4rem",
-          color: "var(--text-muted)",
-        }}
-      >
-        Loading assessment questions...
+      <div className="max-w-2xl mx-auto px-4 py-16 text-center space-y-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+        <p className="text-sm text-muted-foreground">
+          Loading assessment questions...
+        </p>
       </div>
     );
   }
 
   if (error && questions.length === 0) {
     return (
-      <div className="assessment-page-container">
-        <div className="alert-box alert-error">{error}</div>
-        <Link
-          href={`/assessments/${id}`}
-          className="btn-secondary-small"
-          style={{ display: "inline-block", marginTop: "1rem" }}
-        >
-          ← Back to Assessment
+      <div className="max-w-2xl mx-auto px-4 py-12 space-y-4">
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+        <Link href={`/assessments/${id}`}>
+          <Button variant="outline" size="sm" className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to Assessment Details</span>
+          </Button>
         </Link>
       </div>
     );
   }
 
   const currentQuestion = questions[currentIndex];
+  const answeredCount = Object.keys(selectedAnswers).length;
   const progressPercent =
     questions.length > 0
       ? Math.round(((currentIndex + 1) / questions.length) * 100)
       : 0;
-  const isAnswered = currentQuestion && selectedAnswers[currentQuestion._id];
 
   return (
-    <div className="assessment-page-container">
-      <div className="quiz-container">
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <span
-            style={{
-              fontSize: "0.85rem",
-              color: "var(--text-muted)",
-              fontWeight: 600,
-            }}
-          >
-            Question {currentIndex + 1} of {questions.length}
-          </span>
-          <span
-            style={{
-              fontSize: "0.85rem",
-              color: savingAnswer ? "#fbbf24" : "#34d399",
-            }}
-          >
-            {savingAnswer ? "Saving..." : "Saved ✓"}
-          </span>
-        </div>
-
-        <div className="quiz-progress-track">
-          <div
-            className="quiz-progress-fill"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-
-        {error && (
-          <div
-            className="alert-box alert-error"
-            style={{ marginBottom: "1.5rem" }}
-          >
-            {error}
-          </div>
-        )}
-
-        {currentQuestion && (
-          <div>
-            <div style={{ marginBottom: "0.5rem" }}>
-              <span className="dim-tag" style={{ textTransform: "capitalize" }}>
-                {currentQuestion.dimension}
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+      {/* Quiz Container Card */}
+      <Card className="shadow-lg border-border/80">
+        <CardHeader className="space-y-4 pb-4 border-b">
+          <div className="flex items-center justify-between text-xs font-semibold">
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">
+                Question {currentIndex + 1} of {questions.length}
               </span>
+              <Badge variant="secondary" className="text-[10px]">
+                {answeredCount} of {questions.length} Answered
+              </Badge>
             </div>
-
-            <h2 className="quiz-question-text">
-              {currentQuestion.questionText}
-            </h2>
-
-            <div className="options-list">
-              {currentQuestion.options.map((opt) => {
-                const isSelected =
-                  selectedAnswers[currentQuestion._id] === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() =>
-                      handleSelectOption(currentQuestion._id, opt.value)
-                    }
-                    className={`option-button ${isSelected ? "active" : ""}`}
-                  >
-                    <span
-                      style={{
-                        display: "inline-block",
-                        width: "18px",
-                        height: "18px",
-                        borderRadius: "50%",
-                        border: isSelected
-                          ? "5px solid var(--primary)"
-                          : "2px solid var(--border-color)",
-                        background: isSelected ? "white" : "transparent",
-                        flexShrink: 0,
-                      }}
-                    />
-                    <span>{opt.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+            <span
+              className={cn(
+                "text-[11px] font-semibold transition-colors flex items-center gap-1",
+                savingAnswer ? "text-amber-500" : "text-emerald-500",
+              )}
+            >
+              {savingAnswer ? (
+                <>
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="h-3 w-3" />
+                  <span>Saved</span>
+                </>
+              )}
+            </span>
           </div>
-        )}
 
-        <div className="quiz-nav-row">
-          <button
+          <ProgressBar
+            value={progressPercent}
+            height="6px"
+            variant="gradient"
+          />
+        </CardHeader>
+
+        <CardContent className="pt-6 space-y-6">
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {currentQuestion && (
+            <div className="space-y-4">
+              <div>
+                <Badge
+                  variant="outline"
+                  className="text-[11px] uppercase tracking-wider text-primary border-primary/30"
+                >
+                  {currentQuestion.dimension}
+                </Badge>
+              </div>
+
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground leading-snug">
+                {currentQuestion.questionText}
+              </h2>
+
+              <div className="space-y-2.5 pt-2">
+                {currentQuestion.options.map((opt) => {
+                  const isSelected =
+                    selectedAnswers[currentQuestion._id] === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() =>
+                        handleSelectOption(currentQuestion._id, opt.value)
+                      }
+                      className={cn(
+                        "w-full text-left p-4 rounded-xl border transition-all flex items-center gap-3.5 group",
+                        isSelected
+                          ? "border-primary bg-primary/10 shadow-sm text-foreground"
+                          : "border-border bg-card/60 hover:bg-muted/50 hover:border-border text-foreground",
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "h-5 w-5 rounded-full border flex items-center justify-center shrink-0 transition-all",
+                          isSelected
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-muted-foreground/40 group-hover:border-primary",
+                        )}
+                      >
+                        {isSelected && (
+                          <div className="h-2 w-2 rounded-full bg-white" />
+                        )}
+                      </div>
+                      <span className="text-sm font-medium leading-relaxed">
+                        {opt.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </CardContent>
+
+        <CardFooter className="pt-4 border-t flex items-center justify-between">
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
             onClick={handlePrev}
             disabled={currentIndex === 0}
-            className="btn-secondary-small"
-            style={{
-              opacity: currentIndex === 0 ? 0.4 : 1,
-              cursor: currentIndex === 0 ? "not-allowed" : "pointer",
-            }}
+            className="gap-1 text-xs"
           >
-            ← Previous
-          </button>
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span>Previous</span>
+          </Button>
 
           {currentIndex < questions.length - 1 ? (
-            <button
+            <Button
               type="button"
+              variant="default"
+              size="sm"
               onClick={handleNext}
-              className="btn-primary-small"
-              style={{ cursor: "pointer" }}
+              className="gap-1 text-xs"
             >
-              Next Question →
-            </button>
+              <span>Next</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Button>
           ) : (
-            <button
+            <Button
               type="button"
+              variant="success"
+              size="default"
               onClick={handleSubmit}
-              disabled={submitting}
-              className="submit-btn"
-              style={{
-                width: "auto",
-                padding: "0.6rem 1.5rem",
-                background: "#10b981",
-                borderColor: "#10b981",
-              }}
+              loading={submitting}
+              className="gap-1.5 shadow-md"
             >
-              {submitting ? "Scoring Assessment..." : "Submit Assessment ✓"}
-            </button>
+              <Check className="h-4 w-4" />
+              <span>{submitting ? "Scoring..." : "Submit Assessment"}</span>
+            </Button>
           )}
-        </div>
-      </div>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

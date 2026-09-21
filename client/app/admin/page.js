@@ -5,6 +5,26 @@ import Link from "next/link";
 import AdminLayout from "../../components/admin/AdminLayout";
 import adminService from "../../services/adminService";
 import StatusBadge from "../../components/ui/StatusBadge";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { CardSkeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Users,
+  CheckCircle2,
+  ClipboardList,
+  BookOpen,
+  ArrowRight,
+  ShieldCheck,
+  Activity,
+} from "lucide-react";
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState(null);
@@ -35,594 +55,243 @@ export default function AdminDashboardPage() {
       subtitle="Real-time platform metrics, learner engagement, and system management."
     >
       {loading ? (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "4rem",
-            color: "var(--text-muted)",
-          }}
-        >
-          Aggregating platform metrics...
+        <div className="space-y-6">
+          <CardSkeleton count={4} />
+          <CardSkeleton count={2} />
         </div>
       ) : error ? (
-        <div
-          style={{
-            background: "rgba(239, 68, 68, 0.1)",
-            border: "1px solid rgba(239, 68, 68, 0.3)",
-            color: "#f87171",
-            padding: "1rem",
-            borderRadius: "8px",
-            marginBottom: "1.5rem",
-          }}
-        >
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       ) : stats ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+        <div className="space-y-8">
           {/* Top Metrics Cards */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-              gap: "1.25rem",
-            }}
-          >
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Total Learners */}
-            <div
-              style={{
-                background: "var(--bg-surface, #1e293b)",
-                border: "1px solid var(--border-color, #334155)",
-                borderRadius: "12px",
-                padding: "1.5rem",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "0.5rem",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "0.85rem",
-                    color: "var(--text-muted)",
-                    fontWeight: 600,
-                  }}
-                >
-                  TOTAL LEARNERS
+            <Card className="p-5 shadow-sm space-y-2">
+              <div className="flex items-center justify-between text-muted-foreground">
+                <span className="text-[11px] font-bold uppercase tracking-wider">
+                  Total Learners
                 </span>
-                <span style={{ fontSize: "1.25rem" }}>👥</span>
+                <Users className="h-4 w-4" />
               </div>
-              <div
-                style={{
-                  fontSize: "2rem",
-                  fontWeight: 800,
-                  color: "var(--text-primary)",
-                }}
-              >
+              <div className="text-3xl font-black text-foreground">
                 {stats.totalLearners}
               </div>
-              <div
-                style={{
-                  fontSize: "0.8rem",
-                  color: "#10b981",
-                  marginTop: "0.25rem",
-                }}
-              >
+              <div className="text-xs text-emerald-500 font-medium">
                 {stats.activeLearners} active accounts
               </div>
-            </div>
+            </Card>
 
             {/* Active Learners */}
-            <div
-              style={{
-                background: "var(--bg-surface, #1e293b)",
-                border: "1px solid var(--border-color, #334155)",
-                borderRadius: "12px",
-                padding: "1.5rem",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "0.5rem",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "0.85rem",
-                    color: "var(--text-muted)",
-                    fontWeight: 600,
-                  }}
-                >
-                  ACTIVE LEARNERS
+            <Card className="p-5 shadow-sm space-y-2">
+              <div className="flex items-center justify-between text-muted-foreground">
+                <span className="text-[11px] font-bold uppercase tracking-wider">
+                  Active Learners
                 </span>
-                <span style={{ fontSize: "1.25rem" }}>🟢</span>
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
               </div>
-              <div
-                style={{ fontSize: "2rem", fontWeight: 800, color: "#10b981" }}
-              >
+              <div className="text-3xl font-black text-emerald-500">
                 {stats.activeLearners}
               </div>
-              <div
-                style={{
-                  fontSize: "0.8rem",
-                  color: "var(--text-muted)",
-                  marginTop: "0.25rem",
-                }}
-              >
+              <div className="text-xs text-muted-foreground">
                 Eligible for recommendations
               </div>
-            </div>
+            </Card>
 
             {/* Total Assessments */}
-            <div
-              style={{
-                background: "var(--bg-surface, #1e293b)",
-                border: "1px solid var(--border-color, #334155)",
-                borderRadius: "12px",
-                padding: "1.5rem",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "0.5rem",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "0.85rem",
-                    color: "var(--text-muted)",
-                    fontWeight: 600,
-                  }}
-                >
-                  ASSESSMENTS
+            <Card className="p-5 shadow-sm space-y-2">
+              <div className="flex items-center justify-between text-muted-foreground">
+                <span className="text-[11px] font-bold uppercase tracking-wider">
+                  Assessments
                 </span>
-                <span style={{ fontSize: "1.25rem" }}>📋</span>
+                <ClipboardList className="h-4 w-4 text-primary" />
               </div>
-              <div
-                style={{
-                  fontSize: "2rem",
-                  fontWeight: 800,
-                  color: "var(--primary, #6366f1)",
-                }}
-              >
+              <div className="text-3xl font-black text-primary">
                 {stats.totalAssessments}
               </div>
-              <div
-                style={{
-                  fontSize: "0.8rem",
-                  color: "var(--text-muted)",
-                  marginTop: "0.25rem",
-                }}
-              >
-                Diagnostic & skill evaluations
+              <div className="text-xs text-muted-foreground">
+                Diagnostic evaluations
               </div>
-            </div>
+            </Card>
 
             {/* Total Modules */}
-            <div
-              style={{
-                background: "var(--bg-surface, #1e293b)",
-                border: "1px solid var(--border-color, #334155)",
-                borderRadius: "12px",
-                padding: "1.5rem",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "0.5rem",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "0.85rem",
-                    color: "var(--text-muted)",
-                    fontWeight: 600,
-                  }}
-                >
-                  CURRICULUM MODULES
+            <Card className="p-5 shadow-sm space-y-2">
+              <div className="flex items-center justify-between text-muted-foreground">
+                <span className="text-[11px] font-bold uppercase tracking-wider">
+                  Curriculum
                 </span>
-                <span style={{ fontSize: "1.25rem" }}>📚</span>
+                <BookOpen className="h-4 w-4 text-purple-400" />
               </div>
-              <div
-                style={{ fontSize: "2rem", fontWeight: 800, color: "#a855f7" }}
-              >
+              <div className="text-3xl font-black text-purple-400">
                 {stats.totalCurriculumModules}
               </div>
-              <div
-                style={{
-                  fontSize: "0.8rem",
-                  color: "var(--text-muted)",
-                  marginTop: "0.25rem",
-                }}
-              >
-                Active learning catalog nodes
+              <div className="text-xs text-muted-foreground">
+                Catalog graph nodes
               </div>
-            </div>
+            </Card>
           </div>
 
           {/* Quick Management Links */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-              gap: "1.25rem",
-            }}
-          >
-            <Link
-              href="/admin/learners"
-              style={{
-                background: "var(--bg-surface, #1e293b)",
-                border: "1px solid var(--border-color, #334155)",
-                borderRadius: "12px",
-                padding: "1.5rem",
-                textDecoration: "none",
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.5rem",
-                transition: "border-color 0.2s ease",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.75rem",
-                }}
-              >
-                <span style={{ fontSize: "1.5rem" }}>👥</span>
-                <h3
-                  style={{
-                    margin: 0,
-                    fontSize: "1.1rem",
-                    fontWeight: 700,
-                    color: "var(--text-primary)",
-                  }}
-                >
-                  Learner Management
-                </h3>
-              </div>
-              <p
-                style={{
-                  margin: 0,
-                  color: "var(--text-secondary)",
-                  fontSize: "0.875rem",
-                  lineHeight: 1.4,
-                }}
-              >
-                Search, filter, and inspect learner profiles, assessment
-                attempts, and active learning paths.
-              </p>
-              <span
-                style={{
-                  fontSize: "0.85rem",
-                  color: "var(--primary, #6366f1)",
-                  fontWeight: 600,
-                  marginTop: "0.5rem",
-                }}
-              >
-                Manage Learners →
-              </span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <Link href="/admin/learners" className="group">
+              <Card className="p-5 h-full group-hover:border-primary/50 transition-all shadow-sm space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-sky-500/10 text-sky-400">
+                    <Users className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-base font-bold text-foreground">
+                    Learner Management
+                  </h3>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Search, filter, and inspect learner profiles, assessment
+                  attempts, and active learning paths.
+                </p>
+                <div className="text-xs font-semibold text-primary flex items-center gap-1 group-hover:underline pt-1">
+                  <span>Manage Learners</span>
+                  <ArrowRight className="h-3 w-3" />
+                </div>
+              </Card>
             </Link>
 
-            <Link
-              href="/admin/assessments"
-              style={{
-                background: "var(--bg-surface, #1e293b)",
-                border: "1px solid var(--border-color, #334155)",
-                borderRadius: "12px",
-                padding: "1.5rem",
-                textDecoration: "none",
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.5rem",
-                transition: "border-color 0.2s ease",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.75rem",
-                }}
-              >
-                <span style={{ fontSize: "1.5rem" }}>📋</span>
-                <h3
-                  style={{
-                    margin: 0,
-                    fontSize: "1.1rem",
-                    fontWeight: 700,
-                    color: "var(--text-primary)",
-                  }}
-                >
-                  Assessment Management
-                </h3>
-              </div>
-              <p
-                style={{
-                  margin: 0,
-                  color: "var(--text-secondary)",
-                  fontSize: "0.875rem",
-                  lineHeight: 1.4,
-                }}
-              >
-                Create and edit diagnostic evaluations, configure dimension
-                mappings, and manage question sets.
-              </p>
-              <span
-                style={{
-                  fontSize: "0.85rem",
-                  color: "var(--primary, #6366f1)",
-                  fontWeight: 600,
-                  marginTop: "0.5rem",
-                }}
-              >
-                Manage Assessments →
-              </span>
+            <Link href="/admin/assessments" className="group">
+              <Card className="p-5 h-full group-hover:border-primary/50 transition-all shadow-sm space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                    <ClipboardList className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-base font-bold text-foreground">
+                    Assessment Management
+                  </h3>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Create and edit diagnostic evaluations, configure dimension
+                  mappings, and manage question sets.
+                </p>
+                <div className="text-xs font-semibold text-primary flex items-center gap-1 group-hover:underline pt-1">
+                  <span>Manage Assessments</span>
+                  <ArrowRight className="h-3 w-3" />
+                </div>
+              </Card>
             </Link>
 
-            <Link
-              href="/admin/curriculum"
-              style={{
-                background: "var(--bg-surface, #1e293b)",
-                border: "1px solid var(--border-color, #334155)",
-                borderRadius: "12px",
-                padding: "1.5rem",
-                textDecoration: "none",
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.5rem",
-                transition: "border-color 0.2s ease",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.75rem",
-                }}
-              >
-                <span style={{ fontSize: "1.5rem" }}>📚</span>
-                <h3
-                  style={{
-                    margin: 0,
-                    fontSize: "1.1rem",
-                    fontWeight: 700,
-                    color: "var(--text-primary)",
-                  }}
-                >
-                  Curriculum Management
-                </h3>
-              </div>
-              <p
-                style={{
-                  margin: 0,
-                  color: "var(--text-secondary)",
-                  fontSize: "0.875rem",
-                  lineHeight: 1.4,
-                }}
-              >
-                Author curriculum modules, define prerequisite dependency
-                graphs, and manage resource links.
-              </p>
-              <span
-                style={{
-                  fontSize: "0.85rem",
-                  color: "var(--primary, #6366f1)",
-                  fontWeight: 600,
-                  marginTop: "0.5rem",
-                }}
-              >
-                Manage Curriculum →
-              </span>
+            <Link href="/admin/curriculum" className="group">
+              <Card className="p-5 h-full group-hover:border-primary/50 transition-all shadow-sm space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400">
+                    <BookOpen className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-base font-bold text-foreground">
+                    Curriculum Management
+                  </h3>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Author curriculum modules, define prerequisite dependency
+                  graphs, and manage resource links.
+                </p>
+                <div className="text-xs font-semibold text-primary flex items-center gap-1 group-hover:underline pt-1">
+                  <span>Manage Curriculum</span>
+                  <ArrowRight className="h-3 w-3" />
+                </div>
+              </Card>
             </Link>
           </div>
 
           {/* Tables: Recent Learners & Recent Attempts */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
-              gap: "1.5rem",
-            }}
-          >
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Recent Learners */}
-            <div
-              style={{
-                background: "var(--bg-surface, #1e293b)",
-                border: "1px solid var(--border-color, #334155)",
-                borderRadius: "12px",
-                padding: "1.5rem",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "1rem",
-                }}
-              >
-                <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 700 }}>
+            <Card className="p-5 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-bold text-foreground">
                   Recent Learners
                 </h3>
-                <Link
-                  href="/admin/learners"
-                  style={{
-                    fontSize: "0.85rem",
-                    color: "var(--primary, #6366f1)",
-                    textDecoration: "none",
-                  }}
-                >
-                  View All
+                <Link href="/admin/learners">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs text-primary hover:text-primary h-7 px-2"
+                  >
+                    View All
+                  </Button>
                 </Link>
               </div>
 
               {stats.recentLearners?.length === 0 ? (
-                <p
-                  style={{
-                    color: "var(--text-muted)",
-                    fontSize: "0.875rem",
-                    margin: 0,
-                  }}
-                >
+                <p className="text-xs text-muted-foreground">
                   No learners registered yet.
                 </p>
               ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.75rem",
-                  }}
-                >
+                <div className="space-y-2">
                   {stats.recentLearners?.map((learner) => (
                     <div
                       key={learner._id}
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        padding: "0.75rem",
-                        background: "rgba(255, 255, 255, 0.02)",
-                        borderRadius: "8px",
-                        border: "1px solid var(--border-color)",
-                      }}
+                      className="p-3 rounded-lg border bg-muted/20 flex items-center justify-between text-xs"
                     >
                       <div>
-                        <div style={{ fontWeight: 600, fontSize: "0.9rem" }}>
+                        <div className="font-semibold text-foreground">
                           {learner.firstName} {learner.lastName}
                         </div>
-                        <div
-                          style={{
-                            fontSize: "0.8rem",
-                            color: "var(--text-muted)",
-                          }}
-                        >
+                        <div className="text-[11px] text-muted-foreground">
                           {learner.email}
                         </div>
                       </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.75rem",
-                        }}
-                      >
+                      <div className="flex items-center gap-2">
                         <StatusBadge
                           status={learner.isActive ? "ACTIVE" : "INACTIVE"}
                           size="small"
                         />
-                        <Link
-                          href={`/admin/learners/${learner._id}`}
-                          className="btn-secondary-small"
-                          style={{
-                            fontSize: "0.75rem",
-                            padding: "0.25rem 0.6rem",
-                          }}
-                        >
-                          Inspect
+                        <Link href={`/admin/learners/${learner._id}`}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs px-2.5"
+                          >
+                            Inspect
+                          </Button>
                         </Link>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
-            </div>
+            </Card>
 
             {/* Recent Assessment Attempts */}
-            <div
-              style={{
-                background: "var(--bg-surface, #1e293b)",
-                border: "1px solid var(--border-color, #334155)",
-                borderRadius: "12px",
-                padding: "1.5rem",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "1rem",
-                }}
-              >
-                <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 700 }}>
+            <Card className="p-5 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-bold text-foreground">
                   Recent Assessment Activity
                 </h3>
-                <span
-                  style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}
-                >
+                <span className="text-[11px] text-muted-foreground">
                   Authoritative Log
                 </span>
               </div>
 
               {stats.recentAttempts?.length === 0 ? (
-                <p
-                  style={{
-                    color: "var(--text-muted)",
-                    fontSize: "0.875rem",
-                    margin: 0,
-                  }}
-                >
+                <p className="text-xs text-muted-foreground">
                   No assessment attempts recorded yet.
                 </p>
               ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.75rem",
-                  }}
-                >
+                <div className="space-y-2">
                   {stats.recentAttempts?.map((att) => (
                     <div
                       key={att._id}
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        padding: "0.75rem",
-                        background: "rgba(255, 255, 255, 0.02)",
-                        borderRadius: "8px",
-                        border: "1px solid var(--border-color)",
-                      }}
+                      className="p-3 rounded-lg border bg-muted/20 flex items-center justify-between text-xs"
                     >
                       <div>
-                        <div style={{ fontWeight: 600, fontSize: "0.9rem" }}>
+                        <div className="font-semibold text-foreground">
                           {att.assessment?.title || "Psychometric Assessment"}
                         </div>
-                        <div
-                          style={{
-                            fontSize: "0.8rem",
-                            color: "var(--text-muted)",
-                          }}
-                        >
+                        <div className="text-[11px] text-muted-foreground">
                           {att.user
                             ? `${att.user.firstName} ${att.user.lastName} (${att.user.email})`
                             : "Student"}
                         </div>
                       </div>
-                      <div style={{ textAlign: "right" }}>
+                      <div className="text-right space-y-1">
                         <StatusBadge status={att.status} size="small" />
-                        <div
-                          style={{
-                            fontSize: "0.75rem",
-                            color: "var(--text-muted)",
-                            marginTop: "0.25rem",
-                          }}
-                        >
+                        <div className="text-[10px] text-muted-foreground">
                           {att.submittedAt
                             ? new Date(att.submittedAt).toLocaleDateString()
                             : new Date(att.createdAt).toLocaleDateString()}
@@ -632,7 +301,7 @@ export default function AdminDashboardPage() {
                   ))}
                 </div>
               )}
-            </div>
+            </Card>
           </div>
         </div>
       ) : null}

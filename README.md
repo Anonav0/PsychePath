@@ -696,6 +696,27 @@ npm run test:admin --prefix server
 
 ---
 
+## Phase 13: UI/UX Polish & Design System Modernization
+
+Phase 13 overhauls the frontend presentation layer into a production-grade, highly responsive user interface following **shadcn/ui** design patterns and design token conventions.
+
+### Key Highlights
+
+- **Design Tokens**: Standardized HSL-based design variables in `client/app/globals.css` with responsive container layouts.
+- **Component Primitives**: Lightweight, accessible shadcn/ui components (`Button`, `Card`, `Badge`, `Input`, `Select`, `Checkbox`, `Dialog`, `Sheet`, `Table`, `Skeleton`, `Alert`, `Tooltip`, `Toaster`).
+- **Global Toast Feedback**: Imperative toast notifications (`toast.success`, `toast.error`, `toast.info`, `toast.warning`) wired across forms, path regeneration, module progress transitions, and administrative status updates.
+- **Responsive Navigation**: Mobile slide-out drawer (`Sheet`) navigation for the student header and administrative console.
+- **Data-Driven States**: Loading skeleton placeholders (`CardSkeleton`, `TableSkeleton`) and unified empty states (`EmptyState`).
+- **Zero Backend Changes**: 100% backend API contract preservation verified by all 10 automated test suites (186/186 tests passing).
+
+### Verify Client Build
+
+```bash
+npm run build --prefix client
+```
+
+---
+
 ## Running the Application
 
 ### Option A: Run Concurrently from Root

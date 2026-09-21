@@ -6,6 +6,36 @@ import Link from "next/link";
 import profileService from "../../services/profileService";
 import assessmentService from "../../services/assessmentService";
 import authService from "../../services/authService";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CardSkeleton } from "@/components/ui/skeleton";
+import { toast } from "@/components/ui/use-toast";
+import ProgressBar from "@/components/ui/ProgressBar";
+import {
+  User,
+  Sparkles,
+  Plus,
+  X,
+  Save,
+  RefreshCw,
+  GraduationCap,
+  Target,
+  BookOpen,
+  Award,
+  Clock,
+  Briefcase,
+} from "lucide-react";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -87,7 +117,9 @@ export default function ProfilePage() {
         (s) => s.name.toLowerCase() === newSkillName.trim().toLowerCase(),
       )
     ) {
-      setError("Skill already exists in your profile");
+      const err = "Skill already exists in your profile";
+      setError(err);
+      toast.warning("Duplicate Skill", err);
       return;
     }
     setSkills([...skills, { name: newSkillName.trim(), level: newSkillLevel }]);
@@ -107,7 +139,9 @@ export default function ProfilePage() {
         (g) => g.name.toLowerCase() === newGoalName.trim().toLowerCase(),
       )
     ) {
-      setError("Goal already exists in your profile");
+      const err = "Goal already exists in your profile";
+      setError(err);
+      toast.warning("Duplicate Goal", err);
       return;
     }
     setGoals([...goals, { name: newGoalName.trim(), priority: 2 }]);
@@ -142,10 +176,14 @@ export default function ProfilePage() {
       const res = await profileService.updateMyProfile(payload);
       if (res.success) {
         setProfile(res.data);
-        setMessage("Learner profile saved successfully!");
+        const msg = "Learner profile saved successfully!";
+        setMessage(msg);
+        toast.success("Profile Saved", msg);
       }
     } catch (err) {
-      setError(err.message || "Failed to save profile");
+      const errMsg = err.message || "Failed to save profile";
+      setError(errMsg);
+      toast.error("Save Failed", errMsg);
     } finally {
       setSaving(false);
     }
@@ -158,12 +196,16 @@ export default function ProfilePage() {
       const res = await profileService.generateFromAssessment(attemptId);
       if (res.success) {
         setProfile(res.data);
-        setMessage(
-          "Profile psychometrics synced successfully from assessment!",
-        );
+        const msg =
+          "Profile psychometrics synced successfully from assessment!";
+        setMessage(msg);
+        toast.success("Psychometrics Synced", msg);
       }
     } catch (err) {
-      setError(err.message || "Failed to generate profile from assessment");
+      const errMsg =
+        err.message || "Failed to generate profile from assessment";
+      setError(errMsg);
+      toast.error("Sync Failed", errMsg);
     } finally {
       setSaving(false);
     }
@@ -171,14 +213,11 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div
-        style={{
-          textAlign: "center",
-          padding: "4rem",
-          color: "var(--text-muted)",
-        }}
-      >
-        Loading learner profile...
+      <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+        <div className="rounded-2xl border p-8 bg-card/40 space-y-4">
+          <CardSkeleton count={1} />
+        </div>
+        <CardSkeleton count={2} />
       </div>
     );
   }
@@ -186,549 +225,382 @@ export default function ProfilePage() {
   const completedAttempts = attempts.filter((a) => a.status === "COMPLETED");
 
   return (
-    <div className="profile-container">
-      <div className="profile-header-row">
-        <div>
-          <h1
-            style={{
-              fontSize: "1.85rem",
-              fontWeight: 800,
-              color: "var(--text-primary)",
-            }}
-          >
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
             Learner Profile
           </h1>
-          <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
+          <p className="text-sm text-muted-foreground">
             Maintain your educational background, skills, and assessment-derived
             psychometrics.
           </p>
         </div>
 
         {profile && (
-          <div style={{ textAlign: "right" }}>
-            <span className="completeness-badge">
+          <div className="text-left sm:text-right space-y-1">
+            <Badge variant="success" className="text-xs font-bold">
               {profile.profileCompleteness || 0}% Complete
-            </span>
-            <span
-              style={{
-                display: "block",
-                fontSize: "0.75rem",
-                color: "var(--text-muted)",
-                marginTop: "0.25rem",
-              }}
-            >
+            </Badge>
+            <div className="text-[11px] text-muted-foreground">
               Profile v{profile.profileVersion || 1}
-            </span>
+            </div>
           </div>
         )}
       </div>
 
       {message && (
-        <div
-          className="alert-box alert-success"
-          style={{ marginBottom: "1.5rem" }}
-        >
-          {message}
-        </div>
+        <Alert variant="success">
+          <AlertDescription>{message}</AlertDescription>
+        </Alert>
       )}
 
       {error && (
-        <div
-          className="alert-box alert-error"
-          style={{ marginBottom: "1.5rem" }}
-        >
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {/* Assessment-Derived Attributes Section */}
-      <div
-        className="profile-card"
-        style={{ borderLeft: "4px solid var(--primary)" }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            marginBottom: "1rem",
-          }}
-        >
-          <div>
-            <h2
-              style={{
-                fontSize: "1.2rem",
-                fontWeight: 700,
-                color: "var(--text-primary)",
-              }}
-            >
-              Assessment-Derived Psychometrics
-            </h2>
-            <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
-              Derived authoritatively by the backend scoring engine from your
-              completed assessments.
-            </p>
+      <Card className="border-primary/30 shadow-sm">
+        <CardHeader className="pb-4 border-b">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider">
+                <Sparkles className="h-4 w-4" />
+                <span>Assessment-Derived Psychometrics</span>
+              </div>
+              <CardTitle className="text-lg">
+                Cognitive Diagnostic Strengths
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Derived authoritatively by the backend scoring engine from your
+                completed assessments.
+              </CardDescription>
+            </div>
+
+            {completedAttempts.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  handleGenerateFromAttempt(completedAttempts[0]._id)
+                }
+                disabled={saving}
+                className="gap-2 text-xs shrink-0"
+              >
+                <RefreshCw className="h-3.5 w-3.5" />
+                <span>Sync from Latest Assessment</span>
+              </Button>
+            )}
           </div>
+        </CardHeader>
 
-          {completedAttempts.length > 0 && (
-            <button
-              onClick={() =>
-                handleGenerateFromAttempt(completedAttempts[0]._id)
-              }
-              disabled={saving}
-              className="btn-secondary-small"
-              style={{ cursor: "pointer" }}
-            >
-              Sync from Latest Assessment
-            </button>
-          )}
-        </div>
-
-        {profile?.lastAssessmentAttempt ? (
-          <div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "1.5rem",
-                marginBottom: "1.5rem",
-              }}
-            >
-              <div>
-                <h3
-                  style={{
-                    fontSize: "0.9rem",
-                    fontWeight: 700,
-                    color: "#34d399",
-                    marginBottom: "0.6rem",
-                  }}
-                >
-                  Demonstrated Strengths (≥ 75%)
-                </h3>
-                <div
-                  style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}
-                >
-                  {profile.strengths && profile.strengths.length > 0 ? (
-                    profile.strengths.map((s) => (
-                      <span
-                        key={s}
-                        className="badge-strength"
-                        style={{ textTransform: "capitalize" }}
-                      >
-                        ★ {s}
+        <CardContent className="pt-6 space-y-6">
+          {profile?.lastAssessmentAttempt ? (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <h3 className="text-xs font-bold text-emerald-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <Award className="h-3.5 w-3.5" />
+                    <span>Demonstrated Strengths (&ge; 75%)</span>
+                  </h3>
+                  <div className="flex flex-wrap gap-1.5">
+                    {profile.strengths && profile.strengths.length > 0 ? (
+                      profile.strengths.map((s) => (
+                        <Badge
+                          key={s}
+                          variant="success"
+                          className="text-xs capitalize"
+                        >
+                          &bull; {s}
+                        </Badge>
+                      ))
+                    ) : (
+                      <span className="text-xs text-muted-foreground">
+                        None identified above threshold yet.
                       </span>
-                    ))
-                  ) : (
-                    <span
-                      style={{
-                        fontSize: "0.85rem",
-                        color: "var(--text-muted)",
-                      }}
-                    >
-                      None identified above threshold yet.
-                    </span>
-                  )}
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h3 className="text-xs font-bold text-amber-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <Target className="h-3.5 w-3.5" />
+                    <span>Development Areas (&lt; 60%)</span>
+                  </h3>
+                  <div className="flex flex-wrap gap-1.5">
+                    {profile.improvementAreas &&
+                    profile.improvementAreas.length > 0 ? (
+                      profile.improvementAreas.map((ia) => (
+                        <Badge
+                          key={ia}
+                          variant="secondary"
+                          className="text-xs capitalize bg-amber-500/10 text-amber-500 border-amber-500/20"
+                        >
+                          &bull; {ia}
+                        </Badge>
+                      ))
+                    ) : (
+                      <span className="text-xs text-muted-foreground">
+                        No targeted development areas detected.
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <h3
-                  style={{
-                    fontSize: "0.9rem",
-                    fontWeight: 700,
-                    color: "#fbbf24",
-                    marginBottom: "0.6rem",
-                  }}
-                >
-                  Development Areas (&lt; 60%)
-                </h3>
-                <div
-                  style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}
-                >
-                  {profile.improvementAreas &&
-                  profile.improvementAreas.length > 0 ? (
-                    profile.improvementAreas.map((ia) => (
-                      <span
-                        key={ia}
-                        className="badge-development"
-                        style={{ textTransform: "capitalize" }}
-                      >
-                        ▲ {ia}
-                      </span>
-                    ))
-                  ) : (
-                    <span
-                      style={{
-                        fontSize: "0.85rem",
-                        color: "var(--text-muted)",
-                      }}
-                    >
-                      No targeted development areas detected.
-                    </span>
-                  )}
+              {profile.assessmentDimensions && (
+                <div className="space-y-3 pt-4 border-t">
+                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                    Dimension Alignment Breakdown
+                  </h3>
+                  <div className="space-y-3">
+                    {Object.entries(
+                      profile.assessmentDimensions instanceof Map
+                        ? Object.fromEntries(profile.assessmentDimensions)
+                        : profile.assessmentDimensions,
+                    ).map(([dim, score]) => (
+                      <div key={dim} className="space-y-1">
+                        <div className="flex justify-between text-xs font-medium">
+                          <span className="capitalize text-foreground">
+                            {dim}
+                          </span>
+                          <span className="text-primary font-bold">
+                            {score}%
+                          </span>
+                        </div>
+                        <ProgressBar
+                          value={score}
+                          height="6px"
+                          variant="gradient"
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-6 space-y-3">
+              <p className="text-xs text-muted-foreground">
+                No assessment-derived profile generated yet.
+              </p>
+              <Link href="/assessments">
+                <Button size="sm" variant="default" className="text-xs">
+                  Take Psychometric Assessment
+                </Button>
+              </Link>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* User-Managed Profile Attributes Section */}
+      <form onSubmit={handleSaveProfile}>
+        <Card className="shadow-sm">
+          <CardHeader className="pb-4 border-b">
+            <div className="flex items-center gap-2 text-foreground font-bold text-base">
+              <User className="h-5 w-5 text-primary" />
+              <CardTitle className="text-lg">
+                User-Managed Information
+              </CardTitle>
+            </div>
+            <CardDescription className="text-xs">
+              Configure your career goals, education, format preferences, and
+              verified technical skills.
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="pt-6 space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span>Education Level</span>
+                </label>
+                <Select
+                  value={educationLevel}
+                  onChange={(e) => setEducationLevel(e.target.value)}
+                >
+                  <option value="HIGH_SCHOOL">High School</option>
+                  <option value="UNDERGRADUATE">Undergraduate Degree</option>
+                  <option value="POSTGRADUATE">Postgraduate Degree</option>
+                  <option value="BOOTCAMP">Bootcamp / Technical Program</option>
+                  <option value="SELF_TAUGHT">Self-Taught</option>
+                  <option value="OTHER">Other</option>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <Briefcase className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span>Overall Experience Level</span>
+                </label>
+                <Select
+                  value={experienceLevel}
+                  onChange={(e) => setExperienceLevel(e.target.value)}
+                >
+                  <option value="BEGINNER">Beginner</option>
+                  <option value="INTERMEDIATE">Intermediate</option>
+                  <option value="ADVANCED">Advanced</option>
+                </Select>
               </div>
             </div>
 
-            {profile.assessmentDimensions && (
-              <div>
-                <h3
-                  style={{
-                    fontSize: "0.85rem",
-                    fontWeight: 700,
-                    color: "var(--text-muted)",
-                    marginBottom: "0.75rem",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Dimension Alignment Breakdown
-                </h3>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.75rem",
-                  }}
-                >
-                  {Object.entries(
-                    profile.assessmentDimensions instanceof Map
-                      ? Object.fromEntries(profile.assessmentDimensions)
-                      : profile.assessmentDimensions,
-                  ).map(([dim, score]) => (
-                    <div key={dim}>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          fontSize: "0.85rem",
-                          marginBottom: "0.25rem",
-                        }}
-                      >
-                        <span
-                          style={{
-                            textTransform: "capitalize",
-                            color: "var(--text-primary)",
-                          }}
-                        >
-                          {dim}
-                        </span>
-                        <span style={{ color: "#a5b4fc", fontWeight: 600 }}>
-                          {score}%
-                        </span>
-                      </div>
-                      <div className="dim-bar-track" style={{ height: "6px" }}>
-                        <div
-                          className="dim-bar-fill"
-                          style={{ width: `${score}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span>Weekly Learning Hours (1–168)</span>
+                </label>
+                <Input
+                  type="number"
+                  min="1"
+                  max="168"
+                  value={weeklyHours}
+                  onChange={(e) => setWeeklyHours(e.target.value)}
+                />
               </div>
-            )}
-          </div>
-        ) : (
-          <div
-            style={{
-              padding: "1rem",
-              background: "rgba(255, 255, 255, 0.02)",
-              borderRadius: "8px",
-              textAlign: "center",
-            }}
-          >
-            <p
-              style={{
-                fontSize: "0.9rem",
-                color: "var(--text-muted)",
-                marginBottom: "0.75rem",
-              }}
-            >
-              No assessment-derived profile generated yet.
-            </p>
-            <Link href="/assessments" className="btn-primary-small">
-              Take Psychometric Assessment
-            </Link>
-          </div>
-        )}
-      </div>
 
-      {/* User-Managed Profile Attributes Section */}
-      <form onSubmit={handleSaveProfile} className="profile-card">
-        <h2
-          style={{
-            fontSize: "1.2rem",
-            fontWeight: 700,
-            marginBottom: "1.25rem",
-            color: "var(--text-primary)",
-          }}
-        >
-          User-Managed Information
-        </h2>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "1.25rem",
-            marginBottom: "1.5rem",
-          }}
-        >
-          <div>
-            <label
-              style={{
-                display: "block",
-                fontSize: "0.85rem",
-                color: "var(--text-secondary)",
-                marginBottom: "0.4rem",
-              }}
-            >
-              Education Level
-            </label>
-            <select
-              value={educationLevel}
-              onChange={(e) => setEducationLevel(e.target.value)}
-              className="auth-input"
-              style={{
-                width: "100%",
-                background: "var(--bg-surface-elevated)",
-              }}
-            >
-              <option value="HIGH_SCHOOL">High School</option>
-              <option value="UNDERGRADUATE">Undergraduate Degree</option>
-              <option value="POSTGRADUATE">Postgraduate Degree</option>
-              <option value="BOOTCAMP">Bootcamp / Technical Program</option>
-              <option value="SELF_TAUGHT">Self-Taught</option>
-              <option value="OTHER">Other</option>
-            </select>
-          </div>
-
-          <div>
-            <label
-              style={{
-                display: "block",
-                fontSize: "0.85rem",
-                color: "var(--text-secondary)",
-                marginBottom: "0.4rem",
-              }}
-            >
-              Overall Experience Level
-            </label>
-            <select
-              value={experienceLevel}
-              onChange={(e) => setExperienceLevel(e.target.value)}
-              className="auth-input"
-              style={{
-                width: "100%",
-                background: "var(--bg-surface-elevated)",
-              }}
-            >
-              <option value="BEGINNER">Beginner</option>
-              <option value="INTERMEDIATE">Intermediate</option>
-              <option value="ADVANCED">Advanced</option>
-            </select>
-          </div>
-        </div>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "1.25rem",
-            marginBottom: "1.5rem",
-          }}
-        >
-          <div>
-            <label
-              style={{
-                display: "block",
-                fontSize: "0.85rem",
-                color: "var(--text-secondary)",
-                marginBottom: "0.4rem",
-              }}
-            >
-              Weekly Learning Hours (1–168)
-            </label>
-            <input
-              type="number"
-              min="1"
-              max="168"
-              value={weeklyHours}
-              onChange={(e) => setWeeklyHours(e.target.value)}
-              className="auth-input"
-              style={{ width: "100%" }}
-            />
-          </div>
-
-          <div>
-            <label
-              style={{
-                display: "block",
-                fontSize: "0.85rem",
-                color: "var(--text-secondary)",
-                marginBottom: "0.4rem",
-              }}
-            >
-              Preferred Learning Format
-            </label>
-            <select
-              value={preferredFormat}
-              onChange={(e) => setPreferredFormat(e.target.value)}
-              className="auth-input"
-              style={{
-                width: "100%",
-                background: "var(--bg-surface-elevated)",
-              }}
-            >
-              <option value="PROJECT">Project-Based</option>
-              <option value="VIDEO">Video Tutorials</option>
-              <option value="READING">Reading & Documentation</option>
-              <option value="PRACTICE">Hands-on Practice</option>
-              <option value="MIXED">Mixed Multi-format</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Current Skills Manager */}
-        <div style={{ marginBottom: "1.5rem" }}>
-          <label
-            style={{
-              display: "block",
-              fontSize: "0.85rem",
-              color: "var(--text-secondary)",
-              marginBottom: "0.5rem",
-            }}
-          >
-            Current Skills
-          </label>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "0.5rem",
-              marginBottom: "0.75rem",
-            }}
-          >
-            {skills.map((sk, idx) => (
-              <span key={sk.name} className="skill-pill">
-                <strong>{sk.name}</strong>
-                <span className="skill-pill-level">{sk.level}</span>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveSkill(idx)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#f87171",
-                    cursor: "pointer",
-                    fontSize: "0.85rem",
-                  }}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span>Preferred Learning Format</span>
+                </label>
+                <Select
+                  value={preferredFormat}
+                  onChange={(e) => setPreferredFormat(e.target.value)}
                 >
-                  ✕
-                </button>
-              </span>
-            ))}
-          </div>
+                  <option value="PROJECT">Project-Based</option>
+                  <option value="VIDEO">Video Tutorials</option>
+                  <option value="READING">Reading & Documentation</option>
+                  <option value="PRACTICE">Hands-on Practice</option>
+                  <option value="MIXED">Mixed Multi-format</option>
+                </Select>
+              </div>
+            </div>
 
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <input
-              type="text"
-              placeholder="e.g. JavaScript, Python, SQL"
-              value={newSkillName}
-              onChange={(e) => setNewSkillName(e.target.value)}
-              className="auth-input"
-              style={{ flex: 1 }}
-            />
-            <select
-              value={newSkillLevel}
-              onChange={(e) => setNewSkillLevel(e.target.value)}
-              className="auth-input"
-              style={{
-                width: "140px",
-                background: "var(--bg-surface-elevated)",
-              }}
-            >
-              <option value="BEGINNER">Beginner</option>
-              <option value="INTERMEDIATE">Intermediate</option>
-              <option value="ADVANCED">Advanced</option>
-            </select>
-            <button
-              type="button"
-              onClick={handleAddSkill}
-              className="btn-secondary-small"
-            >
-              + Add Skill
-            </button>
-          </div>
-        </div>
+            {/* Current Skills Manager */}
+            <div className="space-y-3 pt-2">
+              <label className="text-xs font-semibold text-foreground block">
+                Current Technical Skills
+              </label>
 
-        {/* Learning Goals Manager */}
-        <div style={{ marginBottom: "2rem" }}>
-          <label
-            style={{
-              display: "block",
-              fontSize: "0.85rem",
-              color: "var(--text-secondary)",
-              marginBottom: "0.5rem",
-            }}
-          >
-            Target Learning Goals
-          </label>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "0.5rem",
-              marginBottom: "0.75rem",
-            }}
-          >
-            {goals.map((g, idx) => (
-              <span key={g.name} className="skill-pill">
-                <strong>{g.name}</strong>
-                <button
+              <div className="flex flex-wrap gap-2">
+                {skills.map((sk, idx) => (
+                  <Badge
+                    key={sk.name}
+                    variant="secondary"
+                    className="gap-1.5 py-1 px-2.5 text-xs"
+                  >
+                    <span className="font-semibold">{sk.name}</span>
+                    <span className="text-[10px] text-muted-foreground uppercase">
+                      ({sk.level})
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSkill(idx)}
+                      className="text-muted-foreground hover:text-destructive focus:outline-none ml-1"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Input
+                  type="text"
+                  placeholder="e.g. JavaScript, Python, SQL"
+                  value={newSkillName}
+                  onChange={(e) => setNewSkillName(e.target.value)}
+                  className="flex-1"
+                />
+                <div className="w-full sm:w-40">
+                  <Select
+                    value={newSkillLevel}
+                    onChange={(e) => setNewSkillLevel(e.target.value)}
+                  >
+                    <option value="BEGINNER">Beginner</option>
+                    <option value="INTERMEDIATE">Intermediate</option>
+                    <option value="ADVANCED">Advanced</option>
+                  </Select>
+                </div>
+                <Button
                   type="button"
-                  onClick={() => handleRemoveGoal(idx)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#f87171",
-                    cursor: "pointer",
-                    fontSize: "0.85rem",
-                  }}
+                  variant="outline"
+                  size="default"
+                  onClick={handleAddSkill}
+                  className="gap-1 text-xs shrink-0"
                 >
-                  ✕
-                </button>
-              </span>
-            ))}
-          </div>
+                  <Plus className="h-4 w-4" />
+                  <span>Add Skill</span>
+                </Button>
+              </div>
+            </div>
 
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <input
-              type="text"
-              placeholder="e.g. Become a Backend Architect"
-              value={newGoalName}
-              onChange={(e) => setNewGoalName(e.target.value)}
-              className="auth-input"
-              style={{ flex: 1 }}
-            />
-            <button
-              type="button"
-              onClick={handleAddGoal}
-              className="btn-secondary-small"
+            {/* Learning Goals Manager */}
+            <div className="space-y-3 pt-2">
+              <label className="text-xs font-semibold text-foreground block">
+                Target Learning Goals
+              </label>
+
+              <div className="flex flex-wrap gap-2">
+                {goals.map((g, idx) => (
+                  <Badge
+                    key={g.name}
+                    variant="secondary"
+                    className="gap-1.5 py-1 px-2.5 text-xs"
+                  >
+                    <span className="font-semibold">{g.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveGoal(idx)}
+                      className="text-muted-foreground hover:text-destructive focus:outline-none ml-1"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+
+              <div className="flex gap-2">
+                <Input
+                  type="text"
+                  placeholder="e.g. Become a Backend Architect"
+                  value={newGoalName}
+                  onChange={(e) => setNewGoalName(e.target.value)}
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="default"
+                  onClick={handleAddGoal}
+                  className="gap-1 text-xs shrink-0"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Add Goal</span>
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+
+          <CardFooter className="pt-4 border-t flex justify-end">
+            <Button
+              type="submit"
+              variant="default"
+              size="default"
+              loading={saving}
+              className="gap-2 shadow-md text-xs sm:text-sm"
             >
-              + Add Goal
-            </button>
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          disabled={saving}
-          className="submit-btn"
-          style={{ width: "auto", padding: "0.75rem 2rem" }}
-        >
-          {saving ? "Saving Profile..." : "Save Profile Changes"}
-        </button>
+              <Save className="h-4 w-4" />
+              <span>{saving ? "Saving..." : "Save Profile Changes"}</span>
+            </Button>
+          </CardFooter>
+        </Card>
       </form>
     </div>
   );

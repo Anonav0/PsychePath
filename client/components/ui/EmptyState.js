@@ -1,88 +1,67 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
+import { Button } from "./button";
+import { cn } from "@/lib/utils";
+import { Inbox } from "lucide-react";
 
 /**
  * Standardized Empty State Component
+ * Upgraded with shadcn tokens and Button component
  */
 export default function EmptyState({
-  icon = "📚",
+  icon: IconOrEmoji = Inbox,
   title = "No items found",
   description = "Get started by taking the first step.",
   actionText = null,
   actionHref = null,
   onAction = null,
+  className = "",
   style = {},
 }) {
+  const isComponent =
+    typeof IconOrEmoji === "function" ||
+    (typeof IconOrEmoji === "object" && IconOrEmoji !== null);
+
   return (
     <div
-      style={{
-        textAlign: "center",
-        padding: "3.5rem 1.5rem",
-        background: "var(--bg-surface)",
-        border: "1px solid var(--border-color)",
-        borderRadius: "12px",
-        margin: "1.5rem 0",
-        ...style,
-      }}
+      className={cn(
+        "text-center py-12 px-6 bg-card border rounded-2xl my-6 flex flex-col items-center justify-center shadow-sm",
+        className,
+      )}
+      style={style}
     >
-      <div style={{ fontSize: "2.75rem", marginBottom: "1rem" }}>{icon}</div>
-      <h3
-        style={{
-          fontSize: "1.25rem",
-          fontWeight: 700,
-          color: "var(--text-primary)",
-          marginBottom: "0.5rem",
-        }}
-      >
+      <div className="mb-4 text-muted-foreground flex items-center justify-center p-4 bg-muted/40 rounded-full">
+        {isComponent ? (
+          React.createElement(IconOrEmoji, {
+            className: "h-8 w-8 text-primary",
+          })
+        ) : (
+          <span className="text-3xl leading-none">{IconOrEmoji}</span>
+        )}
+      </div>
+
+      <h3 className="text-lg font-semibold text-foreground mb-1.5 tracking-tight">
         {title}
       </h3>
-      <p
-        style={{
-          color: "var(--text-secondary)",
-          fontSize: "0.95rem",
-          maxWidth: "480px",
-          margin: "0 auto 1.5rem",
-          lineHeight: 1.5,
-        }}
-      >
+
+      <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6 leading-relaxed">
         {description}
       </p>
 
       {actionText && actionHref && (
-        <Link
-          href={actionHref}
-          style={{
-            display: "inline-block",
-            background: "linear-gradient(135deg, #6366f1, #a855f7)",
-            color: "#ffffff",
-            padding: "0.65rem 1.5rem",
-            borderRadius: "8px",
-            fontWeight: 600,
-            fontSize: "0.9rem",
-            textDecoration: "none",
-          }}
-        >
-          {actionText}
+        <Link href={actionHref}>
+          <Button variant="default" size="default">
+            {actionText}
+          </Button>
         </Link>
       )}
 
       {actionText && onAction && !actionHref && (
-        <button
-          onClick={onAction}
-          style={{
-            background: "linear-gradient(135deg, #6366f1, #a855f7)",
-            color: "#ffffff",
-            border: "none",
-            padding: "0.65rem 1.5rem",
-            borderRadius: "8px",
-            fontWeight: 600,
-            fontSize: "0.9rem",
-            cursor: "pointer",
-          }}
-        >
+        <Button onClick={onAction} variant="default" size="default">
           {actionText}
-        </button>
+        </Button>
       )}
     </div>
   );

@@ -1,5 +1,6 @@
 import "./globals.css";
 import Navbar from "../components/Navbar";
+import { Toaster } from "@/components/ui/toast";
 
 export const metadata = {
   title: "PsychePath — Psychometric Learning Path Recommender",
@@ -9,18 +10,21 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body>
-        <div className="app-shell">
+    <html lang="en" className="dark">
+      <body className="min-h-screen bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary">
+        <div className="app-shell min-h-screen flex flex-col">
           <Navbar />
-          <main className="main-content">{children}</main>
-          <footer className="app-footer">
+          <main className="main-content flex-1 flex flex-col w-full">
+            {children}
+          </main>
+          <footer className="app-footer border-t py-6 text-center text-xs text-muted-foreground bg-card/40">
             <p>
               PsychePath &copy; {new Date().getFullYear()} &mdash; Personalized
-              Learning System
+              Learning System &bull; Evidence-Based Education
             </p>
           </footer>
         </div>
+        <Toaster />
       </body>
     </html>
   );
